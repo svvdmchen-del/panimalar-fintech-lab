@@ -17,7 +17,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" data-theme="dark" suppressHydrationWarning className="h-full antialiased">
       <head>
         <script
           // Runs before paint: applies the saved theme so a reload never flashes dark.
