@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "engines": {
+    "node": "^20 || ^22"
+  },
   "dependencies": {
     "india-stock-mcp": "^1.0.1",
     "lightweight-charts": "^5.2.1",
