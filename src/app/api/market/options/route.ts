@@ -1,0 +1,14 @@
+import type { NextRequest } from "next/server";
+import { cached } from "@/lib/cache";
+import { getOptionChain } from "@/lib/providers";
+
+const TTL = 45_000;
+const UNDERLYINGS = new Set(["NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY"]);
+
+export async function GET(request: NextRequest) {
+  const requested = (request.nextUrl.searchParams.get("symbol") ?? "NIFTY").toUpperCase();
+  const symbol = UNDERLYINGS.has(requested) ? requested : "NIFTY";
+
+  const payload = await cached(`options:${symbol}`, TTL, () => getOptionChain(symbol));
+  return Response.json(payload, { headers: { "cache-control": "no-store" } });
+}
