@@ -25,17 +25,23 @@ export function ZoomToggle() {
   }, []);
 
   const cycleZoom = () => {
-    const nextIndex = (ZOOM_LEVELS.indexOf(zoom) + 1) % ZOOM_LEVELS.length;
-    const nextZoom = ZOOM_LEVELS[nextIndex];
-    setZoom(nextZoom);
-    const numericZoom = parseFloat(nextZoom) / 100;
-    document.documentElement.style.zoom = String(numericZoom);
-    try {
-      localStorage.setItem(STORAGE_KEY, nextZoom);
-    } catch {
-      // storage disabled
-    }
+    setZoom((curr) => {
+      const nextIndex = (ZOOM_LEVELS.indexOf(curr) + 1) % ZOOM_LEVELS.length;
+      const nextZoom = ZOOM_LEVELS[nextIndex];
+      const numericZoom = parseFloat(nextZoom) / 100;
+      document.documentElement.style.zoom = String(numericZoom);
+      try {
+        localStorage.setItem(STORAGE_KEY, nextZoom);
+      } catch {}
+      return nextZoom;
+    });
   };
+
+  useEffect(() => {
+    const onCycle = () => cycleZoom();
+    window.addEventListener("nse:cycle-zoom", onCycle);
+    return () => window.removeEventListener("nse:cycle-zoom", onCycle);
+  }, []);
 
   return (
     <button

@@ -70,6 +70,25 @@ export function PriceChart({
   const [range, setRange] = useState<ChartRange>("1D");
   const [chartType, setChartType] = useState<"area" | "candle">("area");
   const [showVolume, setShowVolume] = useState(true);
+
+  // Keyboard shortcut listener for chart controls
+  useEffect(() => {
+    const onRangeChange = (e: Event) => {
+      const custom = e as CustomEvent<ChartRange>;
+      if (RANGES.includes(custom.detail)) setRange(custom.detail);
+    };
+    const onToggleType = () => setChartType((t) => (t === "area" ? "candle" : "area"));
+    const onToggleVol = () => setShowVolume((v) => !v);
+
+    window.addEventListener("nse:chart-range", onRangeChange);
+    window.addEventListener("nse:chart-toggle-type", onToggleType);
+    window.addEventListener("nse:chart-toggle-vol", onToggleVol);
+    return () => {
+      window.removeEventListener("nse:chart-range", onRangeChange);
+      window.removeEventListener("nse:chart-toggle-type", onToggleType);
+      window.removeEventListener("nse:chart-toggle-vol", onToggleVol);
+    };
+  }, []);
   const [hoveredCandle, setHoveredCandle] = useState<{
     open: number;
     high: number;

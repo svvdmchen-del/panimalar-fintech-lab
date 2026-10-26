@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { dateIST, timeIST, weekdayIST } from "@/lib/format";
 import { sessionLabel } from "@/lib/marketHours";
@@ -27,6 +27,7 @@ export function TopBar({
   onRefresh,
   onSelect,
   onDetails,
+  onOpenShortcuts,
   updatedAt,
 }: {
   dataStatus: DataStatus;
@@ -38,14 +39,39 @@ export function TopBar({
   onRefresh: () => void;
   onSelect: (symbol: string) => void;
   onDetails: (symbol: string) => void;
+  onOpenShortcuts?: () => void;
   updatedAt?: number;
 }) {
   const now = useNow(1000);
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [justRefreshed, setJustRefreshed] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const results = useSymbolSearch(query, 8);
+
+  // Reset active index when search results change
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
+
+  // Global '/' or 'Ctrl+K' hotkey to focus search bar
+  useEffect(() => {
+    const onGlobalKey = (e: KeyboardEvent) => {
+      const target = document.activeElement;
+      const isInput = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA";
+
+      if ((e.key === "/" && !isInput) || (e.key.toLowerCase() === "k" && (e.ctrlKey || e.metaKey))) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+        setOpen(true);
+      }
+    };
+    window.addEventListener("keydown", onGlobalKey);
+    return () => window.removeEventListener("keydown", onGlobalKey);
+  }, []);
 
   const pick = (symbol: string) => {
     const clean = symbol.trim().toUpperCase();
@@ -53,6 +79,43 @@ export function TopBar({
     onDetails(clean);
     setQuery("");
     setOpen(false);
+  };
+
+  const onSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setOpen(true);
+      if (results.length > 0) {
+        setActiveIndex((prev) => (prev + 1) % results.length);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setOpen(true);
+      if (results.length > 0) {
+        setActiveIndex((prev) => (prev - 1 + results.length) % results.length);
+      }
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (results[activeIndex]) {
+        pick(results[activeIndex].symbol);
+      } else if (results.length > 0) {
+        pick(results[0].symbol);
+      } else if (query.trim()) {
+        pick(query.trim());
+      }
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setOpen(false);
+      searchInputRef.current?.blur();
+    }
   };
 
   const statusTone = marketOpen
@@ -80,8 +143,10 @@ export function TopBar({
           </div>
         </div>
 
-        <div className="relative order-last w-full sm:order-none sm:ml-2 sm:w-64">
+        {/* Global Search with Arrow Navigation & Shortcut hint */}
+        <div className="relative order-last w-full sm:order-none sm:ml-2 sm:w-72">
           <input
+            ref={searchInputRef}
             value={query}
             onChange={(event) => {
               setQuery(event.target.value);
@@ -89,48 +154,57 @@ export function TopBar({
             }}
             onFocus={() => setOpen(true)}
             onBlur={() => window.setTimeout(() => setOpen(false), 140)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                if (results.length > 0) {
-                  pick(results[0].symbol);
-                } else if (query.trim()) {
-                  pick(query.trim());
-                }
-              }
-              if (event.key === "Escape") setOpen(false);
-            }}
-            placeholder="Search any NSE stock (e.g. Suzlon, IRCTC)…"
+            onKeyDown={onSearchKeyDown}
+            placeholder="Search NSE stock (or press /)…"
             aria-label="Search for an NSE stock"
-            className="w-full rounded-lg border border-line bg-panel px-3 py-1.5 text-[11px] text-ink placeholder:text-muted/60 focus:border-cyan/40 focus:outline-none focus:ring-1 focus:ring-cyan/40"
+            className="w-full rounded-lg border border-line bg-panel pl-3 pr-8 py-1.5 text-[11px] text-ink placeholder:text-muted/60 focus:border-cyan/40 focus:outline-none focus:ring-1 focus:ring-cyan/40"
           />
+          <kbd
+            title="Press / or Ctrl+K anywhere to focus search"
+            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-line bg-panel2 px-1.5 py-0.5 text-[9px] font-mono text-muted/70"
+          >
+            /
+          </kbd>
+
           {open && results.length > 0 ? (
             <ul
               role="listbox"
-              className="absolute left-0 top-full z-50 mt-1 w-72 max-w-[90vw] overflow-hidden rounded-lg border border-line bg-panel2 shadow-2xl"
+              className="absolute left-0 top-full z-50 mt-1 w-80 max-w-[90vw] overflow-hidden rounded-lg border border-line bg-panel2 shadow-2xl"
             >
-              {results.map((entry) => (
-                <li key={entry.symbol} role="presentation">
-                  <button
-                    type="button"
-                    role="option"
-                    aria-selected={false}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => pick(entry.symbol)}
-                    className="flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left text-[11px] hover:bg-wash/5"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <span className="font-semibold text-ink">{entry.symbol}</span>
-                      <span className="ml-2 truncate text-[10px] text-muted">{entry.name}</span>
-                    </div>
-                    {entry.sector ? (
-                      <span className="shrink-0 rounded border border-line/60 bg-panel px-1 py-0.5 text-[8px] uppercase tracking-wider text-muted/80">
-                        {entry.sector}
-                      </span>
-                    ) : null}
-                  </button>
-                </li>
-              ))}
+              <div className="border-b border-line/60 px-3 py-1 text-[9px] text-muted flex items-center justify-between">
+                <span>Navigate with ↑ ↓ and press Enter</span>
+                <span>{results.length} matches</span>
+              </div>
+              {results.map((entry, index) => {
+                const isHighlighted = index === activeIndex;
+                return (
+                  <li key={entry.symbol} role="presentation">
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={isHighlighted}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onMouseEnter={() => setActiveIndex(index)}
+                      onClick={() => pick(entry.symbol)}
+                      className={`flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left text-[11px] transition-colors ${
+                        isHighlighted
+                          ? "bg-cyan/15 text-cyan border-l-2 border-cyan"
+                          : "text-ink hover:bg-wash/5"
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <span className="font-semibold">{entry.symbol}</span>
+                        <span className="ml-2 truncate text-[10px] text-muted">{entry.name}</span>
+                      </div>
+                      {entry.sector ? (
+                        <span className="shrink-0 rounded border border-line/60 bg-panel px-1 py-0.5 text-[8px] uppercase tracking-wider text-muted/80">
+                          {entry.sector}
+                        </span>
+                      ) : null}
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           ) : null}
         </div>
@@ -179,7 +253,7 @@ export function TopBar({
               setJustRefreshed(true);
               window.setTimeout(() => setJustRefreshed(false), 700);
             }}
-            title={updatedAt ? `Last update ${timeIST(updatedAt, true)} IST` : "Refresh now"}
+            title={updatedAt ? `Last update ${timeIST(updatedAt, true)} IST (or press R)` : "Refresh now (R)"}
             aria-label="Refresh data now"
             className="rounded-md border border-line bg-panel px-2 py-1 text-[11px] text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
           >
@@ -190,6 +264,18 @@ export function TopBar({
 
           <ZoomToggle />
           <ThemeToggle />
+
+          {onOpenShortcuts ? (
+            <button
+              type="button"
+              onClick={onOpenShortcuts}
+              title="Keyboard shortcuts HUD (press ?)"
+              aria-label="Open keyboard shortcuts cheat sheet"
+              className="flex h-7 w-7 items-center justify-center rounded-md border border-line bg-panel text-[11px] font-mono text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
+            >
+              ?
+            </button>
+          ) : null}
         </div>
       </div>
 

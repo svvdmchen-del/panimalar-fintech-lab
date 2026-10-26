@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { BreadthStrip } from "@/components/BreadthStrip";
 import { FiiDiiPanel } from "@/components/FiiDiiPanel";
 import { IndexStrip } from "@/components/IndexStrip";
+import { KeyboardShortcutsHUD } from "@/components/KeyboardShortcutsHUD";
 import { MoversPanel } from "@/components/MoversPanel";
 import { NewsFeed } from "@/components/NewsFeed";
 import { OptionChainPanel } from "@/components/OptionChainPanel";
@@ -17,6 +18,7 @@ import { Watchlist } from "@/components/Watchlist";
 import { DataBadge } from "@/components/ui";
 import { isMarketOpen } from "@/lib/marketHours";
 import { DEFAULT_WATCHLIST } from "@/lib/symbols";
+import { applyTheme } from "@/lib/theme";
 import type {
   DataStatus,
   Envelope,
@@ -39,6 +41,7 @@ export default function Page() {
   const [optionUnderlying, setOptionUnderlying] = useState("NIFTY");
   const [detail, setDetail] = useState<string | null>(null);
   const [dockBottomTicker, setDockBottomTicker] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   const now = useNow(30_000);
   const marketOpen = now ? isMarketOpen(now) : false;
@@ -134,6 +137,129 @@ export default function Page() {
     [setWatchlist],
   );
 
+  // Global Keyboard Shortcuts System
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = document.activeElement;
+      const isTyping = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA";
+
+      // '?' toggles the shortcut cheat sheet modal from anywhere
+      if (e.key === "?" && !isTyping) {
+        e.preventDefault();
+        setShortcutsOpen((o) => !o);
+        return;
+      }
+
+      if (isTyping) return;
+
+      // 1. Live Feed & Classroom Controls
+      if (e.code === "Space") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("nse:ticker-toggle-pause"));
+        return;
+      }
+      if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        setRefreshToken((t) => t + 1);
+        return;
+      }
+      if (e.key === "[") {
+        e.preventDefault();
+        const intervals = [10_000, 15_000, 30_000, 60_000];
+        const curIdx = intervals.indexOf(intervalMs);
+        const prev = intervals[Math.max(0, curIdx - 1)];
+        setIntervalMs(prev);
+        return;
+      }
+      if (e.key === "]") {
+        e.preventDefault();
+        const intervals = [10_000, 15_000, 30_000, 60_000];
+        const curIdx = intervals.indexOf(intervalMs);
+        const next = intervals[Math.min(intervals.length - 1, curIdx + 1)];
+        setIntervalMs(next);
+        return;
+      }
+
+      // 2. Watchlist Stepping
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (watchlist.length > 0) {
+          const idx = watchlist.indexOf(selected);
+          const next = watchlist[(idx + 1) % watchlist.length];
+          setSelected(next);
+        }
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (watchlist.length > 0) {
+          const idx = watchlist.indexOf(selected);
+          const prev = watchlist[(idx - 1 + watchlist.length) % watchlist.length];
+          setSelected(prev);
+        }
+        return;
+      }
+      if (e.key === "Enter" && !detail) {
+        e.preventDefault();
+        setDetail(selected);
+        return;
+      }
+      if (e.key === "w" || e.key === "W") {
+        e.preventDefault();
+        toggleWatchlist(selected);
+        return;
+      }
+
+      // 3. TradingView Charting Controls
+      if (["1", "2", "3", "4", "5"].includes(e.key)) {
+        e.preventDefault();
+        const map: Record<string, string> = { "1": "1D", "2": "1W", "3": "1M", "4": "6M", "5": "1Y" };
+        window.dispatchEvent(new CustomEvent("nse:chart-range", { detail: map[e.key] }));
+        return;
+      }
+      if (e.key === "c" || e.key === "C") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("nse:chart-toggle-type"));
+        return;
+      }
+      if (e.key === "v" || e.key === "V") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("nse:chart-toggle-vol"));
+        return;
+      }
+
+      // 4. Display, Classroom Projector & UI Scale
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {});
+        } else {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        return;
+      }
+      if (e.key === "z" || e.key === "Z") {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent("nse:cycle-zoom"));
+        return;
+      }
+      if (e.key === "t" || e.key === "T") {
+        e.preventDefault();
+        const current = document.documentElement.dataset.theme;
+        applyTheme(current === "light" ? "dark" : "light");
+        return;
+      }
+      if (e.key === "m" || e.key === "M") {
+        e.preventDefault();
+        setDockBottomTicker((d) => !d);
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [watchlist, selected, detail, intervalMs, toggleWatchlist]);
+
   const detailQuote = detail ? quoteList.find((quote) => quote.symbol === detail) : undefined;
 
   return (
@@ -148,6 +274,7 @@ export default function Page() {
         onRefresh={() => setRefreshToken((value) => value + 1)}
         onSelect={setSelected}
         onDetails={setDetail}
+        onOpenShortcuts={() => setShortcutsOpen(true)}
         updatedAt={lastUpdated}
       />
 
@@ -272,6 +399,8 @@ export default function Page() {
           onToggleWatchlist={() => toggleWatchlist(detail)}
         />
       ) : null}
+
+      <KeyboardShortcutsHUD open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
     </div>
   );
 }

@@ -39,6 +39,13 @@ export function TickerTape({
   const [flashes, setFlashes] = useState<Record<string, "up" | "down">>({});
   const prevPricesRef = useRef<Map<string, number>>(new Map());
 
+  // Keyboard shortcut listener to toggle pause
+  useEffect(() => {
+    const onTogglePause = () => setPaused((p) => !p);
+    window.addEventListener("nse:ticker-toggle-pause", onTogglePause);
+    return () => window.removeEventListener("nse:ticker-toggle-pause", onTogglePause);
+  }, []);
+
   // Macro indicators to mix into the ticker
   const macroItems: TickerItem[] = useMemo(() => {
     const list: TickerItem[] = [];
