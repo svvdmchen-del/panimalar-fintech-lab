@@ -1,13 +1,23 @@
 {
   "hosting": {
-    "source": ".",
+    "site": "panimalar-mba-fintech",
+    "public": "hosting-public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "frameworksBackend": {
-      "region": "asia-south1"
-    }
+    "redirects": [
+      {
+        "source": "/",
+        "destination": "https://panimalar-fintech-lab--panimalar-mba-fintech.asia-southeast1.hosted.app/",
+        "type": 302
+      },
+      {
+        "source": "/:path*",
+        "destination": "https://panimalar-fintech-lab--panimalar-mba-fintech.asia-southeast1.hosted.app/:path*",
+        "type": 302
+      }
+    ]
   }
 }
