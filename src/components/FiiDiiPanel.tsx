@@ -60,7 +60,7 @@ export function FiiDiiPanel({
   const max = Math.max(1, ...rows.flatMap((row) => [Math.abs(row.fii.net), Math.abs(row.dii.net)]));
 
   return (
-    <Panel title="FII / DII flows" subtitle="₹ crore, cash market" badge={badge} bodyClassName="p-2.5">
+    <Panel title="FII / DII flows" popoutWidget="flows" subtitle="₹ crore, cash market" badge={badge} bodyClassName="p-2.5">
       {!rows.length && loading ? (
         <div className="space-y-2">
           <Skeleton className="h-12 w-full" />

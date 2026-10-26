@@ -24,6 +24,7 @@ export function OptionChainPanel({
   return (
     <Panel
       title="Option chain"
+      popoutWidget="options"
       subtitle={chain ? `${chain.symbol} · expiry ${chain.expiry}` : "NSE F&O"}
       badge={badge}
       actions={

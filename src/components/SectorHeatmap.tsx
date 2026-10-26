@@ -30,6 +30,7 @@ export function SectorHeatmap({
   return (
     <Panel
       title="Sector heat-map"
+      popoutWidget="sectors"
       subtitle={
         sectors.length
           ? `${advancing} of ${sectors.length} sectors up`

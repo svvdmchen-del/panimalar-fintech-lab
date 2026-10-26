@@ -237,6 +237,7 @@ export function Watchlist({
   return (
     <Panel
       title="Watchlist"
+      popoutWidget="watchlist"
       subtitle={
         <>
           {filteredRows.length} shown of {watchlist.length} symbols · click to chart

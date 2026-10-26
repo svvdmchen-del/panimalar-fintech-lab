@@ -7,6 +7,7 @@ import { FiiDiiPanel } from "@/components/FiiDiiPanel";
 import { IndexStrip } from "@/components/IndexStrip";
 import { KeyboardShortcutsHUD } from "@/components/KeyboardShortcutsHUD";
 import { MarketLensDrawer } from "@/components/MarketLensDrawer";
+import { postBroadcast, subscribeBroadcast } from "@/lib/broadcast";
 import { MoversPanel } from "@/components/MoversPanel";
 import { NewsFeed } from "@/components/NewsFeed";
 import { OptionChainPanel } from "@/components/OptionChainPanel";
@@ -267,6 +268,24 @@ export default function Page() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [watchlist, selected, detail, intervalMs, toggleWatchlist]);
 
+  const handleSelectSymbol = (symbol: string) => {
+    const clean = symbol.trim().toUpperCase();
+    setSelected(clean);
+    postBroadcast({ type: "SELECT_SYMBOL", symbol: clean });
+  };
+
+  useEffect(() => {
+    return subscribeBroadcast((event) => {
+      if (event.type === "SELECT_SYMBOL") {
+        setSelected(event.symbol);
+      } else if (event.type === "INTERVAL_CHANGE") {
+        setIntervalMs(event.intervalMs);
+      } else if (event.type === "REFRESH") {
+        setRefreshToken((r) => r + 1);
+      }
+    });
+  }, []);
+
   const detailQuote = detail ? quoteList.find((quote) => quote.symbol === detail) : undefined;
 
   return (
@@ -279,7 +298,7 @@ export default function Page() {
         intervalMs={intervalMs}
         onIntervalChange={setIntervalMs}
         onRefresh={() => setRefreshToken((value) => value + 1)}
-        onSelect={setSelected}
+        onSelect={handleSelectSymbol}
         onDetails={setDetail}
         onOpenShortcuts={() => setShortcutsOpen(true)}
         onOpenMarketLens={() => setMarketLensOpen(true)}
@@ -289,7 +308,7 @@ export default function Page() {
       <TickerTape
         quotes={tape}
         indices={indexList}
-        onSelect={setSelected}
+        onSelect={handleSelectSymbol}
         onDetails={setDetail}
         dockBottom={dockBottomTicker}
         onToggleDock={() => setDockBottomTicker((d) => !d)}
@@ -303,7 +322,7 @@ export default function Page() {
           </div>
         ) : null}
 
-        <IndexStrip indices={indexList} loading={indices.loading} onSelect={setSelected} />
+        <IndexStrip indices={indexList} loading={indices.loading} onSelect={handleSelectSymbol} />
 
         <BreadthStrip index={nifty50} />
 
@@ -313,7 +332,7 @@ export default function Page() {
               quotes={quoteList}
               loading={quotes.loading}
               selected={selected}
-              onSelect={setSelected}
+              onSelect={handleSelectSymbol}
               onDetails={setDetail}
               watchlist={watchlist}
               onWatchlistChange={setWatchlist}
@@ -325,7 +344,7 @@ export default function Page() {
             <MoversPanel
               movers={movers.data?.data}
               loading={movers.loading}
-              onSelect={setSelected}
+              onSelect={handleSelectSymbol}
               badge={movers.data ? <DataBadge status={movers.data.status} source={movers.data.source} /> : null}
             />
           </div>

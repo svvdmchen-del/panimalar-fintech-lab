@@ -14,7 +14,7 @@ export function NewsFeed({
   badge?: React.ReactNode;
 }) {
   return (
-    <Panel title="Market news" subtitle="Latest headlines" badge={badge} bodyClassName="overflow-y-auto">
+    <Panel title="Market news" popoutWidget="news" subtitle="Latest headlines" badge={badge} bodyClassName="overflow-y-auto">
       {!items.length && loading ? (
         <div className="space-y-3 p-3">
           {Array.from({ length: 5 }).map((_, index) => (

@@ -31,6 +31,7 @@ export function MoversPanel({
   return (
     <Panel
       title="Movers"
+      popoutWidget="movers"
       subtitle="NIFTY 50 universe"
       badge={badge}
       actions={

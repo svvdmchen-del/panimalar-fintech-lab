@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { pct, pctOf, signed, toneClass } from "@/lib/format";
 import type { DataStatus } from "@/lib/types";
+import { openPopout } from "@/lib/broadcast";
 
 export function Panel({
   title,
@@ -10,6 +11,7 @@ export function Panel({
   children,
   className = "",
   bodyClassName = "",
+  popoutWidget,
 }: {
   title: string;
   subtitle?: ReactNode;
@@ -18,6 +20,7 @@ export function Panel({
   children: ReactNode;
   className?: string;
   bodyClassName?: string;
+  popoutWidget?: string;
 }) {
   return (
     <section
@@ -31,9 +34,20 @@ export function Panel({
           </h2>
           {subtitle ? <div className="truncate text-[11px] text-muted">{subtitle}</div> : null}
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1.5">
           {badge}
           {actions}
+          {popoutWidget ? (
+            <button
+              type="button"
+              onClick={() => openPopout(popoutWidget, title)}
+              title={`Pop out ${title} to another monitor (⤢)`}
+              aria-label={`Pop out ${title} to another monitor`}
+              className="flex h-6 w-6 items-center justify-center rounded border border-line/70 bg-panel2/60 text-[11px] text-muted transition-colors hover:border-cyan/40 hover:bg-cyan/15 hover:text-cyan"
+            >
+              ⤢
+            </button>
+          ) : null}
         </div>
       </header>
       <div className={`min-w-0 flex-1 ${bodyClassName}`}>{children}</div>

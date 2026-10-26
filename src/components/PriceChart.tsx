@@ -16,6 +16,7 @@ import { usePoll } from "@/lib/usePoll";
 import { useTheme } from "@/lib/theme";
 import type { ChartRange, Candle, Envelope, History } from "@/lib/types";
 import { DataBadge, Empty, Skeleton } from "./ui";
+import { openPopout } from "@/lib/broadcast";
 
 const RANGES: ChartRange[] = ["1D", "1W", "1M", "6M", "1Y"];
 /** Shift epoch seconds so the chart's UTC axis renders IST wall-clock time. */
@@ -63,12 +64,14 @@ export function PriceChart({
   intervalMs,
   height = 320,
   hideTitle = false,
+  hidePopout = false,
   livePrice,
 }: {
   symbol: string;
   intervalMs: number;
   height?: number;
   hideTitle?: boolean;
+  hidePopout?: boolean;
   livePrice?: number;
 }) {
   const [range, setRange] = useState<ChartRange>("1D");
@@ -408,6 +411,19 @@ export function PriceChart({
               </button>
             ))}
           </div>
+
+          {/* Pop out to Monitor 2 */}
+          {!hidePopout ? (
+            <button
+              type="button"
+              onClick={() => openPopout("chart", `${symbol} Technical Chart`)}
+              title="Pop out Chart to Monitor 2 (⤢)"
+              aria-label="Pop out Chart to another monitor"
+              className="flex h-6 w-6 items-center justify-center rounded border border-line/70 bg-panel2 text-[11px] text-muted transition-colors hover:border-cyan/40 hover:bg-cyan/15 hover:text-cyan"
+            >
+              ⤢
+            </button>
+          ) : null}
         </div>
       </header>
 
