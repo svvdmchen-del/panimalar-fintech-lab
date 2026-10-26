@@ -155,6 +155,14 @@ export async function yahooHistory(
   const candles = toCandles(result);
   if (candles.length < 2) throw new Error(`Yahoo ${symbol}: only ${candles.length} candles for ${range}`);
 
+  const livePrice = result.meta?.regularMarketPrice;
+  if (livePrice && candles.length > 0 && range === "1D") {
+    const last = candles[candles.length - 1];
+    last.close = livePrice;
+    last.high = Math.max(last.high, livePrice);
+    last.low = Math.min(last.low, livePrice);
+  }
+
   const prevClose = result.meta?.chartPreviousClose ?? candles.at(-2)!.close;
   return { candles, prevClose };
 }

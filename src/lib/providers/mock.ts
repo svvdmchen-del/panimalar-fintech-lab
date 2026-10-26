@@ -400,6 +400,12 @@ export function mockHistory(symbol: string, range: ChartRange): { candles: Candl
       });
       price = close;
     }
+    if (candles.length > 0) {
+      const last = candles[candles.length - 1];
+      last.close = quote.price;
+      last.high = Math.max(last.high, quote.price);
+      last.low = Math.min(last.low, quote.price);
+    }
     return { candles, prevClose: quote.prevClose };
   }
 

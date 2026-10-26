@@ -395,6 +395,7 @@ export function StockModal({
                 intervalMs={intervalMs}
                 height={320}
                 hideTitle={true}
+                livePrice={quote?.price}
               />
             </div>
 

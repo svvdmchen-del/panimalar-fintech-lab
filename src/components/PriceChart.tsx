@@ -63,11 +63,13 @@ export function PriceChart({
   intervalMs,
   height = 320,
   hideTitle = false,
+  livePrice,
 }: {
   symbol: string;
   intervalMs: number;
   height?: number;
   hideTitle?: boolean;
+  livePrice?: number;
 }) {
   const [range, setRange] = useState<ChartRange>("1D");
   const [chartType, setChartType] = useState<"area" | "candle">("area");
@@ -115,11 +117,18 @@ export function PriceChart({
     const deduped: Candle[] = [];
     for (const candle of sorted) {
       if (!deduped.length || candle.time > deduped[deduped.length - 1].time) {
-        deduped.push(candle);
+        deduped.push({ ...candle });
       }
     }
+    // Synchronize the real-time live price on 1D intraday view so chart and header never differ
+    if (range === "1D" && livePrice && deduped.length > 0) {
+      const last = deduped[deduped.length - 1];
+      last.close = livePrice;
+      last.high = Math.max(last.high, livePrice);
+      last.low = Math.min(last.low, livePrice);
+    }
     return deduped;
-  }, [data]);
+  }, [data, range, livePrice]);
   const isIntraday = range === "1D";
   const { theme } = useTheme();
 

@@ -323,7 +323,11 @@ export default function Page() {
           </div>
 
           <div className="min-w-0 xl:col-span-8">
-            <PriceChart symbol={selected} intervalMs={intervalMs} />
+            <PriceChart
+              symbol={selected}
+              intervalMs={intervalMs}
+              livePrice={quoteList.find((q) => q.symbol === selected)?.price}
+            />
           </div>
 
           <div className="min-w-0 xl:col-span-4 xl:self-start">
