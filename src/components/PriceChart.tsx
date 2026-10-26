@@ -68,6 +68,19 @@ export function PriceChart({
   height?: number;
 }) {
   const [range, setRange] = useState<ChartRange>("1D");
+  const [chartType, setChartType] = useState<"area" | "candle">("area");
+  const [showVolume, setShowVolume] = useState(true);
+  const [hoveredCandle, setHoveredCandle] = useState<{
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+    time: number;
+    change: number;
+    changePct: number;
+  } | null>(null);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const url = `/api/market/history?symbol=${encodeURIComponent(symbol)}&range=${range}`;
@@ -103,6 +116,7 @@ export function PriceChart({
       change,
       changePct: prevClose ? (change / prevClose) * 100 : 0,
       time: last.time,
+      volume: last.volume,
     };
   }, [candles, data?.data?.prevClose]);
 
@@ -128,7 +142,7 @@ export function PriceChart({
       },
       rightPriceScale: {
         borderColor: colors.border,
-        scaleMargins: { top: 0.08, bottom: 0.28 },
+        scaleMargins: { top: 0.08, bottom: showVolume ? 0.26 : 0.08 },
       },
       timeScale: {
         borderColor: colors.border,
@@ -139,8 +153,22 @@ export function PriceChart({
       },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: { color: colors.crosshair, width: 1, style: 2, labelBackgroundColor: colors.labelBg },
-        horzLine: { color: colors.crosshair, width: 1, style: 2, labelBackgroundColor: colors.labelBg },
+        vertLine: {
+          color: colors.crosshair,
+          width: 1,
+          style: 2,
+          visible: true,
+          labelVisible: true,
+          labelBackgroundColor: colors.labelBg,
+        },
+        horzLine: {
+          color: colors.crosshair,
+          width: 1,
+          style: 2,
+          visible: true,
+          labelVisible: true,
+          labelBackgroundColor: colors.labelBg,
+        },
       },
       localization: {
         locale: "en-IN",
@@ -161,7 +189,13 @@ export function PriceChart({
     const toTime = (candle: Candle) => (candle.time + IST_SHIFT) as UTCTimestamp;
     const rising = candles[candles.length - 1].close >= candles[0].open;
 
-    if (isIntraday) {
+    // Fast lookup map for crosshair magnet hover
+    const candleByTime = new Map<number, Candle>();
+    for (const c of candles) {
+      candleByTime.set(toTime(c) as number, c);
+    }
+
+    if (chartType === "area") {
       const area = chart.addSeries(AreaSeries, {
         lineColor: rising ? colors.up : colors.down,
         lineWidth: 2,
@@ -192,23 +226,49 @@ export function PriceChart({
       );
     }
 
-    const volume = chart.addSeries(HistogramSeries, {
-      priceScaleId: "volume",
-      priceFormat: { type: "volume" },
-      priceLineVisible: false,
-      lastValueVisible: false,
-    });
-    volume.setData(
-      candles.map((candle) => ({
-        time: toTime(candle),
-        value: candle.volume,
-        color: candle.close >= candle.open ? colors.volume.up : colors.volume.down,
-      })),
-    );
-    chart.priceScale("volume").applyOptions({ scaleMargins: { top: 0.82, bottom: 0 } });
+    if (showVolume) {
+      const volume = chart.addSeries(HistogramSeries, {
+        priceScaleId: "volume",
+        priceFormat: { type: "volume" },
+        priceLineVisible: false,
+        lastValueVisible: false,
+      });
+      volume.setData(
+        candles.map((candle) => ({
+          time: toTime(candle),
+          value: candle.volume,
+          color: candle.close >= candle.open ? colors.volume.up : colors.volume.down,
+        })),
+      );
+      chart.priceScale("volume").applyOptions({ scaleMargins: { top: 0.80, bottom: 0 } });
+    }
 
-    // Inset the first/last bar so the edge tick labels are not clipped. The
-    // padding is expressed in bars, so it scales with the pixel width.
+    // Subscribe to crosshair move for interactive HUD
+    chart.subscribeCrosshairMove((param) => {
+      if (!param.point || !param.time) {
+        setHoveredCandle(null);
+        return;
+      }
+      const c = candleByTime.get(param.time as number);
+      if (!c) {
+        setHoveredCandle(null);
+        return;
+      }
+      const prevClose = data?.data?.prevClose ?? candles[0].open;
+      const change = c.close - prevClose;
+      setHoveredCandle({
+        open: c.open,
+        high: c.high,
+        low: c.low,
+        close: c.close,
+        volume: c.volume,
+        time: c.time,
+        change,
+        changePct: prevClose ? (change / prevClose) * 100 : 0,
+      });
+    });
+
+    // Inset the first/last bar so the edge tick labels are not clipped.
     const fitRange = (width: number) => {
       const plot = Math.max(200, width - 64);
       const spacing = Math.max(2, plot / candles.length);
@@ -230,7 +290,9 @@ export function PriceChart({
       observer.disconnect();
       chart.remove();
     };
-  }, [candles, isIntraday, height, theme]);
+  }, [candles, isIntraday, height, theme, chartType, showVolume, data?.data?.prevClose]);
+
+  const activeDisplay = hoveredCandle ?? stats;
 
   return (
     <section
@@ -240,19 +302,62 @@ export function PriceChart({
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3.5 py-2.5">
         <div className="flex min-w-0 items-baseline gap-3">
           <h2 className="truncate text-sm font-semibold tracking-wide text-ink">{symbol}</h2>
-          {stats ? (
+          {activeDisplay ? (
             <>
-              <span className="font-mono text-lg tabular-nums text-ink">{price(stats.close)}</span>
-              <span className={`font-mono text-xs tabular-nums ${toneClass(stats.changePct)}`}>
-                {stats.change > 0 ? "+" : ""}
-                {num(stats.change)} ({pct(stats.changePct)})
+              <span className="font-mono text-lg tabular-nums text-ink">{price(activeDisplay.close)}</span>
+              <span className={`font-mono text-xs tabular-nums ${toneClass(activeDisplay.changePct)}`}>
+                {activeDisplay.change > 0 ? "+" : ""}
+                {num(activeDisplay.change)} ({pct(activeDisplay.changePct)})
               </span>
+              {hoveredCandle ? (
+                <span className="rounded bg-cyan/15 px-1.5 py-0.5 text-[9px] font-mono text-cyan">
+                  HUD ACTIVE
+                </span>
+              ) : null}
             </>
           ) : null}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {data ? <DataBadge status={data.status} source={data.source} /> : null}
+
+          {/* Chart Type Toggle: Area vs Candlestick */}
+          <div className="flex overflow-hidden rounded-md border border-line bg-panel2 p-0.5" role="tablist" aria-label="Chart type">
+            <button
+              type="button"
+              onClick={() => setChartType("area")}
+              title="Area / Line chart"
+              className={`rounded px-2 py-0.5 text-[10px] transition-colors ${
+                chartType === "area" ? "bg-cyan/15 font-semibold text-cyan" : "text-muted hover:text-ink"
+              }`}
+            >
+              📈 Area
+            </button>
+            <button
+              type="button"
+              onClick={() => setChartType("candle")}
+              title="Japanese Candlestick chart"
+              className={`rounded px-2 py-0.5 text-[10px] transition-colors ${
+                chartType === "candle" ? "bg-cyan/15 font-semibold text-cyan" : "text-muted hover:text-ink"
+              }`}
+            >
+              🕯 Candles
+            </button>
+          </div>
+
+          {/* Volume toggle */}
+          <button
+            type="button"
+            onClick={() => setShowVolume((v) => !v)}
+            title="Toggle Volume Sub-Bars"
+            className={`rounded-md border border-line px-2 py-1 text-[10px] transition-colors ${
+              showVolume ? "bg-cyan/10 font-semibold text-cyan" : "bg-panel2 text-muted hover:text-ink"
+            }`}
+          >
+            📊 Vol
+          </button>
+
+          {/* Timeframe Range selector */}
           <div className="flex overflow-hidden rounded-md border border-line bg-panel2" role="tablist" aria-label="Chart range">
             {RANGES.map((option) => (
               <button
@@ -272,14 +377,15 @@ export function PriceChart({
         </div>
       </header>
 
-      {stats ? (
-        <div className="grid grid-cols-3 gap-x-4 gap-y-1 border-b border-line/70 px-3.5 py-2 font-mono text-[10px] tabular-nums text-muted sm:grid-cols-6">
-          <Stat label="Open" value={price(stats.open)} />
-          <Stat label="High" value={price(stats.high)} tone="up" />
-          <Stat label="Low" value={price(stats.low)} tone="down" />
-          <Stat label="Prev" value={price(data?.data?.prevClose)} />
-          <Stat label={isIntraday ? "Last tick" : "Last candle"} value={timeIST(stats.time * 1000)} />
-          <Stat label="Bars" value={String(candles.length)} />
+      {/* OHLCV Live HUD Bar on Crosshair Magnet Hover */}
+      {activeDisplay ? (
+        <div className="grid grid-cols-3 gap-x-4 gap-y-1 border-b border-line/70 px-3.5 py-1.5 font-mono text-[10px] tabular-nums text-muted sm:grid-cols-6">
+          <Stat label="Open" value={price(activeDisplay.open)} />
+          <Stat label="High" value={price(activeDisplay.high)} tone="up" />
+          <Stat label="Low" value={price(activeDisplay.low)} tone="down" />
+          <Stat label="Close" value={price(activeDisplay.close)} />
+          <Stat label="Vol" value={activeDisplay.volume ? num(activeDisplay.volume, 0) : "—"} />
+          <Stat label={hoveredCandle ? "Cursor" : (isIntraday ? "Last tick" : "Last bar")} value={timeIST(activeDisplay.time * 1000, true)} />
         </div>
       ) : null}
 
@@ -293,7 +399,7 @@ export function PriceChart({
         ) : null}
         <div ref={containerRef} className="w-full" style={{ height }} />
         <span className="pointer-events-none absolute bottom-2 right-3 rounded bg-bg/70 px-1.5 py-0.5 text-[9px] uppercase tracking-widest text-muted/60">
-          {RANGE_LABEL[range]}
+          {RANGE_LABEL[range]} · {chartType === "candle" ? "Candlesticks" : "Area"}
         </span>
       </div>
     </section>

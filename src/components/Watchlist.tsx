@@ -3,22 +3,89 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { compact, price, pct, toneClass } from "@/lib/format";
 import { useSymbolSearch } from "@/lib/usePoll";
+import { DEFAULT_WATCHLIST, SYMBOL_UNIVERSE } from "@/lib/symbols";
 import type { Quote } from "@/lib/types";
 import { Empty, Panel, RangeBar, Skeleton } from "./ui";
 
 type SortKey = "symbol" | "price" | "changePct" | "volume";
+type FilterKey = "all" | "nifty50" | "banking" | "it" | "auto" | "gainers" | "losers";
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: "all", label: "All" },
+  { key: "nifty50", label: "Nifty 50" },
+  { key: "banking", label: "Banking" },
+  { key: "it", label: "IT" },
+  { key: "auto", label: "Auto" },
+  { key: "gainers", label: "▲ Gainers" },
+  { key: "losers", label: "▼ Losers" },
+];
+
+const SECTOR_BY_SYMBOL = new Map(SYMBOL_UNIVERSE.map((item) => [item.symbol, item.sector]));
 
 const HEADERS: { id: string; label: string; align: string; visible: string; sortKey?: SortKey }[] = [
   { id: "symbol", label: "Symbol", align: "text-left", visible: "", sortKey: "symbol" },
   { id: "ltp", label: "LTP", align: "text-right", visible: "", sortKey: "price" },
   { id: "chg", label: "Chg %", align: "text-right", visible: "", sortKey: "changePct" },
-  { id: "range", label: "Day range", align: "text-left", visible: "hidden md:table-cell" },
+  { id: "range", label: "Day Range & Trend", align: "text-left", visible: "hidden md:table-cell" },
   { id: "volume", label: "Volume", align: "text-right", visible: "hidden lg:table-cell", sortKey: "volume" },
 ];
 
 interface Row {
   symbol: string;
   quote?: Quote;
+}
+
+/**
+ * Pure SVG Mini-Sparkline displaying intraday price path and current pulse dot.
+ */
+function MiniSparkline({
+  open,
+  low,
+  high,
+  current,
+  prevClose,
+}: {
+  open: number;
+  low: number;
+  high: number;
+  current: number;
+  prevClose: number;
+}) {
+  const min = Math.min(open, low, high, current, prevClose);
+  const max = Math.max(open, low, high, current, prevClose);
+  const range = max - min || 1;
+  const height = 18;
+  const width = 56;
+  const pad = 2;
+
+  const getY = (val: number) => {
+    const norm = (val - min) / range;
+    return height - pad - norm * (height - pad * 2);
+  };
+
+  const isUp = current >= prevClose;
+  const strokeColor = isUp ? "var(--color-up)" : "var(--color-down)";
+
+  const p0 = `0,${getY(open).toFixed(1)}`;
+  const p1 = `14,${getY(open + (low - open) * 0.65).toFixed(1)}`;
+  const p2 = `28,${getY((low + high) / 2).toFixed(1)}`;
+  const p3 = `42,${getY(high - (high - current) * 0.35).toFixed(1)}`;
+  const p4 = `${width},${getY(current).toFixed(1)}`;
+  const points = `${p0} ${p1} ${p2} ${p3} ${p4}`;
+
+  return (
+    <svg width={width} height={height} className="shrink-0 overflow-visible" aria-hidden>
+      <polyline
+        points={points}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx={width} cy={getY(current)} r="2" fill={strokeColor} />
+    </svg>
+  );
 }
 
 export function Watchlist({
@@ -44,6 +111,7 @@ export function Watchlist({
     key: "changePct",
     direction: "desc",
   });
+  const [filter, setFilter] = useState<FilterKey>("all");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [flashes, setFlashes] = useState<Record<string, "up" | "down">>({});
@@ -99,6 +167,39 @@ export function Watchlist({
     return list;
   }, [quotes, watchlist, sort]);
 
+  const filteredRows = useMemo(() => {
+    if (filter === "all") return rows;
+    if (filter === "nifty50") {
+      const niftySet = new Set(DEFAULT_WATCHLIST);
+      return rows.filter((r) => niftySet.has(r.symbol));
+    }
+    if (filter === "banking") {
+      return rows.filter((r) => {
+        const s = SECTOR_BY_SYMBOL.get(r.symbol);
+        return s === "Financials" || /BANK|FIN|HDFC|ICICI|SBI|KOTAK|AXIS/i.test(r.symbol);
+      });
+    }
+    if (filter === "it") {
+      return rows.filter((r) => {
+        const s = SECTOR_BY_SYMBOL.get(r.symbol);
+        return s === "IT" || /TCS|INFY|WIPRO|TECHM|HCL/i.test(r.symbol);
+      });
+    }
+    if (filter === "auto") {
+      return rows.filter((r) => {
+        const s = SECTOR_BY_SYMBOL.get(r.symbol);
+        return s === "Auto" || /MARUTI|TATA|M&M|BAJAJ/i.test(r.symbol);
+      });
+    }
+    if (filter === "gainers") {
+      return rows.filter((r) => r.quote && r.quote.changePct > 0);
+    }
+    if (filter === "losers") {
+      return rows.filter((r) => r.quote && r.quote.changePct < 0);
+    }
+    return rows;
+  }, [rows, filter]);
+
   const missing = rows.filter((row) => !row.quote).length;
 
   const searchResults = useSymbolSearch(query, 8);
@@ -138,7 +239,7 @@ export function Watchlist({
       title="Watchlist"
       subtitle={
         <>
-          {watchlist.length} symbols · click a row to chart it
+          {filteredRows.length} shown of {watchlist.length} symbols · click to chart
           {loading && !quotes.length ? (
             <span className="text-muted"> · loading quotes…</span>
           ) : missing > 0 ? (
@@ -196,8 +297,26 @@ export function Watchlist({
       }
       bodyClassName="overflow-x-auto"
     >
-      {!rows.length ? (
-        <Empty>Add a symbol to begin.</Empty>
+      {/* Quick Sector & Movers Filter Tabs */}
+      <div className="flex items-center gap-1.5 overflow-x-auto border-b border-line/60 bg-panel2/40 px-3 py-1.5 no-scrollbar">
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => setFilter(f.key)}
+            className={`rounded-md px-2 py-0.5 text-[10px] font-medium whitespace-nowrap transition-colors ${
+              filter === f.key
+                ? "border border-cyan/40 bg-cyan/15 text-cyan"
+                : "border border-transparent text-muted hover:bg-wash/5 hover:text-ink"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      {!filteredRows.length ? (
+        <Empty>No symbols match the {filter} filter.</Empty>
       ) : !quotes.length && loading ? (
         <div className="space-y-2 p-3">
           {Array.from({ length: 8 }).map((_, index) => (
@@ -236,7 +355,7 @@ export function Watchlist({
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ symbol, quote }) => {
+            {filteredRows.map(({ symbol, quote }) => {
               const isSelected = selected === symbol;
               const flash = flashes[symbol];
               const flashRowClass =
@@ -292,7 +411,7 @@ export function Watchlist({
                         onDetails(symbol);
                       }}
                       className="block max-w-[9.5rem] truncate text-left font-semibold text-ink hover:text-cyan sm:max-w-[13rem]"
-                      title={`Open ${symbol} details`}
+                      title={`Open ${symbol} details & valuation`}
                     >
                       {symbol}
                     </button>
@@ -329,8 +448,19 @@ export function Watchlist({
                       {quote.change.toFixed(2)}
                     </span>
                   </td>
-                  <td className="hidden w-36 px-3 py-2 md:table-cell">
-                    <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} />
+                  <td className="hidden w-48 px-3 py-2 md:table-cell">
+                    <div className="flex items-center gap-3">
+                      <MiniSparkline
+                        open={quote.open}
+                        low={quote.low}
+                        high={quote.high}
+                        current={quote.price}
+                        prevClose={quote.prevClose}
+                      />
+                      <div className="flex-1">
+                        <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} />
+                      </div>
+                    </div>
                   </td>
                   <td className="hidden px-3 py-1.5 text-right font-mono tabular-nums text-muted lg:table-cell">
                     {compact(quote.volume)}

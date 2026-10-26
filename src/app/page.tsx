@@ -38,6 +38,7 @@ export default function Page() {
   const [refreshToken, setRefreshToken] = useState(0);
   const [optionUnderlying, setOptionUnderlying] = useState("NIFTY");
   const [detail, setDetail] = useState<string | null>(null);
+  const [dockBottomTicker, setDockBottomTicker] = useState(false);
 
   const now = useNow(30_000);
   const marketOpen = now ? isMarketOpen(now) : false;
@@ -150,9 +151,16 @@ export default function Page() {
         updatedAt={lastUpdated}
       />
 
-      <TickerTape quotes={tape} onSelect={setSelected} />
+      <TickerTape
+        quotes={tape}
+        indices={indexList}
+        onSelect={setSelected}
+        onDetails={setDetail}
+        dockBottom={dockBottomTicker}
+        onToggleDock={() => setDockBottomTicker((d) => !d)}
+      />
 
-      <main className="mx-auto max-w-[1680px] space-y-2.5 px-4 py-3">
+      <main className={`mx-auto max-w-[1680px] space-y-2.5 px-4 py-3 ${dockBottomTicker ? "pb-16" : ""}`}>
         {dataStatus === "demo" ? (
           <div className="rounded-lg border border-accent/30 bg-accent/[0.08] px-3 py-1.5 text-[11px] text-accent">
             Live NSE feeds are unreachable right now — the built-in simulated dataset is shown so the lab
