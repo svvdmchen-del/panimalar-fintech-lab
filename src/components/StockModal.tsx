@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { compact, num, price, pct, toneClass, formatMarketCap } from "@/lib/format";
-import { usePoll } from "@/lib/usePoll";
+import { usePoll, useSymbolSearch } from "@/lib/usePoll";
 import type { Envelope, Quote, StockFundamentals } from "@/lib/types";
 import { PriceChart } from "./PriceChart";
 import { RangeBar } from "./ui";
@@ -156,6 +156,7 @@ export function StockModal({
   onClose,
   inWatchlist,
   onToggleWatchlist,
+  onSelectSymbol,
 }: {
   symbol: string;
   quote?: Quote;
@@ -163,8 +164,14 @@ export function StockModal({
   onClose: () => void;
   inWatchlist: boolean;
   onToggleWatchlist: () => void;
+  onSelectSymbol?: (symbol: string) => void;
 }) {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchActiveIndex, setSearchActiveIndex] = useState(0);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  const searchResults = useSymbolSearch(searchQuery, 8);
 
   const fallbackQuote = usePoll<Envelope<Quote[]>>(
     !initialQuote ? `/api/market/quotes?symbols=${encodeURIComponent(symbol)}` : null,
@@ -179,9 +186,14 @@ export function StockModal({
   const quote = initialQuote ?? fallbackQuote.data?.data?.[0];
   const fundamentals = fundamentalsRes.data?.data;
 
+  // Reset active search suggestion index when query changes
+  useEffect(() => {
+    setSearchActiveIndex(0);
+  }, [searchQuery]);
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape" && !searchOpen) onClose();
     };
     document.addEventListener("keydown", onKey);
     const previous = document.body.style.overflow;
@@ -190,7 +202,51 @@ export function StockModal({
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previous;
     };
-  }, [onClose]);
+  }, [onClose, searchOpen]);
+
+  const pickSymbol = (newSymbol: string) => {
+    const clean = newSymbol.trim().toUpperCase();
+    setSearchQuery("");
+    setSearchOpen(false);
+    if (onSelectSymbol) {
+      onSelectSymbol(clean);
+    }
+  };
+
+  const onSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSearchOpen(true);
+      if (searchResults.length > 0) {
+        setSearchActiveIndex((prev) => (prev + 1) % searchResults.length);
+      }
+      return;
+    }
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSearchOpen(true);
+      if (searchResults.length > 0) {
+        setSearchActiveIndex((prev) => (prev - 1 + searchResults.length) % searchResults.length);
+      }
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (searchResults[searchActiveIndex]) {
+        pickSymbol(searchResults[searchActiveIndex].symbol);
+      } else if (searchResults.length > 0) {
+        pickSymbol(searchResults[0].symbol);
+      } else if (searchQuery.trim()) {
+        pickSymbol(searchQuery.trim());
+      }
+      return;
+    }
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      setSearchOpen(false);
+      searchInputRef.current?.blur();
+    }
+  };
 
   return (
     <div
@@ -206,14 +262,8 @@ export function StockModal({
         className="fixed inset-0 cursor-default bg-[var(--color-scrim)] backdrop-blur-sm"
       />
 
-      <div
-        className={`relative z-10 flex flex-col overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-2xl transition-all duration-200 ${
-          isFullscreen
-            ? "h-[95vh] w-[98vw] max-w-[1640px]"
-            : "h-auto max-h-[90vh] w-full max-w-6xl"
-        }`}
-      >
-        {/* Header: Clean Stock Identity & Actions */}
+      <div className="relative z-10 flex h-auto max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-2xl transition-all duration-200">
+        {/* Header: Clean Stock Identity & In-Modal Search Replacement */}
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-panel/70 px-5 py-3">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
@@ -250,15 +300,65 @@ export function StockModal({
               </div>
             ) : null}
 
-            {/* Fullscreen Cockpit Toggle */}
-            <button
-              type="button"
-              onClick={() => setIsFullscreen((f) => !f)}
-              title={isFullscreen ? "Restore windowed view" : "Expand to fullscreen analysis cockpit"}
-              className="rounded-md border border-line bg-panel px-2.5 py-1 text-[11px] font-mono text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
-            >
-              {isFullscreen ? "⛷ Windowed" : "⛶ Expand"}
-            </button>
+            {/* In-Modal Instant Stock Search (Replacing Expand Button) */}
+            <div className="relative w-36 sm:w-52">
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setSearchOpen(true);
+                }}
+                onFocus={() => setSearchOpen(true)}
+                onBlur={() => window.setTimeout(() => setSearchOpen(false), 140)}
+                onKeyDown={onSearchKeyDown}
+                placeholder="Search stock…"
+                aria-label="Search another stock in modal"
+                className="w-full rounded-md border border-line bg-panel2/90 px-2.5 py-1 text-[11px] text-ink placeholder:text-muted/60 focus:border-cyan/40 focus:outline-none focus:ring-1 focus:ring-cyan/40"
+              />
+
+              {searchOpen && searchResults.length > 0 ? (
+                <ul
+                  role="listbox"
+                  className="absolute right-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-lg border border-line bg-panel2 shadow-2xl"
+                >
+                  <div className="border-b border-line/60 px-3 py-1 text-[9px] text-muted flex items-center justify-between">
+                    <span>Select to switch</span>
+                    <span>↑ ↓ Enter</span>
+                  </div>
+                  {searchResults.map((entry, index) => {
+                    const isHighlighted = index === searchActiveIndex;
+                    return (
+                      <li key={entry.symbol} role="presentation">
+                        <button
+                          type="button"
+                          role="option"
+                          aria-selected={isHighlighted}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onMouseEnter={() => setSearchActiveIndex(index)}
+                          onClick={() => pickSymbol(entry.symbol)}
+                          className={`flex w-full items-baseline justify-between gap-2 px-3 py-1.5 text-left text-[11px] transition-colors ${
+                            isHighlighted
+                              ? "bg-cyan/15 text-cyan border-l-2 border-cyan font-semibold"
+                              : "text-ink hover:bg-wash/5"
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <span>{entry.symbol}</span>
+                            <span className="ml-1.5 truncate text-[10px] text-muted">{entry.name}</span>
+                          </div>
+                          {entry.sector ? (
+                            <span className="shrink-0 text-[8px] uppercase tracking-wider text-muted/70">
+                              {entry.sector}
+                            </span>
+                          ) : null}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : null}
+            </div>
 
             <button
               type="button"
@@ -293,7 +393,7 @@ export function StockModal({
               <PriceChart
                 symbol={symbol}
                 intervalMs={intervalMs}
-                height={isFullscreen ? 420 : 300}
+                height={320}
                 hideTitle={true}
               />
             </div>

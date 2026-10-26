@@ -395,6 +395,10 @@ export default function Page() {
           quote={detailQuote}
           intervalMs={intervalMs}
           onClose={() => setDetail(null)}
+          onSelectSymbol={(sym) => {
+            setSelected(sym);
+            setDetail(sym);
+          }}
           inWatchlist={watchlist.includes(detail)}
           onToggleWatchlist={() => toggleWatchlist(detail)}
         />
