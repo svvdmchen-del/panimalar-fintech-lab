@@ -85,12 +85,19 @@ export interface Mover {
   change: number;
   changePct: number;
   volume: number;
+  yearHigh?: number;
+  yearLow?: number;
+  pctFromHigh?: number;
+  pctFromLow?: number;
 }
 
 export interface Movers {
   gainers: Mover[];
   losers: Mover[];
   volume: Mover[];
+  high52?: Mover[];
+  low52?: Mover[];
+  universe?: "NIFTY 50" | "NIFTY 500";
 }
 
 export interface SectorPerf {

@@ -103,12 +103,12 @@ export function getQuotes(symbols: string[]) {
   );
 }
 
-export function getMovers(count = 8) {
+export function getMovers(count = 8, universe: "NIFTY 50" | "NIFTY 500" = "NIFTY 500") {
   return resolveMany<Movers>(
     [
-      { source: SOURCES.nse, status: "live", run: () => fetchMovers(count) },
-      { source: SOURCES.mcp, status: "delayed", run: () => mcpMovers(count) },
-      { source: SOURCES.demo, status: "demo", run: async () => mockMovers(count) },
+      { source: SOURCES.nse, status: "live", run: () => fetchMovers(count, universe) },
+      { source: SOURCES.mcp, status: "delayed", run: () => mcpMovers(count, universe) },
+      { source: SOURCES.demo, status: "demo", run: async () => mockMovers(count, universe) },
     ],
     "Movers",
   );

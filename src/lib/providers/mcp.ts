@@ -6,6 +6,7 @@ import type {
   IndexQuote,
   MarketSession,
   Mover,
+  Movers,
   OptionChain,
   OptionLeg,
   OptionStrike,
@@ -158,7 +159,10 @@ interface RawMover {
   volume?: number;
 }
 
-export async function mcpMovers(count = 8): Promise<{ gainers: Mover[]; losers: Mover[]; volume: Mover[] }> {
+export async function mcpMovers(
+  count = 8,
+  universe: "NIFTY 50" | "NIFTY 500" = "NIFTY 500",
+): Promise<Movers> {
   const [gainersRaw, losersRaw] = await Promise.all([
     client().callTool<{ data?: RawMover[] }>("get_gainers_losers", { type: "gainers", count }),
     client().callTool<{ data?: RawMover[] }>("get_gainers_losers", { type: "losers", count }),
@@ -179,7 +183,7 @@ export async function mcpMovers(count = 8): Promise<{ gainers: Mover[]; losers: 
   if (!gainers.length && !losers.length) throw new Error("MCP movers returned no rows");
 
   const volume = [...gainers, ...losers].sort((a, b) => b.volume - a.volume).slice(0, count);
-  return { gainers, losers, volume };
+  return { gainers, losers, volume, high52: [], low52: [], universe };
 }
 
 interface RawStatus {

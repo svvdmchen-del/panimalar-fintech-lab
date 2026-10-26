@@ -375,16 +375,51 @@ export function StockModal({
         <div className="grid min-h-0 flex-1 grid-cols-1 divide-y divide-line overflow-y-auto lg:grid-cols-12 lg:divide-x lg:divide-y-0">
           {/* Left Column: Live Chart & Technical Ribbon (Col span 7) */}
           <div className="flex flex-col space-y-3 p-4 lg:col-span-7">
-            {/* Range Bar & 52-Week Limits */}
+            {/* Dual Range Visualizer: Intraday vs 52-Week Channel */}
             {quote ? (
-              <div className="rounded-xl border border-line bg-panel2/70 px-3.5 py-2.5">
-                <div className="mb-1.5 flex items-center justify-between text-[10px] font-medium text-muted">
-                  <span>Intraday Range</span>
-                  <span>
-                    52W: {quote.yearLow ? price(quote.yearLow) : "—"} – {quote.yearHigh ? price(quote.yearHigh) : "—"}
-                  </span>
+              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {/* Day Range */}
+                <div className="rounded-xl border border-line bg-panel2/70 px-3 py-2">
+                  <div className="mb-1 flex items-center justify-between text-[10px] font-medium text-muted">
+                    <span className="flex items-center gap-1.5">
+                      <span className="size-1.5 rounded-full bg-cyan" />
+                      Day Range
+                    </span>
+                    <span className="font-mono text-[9px] text-muted/80">
+                      Spread: {price(quote.high - quote.low)}
+                    </span>
+                  </div>
+                  <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} showLabels />
                 </div>
-                <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} showLabels />
+
+                {/* 52-Week Range */}
+                <div className="rounded-xl border border-line bg-panel2/70 px-3 py-2">
+                  <div className="mb-1 flex items-center justify-between text-[10px] font-medium text-muted">
+                    <span className="flex items-center gap-1.5">
+                      <span className="size-1.5 rounded-full bg-accent" />
+                      52-Week Range
+                    </span>
+                    {quote.yearHigh && quote.yearHigh > 0 ? (
+                      <span
+                        className={`rounded px-1.5 py-0.2 text-[9px] font-bold ${
+                          quote.price >= quote.yearHigh * 0.975
+                            ? "bg-up/20 text-up border border-up/30"
+                            : "bg-cyan/15 text-cyan"
+                        }`}
+                      >
+                        {quote.price >= quote.yearHigh * 0.99
+                          ? "🔥 AT 52W HIGH"
+                          : `${(((quote.price - quote.yearHigh) / quote.yearHigh) * 100).toFixed(1)}% off High`}
+                      </span>
+                    ) : null}
+                  </div>
+                  <RangeBar
+                    low={quote.yearLow ?? quote.low}
+                    high={quote.yearHigh ?? quote.high}
+                    value={quote.price}
+                    showLabels
+                  />
+                </div>
               </div>
             ) : null}
 
@@ -399,19 +434,19 @@ export function StockModal({
               />
             </div>
 
-            {/* Consolidated Session Ribbon (Single Clean Row) */}
+            {/* Consolidated Session Ribbon (8 Clean Metric Tiles) */}
             {quote ? (
-              <div className="grid grid-cols-3 divide-x divide-line/60 rounded-xl border border-line bg-panel2/50 p-2 text-center sm:grid-cols-6">
+              <div className="grid grid-cols-4 divide-x divide-line/60 rounded-xl border border-line bg-panel2/50 p-2 text-center sm:grid-cols-8">
                 <div className="px-1.5 py-1">
                   <div className="text-[9px] uppercase tracking-wider text-muted">Open</div>
                   <div className="font-mono text-[11px] tabular-nums text-ink">{price(quote.open)}</div>
                 </div>
                 <div className="px-1.5 py-1">
-                  <div className="text-[9px] uppercase tracking-wider text-muted">High</div>
+                  <div className="text-[9px] uppercase tracking-wider text-muted">Day High</div>
                   <div className="font-mono text-[11px] tabular-nums text-up">{price(quote.high)}</div>
                 </div>
                 <div className="px-1.5 py-1">
-                  <div className="text-[9px] uppercase tracking-wider text-muted">Low</div>
+                  <div className="text-[9px] uppercase tracking-wider text-muted">Day Low</div>
                   <div className="font-mono text-[11px] tabular-nums text-down">{price(quote.low)}</div>
                 </div>
                 <div className="px-1.5 py-1">
@@ -421,6 +456,18 @@ export function StockModal({
                 <div className="px-1.5 py-1">
                   <div className="text-[9px] uppercase tracking-wider text-muted">Volume</div>
                   <div className="font-mono text-[11px] tabular-nums text-ink">{compact(quote.volume)}</div>
+                </div>
+                <div className="px-1.5 py-1">
+                  <div className="text-[9px] uppercase tracking-wider text-muted">52W High</div>
+                  <div className="font-mono text-[11px] tabular-nums text-up">
+                    {quote.yearHigh ? price(quote.yearHigh) : "—"}
+                  </div>
+                </div>
+                <div className="px-1.5 py-1">
+                  <div className="text-[9px] uppercase tracking-wider text-muted">52W Low</div>
+                  <div className="font-mono text-[11px] tabular-nums text-down">
+                    {quote.yearLow ? price(quote.yearLow) : "—"}
+                  </div>
                 </div>
                 <div className="px-1.5 py-1">
                   <div className="text-[9px] uppercase tracking-wider text-muted">P/E Ratio</div>

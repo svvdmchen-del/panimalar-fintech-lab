@@ -1,4 +1,4 @@
-import { DEFAULT_WATCHLIST, INDEX_CARDS, SECTOR_INDICES, displayName } from "@/lib/symbols";
+import { DEFAULT_WATCHLIST, INDEX_CARDS, NIFTY50_SYMBOLS, NIFTY500_SYMBOLS, SECTOR_INDICES, displayName } from "@/lib/symbols";
 import type {
   Candle,
   ChartRange,
@@ -188,23 +188,49 @@ export function mockSectors(): SectorPerf[] {
   }).sort((a, b) => b.changePct - a.changePct);
 }
 
-export function mockMovers(count = 8): Movers {
-  const universe = DEFAULT_WATCHLIST;
-  const quotes = universe.map(mockQuote);
+export function mockMovers(count = 8, universe: "NIFTY 50" | "NIFTY 500" = "NIFTY 500"): Movers {
+  const symbols = universe === "NIFTY 50" ? NIFTY50_SYMBOLS : NIFTY500_SYMBOLS;
+  const quotes = symbols.map(mockQuote);
   const sorted = [...quotes].sort((a, b) => b.changePct - a.changePct);
-  const toMover = (quote: Quote): Mover => ({
-    symbol: quote.symbol,
-    name: quote.name,
-    price: quote.price,
-    change: quote.change,
-    changePct: quote.changePct,
-    volume: quote.volume,
-  });
+  
+  const toMover = (quote: Quote): Mover => {
+    const yHigh = quote.yearHigh ?? quote.high;
+    const yLow = quote.yearLow ?? quote.low;
+    const pctFromHigh = yHigh > 0 ? ((quote.price - yHigh) / yHigh) * 100 : 0;
+    const pctFromLow = yLow > 0 ? ((quote.price - yLow) / yLow) * 100 : 0;
+    return {
+      symbol: quote.symbol,
+      name: quote.name,
+      price: quote.price,
+      change: quote.change,
+      changePct: quote.changePct,
+      volume: quote.volume,
+      yearHigh: yHigh,
+      yearLow: yLow,
+      pctFromHigh: round2(pctFromHigh),
+      pctFromLow: round2(pctFromLow),
+    };
+  };
+
+  const allMovers = quotes.map(toMover);
+
+  // 52W High: stocks closest to their 52-week peak (pctFromHigh closest to 0 or positive)
+  const high52 = [...allMovers]
+    .sort((a, b) => (b.pctFromHigh ?? -100) - (a.pctFromHigh ?? -100))
+    .slice(0, count);
+
+  // 52W Low: stocks closest to their 52-week trough (pctFromLow closest to 0 or negative)
+  const low52 = [...allMovers]
+    .sort((a, b) => (a.pctFromLow ?? 100) - (b.pctFromLow ?? 100))
+    .slice(0, count);
 
   return {
     gainers: sorted.slice(0, count).map(toMover),
     losers: [...sorted].reverse().slice(0, count).map(toMover),
     volume: [...quotes].sort((a, b) => b.volume - a.volume).slice(0, count).map(toMover),
+    high52,
+    low52,
+    universe,
   };
 }
 
