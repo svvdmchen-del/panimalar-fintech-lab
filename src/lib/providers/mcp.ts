@@ -10,6 +10,8 @@ import type {
   OptionLeg,
   OptionStrike,
   Quote,
+  MarketCapCategory,
+  StockFundamentals,
 } from "@/lib/types";
 
 /**
@@ -349,3 +351,32 @@ function nearestStrike(strikes: OptionStrike[], target: number): number {
 }
 
 export const MCP_SERVER_NAME = "india-stock-mcp";
+
+export async function mcpFundamentals(symbol: string): Promise<StockFundamentals> {
+  const raw = await client().callTool<any>("get_fundamentals", { symbol });
+  const fin = raw?.financialData;
+  const stats = raw?.keyStats;
+  const detail = raw?.summaryDetail;
+  const mcap = num(detail?.marketCap ?? fin?.totalCash);
+
+  const category: MarketCapCategory =
+    mcap >= 200_000_000_000 ? "Large Cap" : mcap >= 50_000_000_000 ? "Mid Cap" : "Small Cap";
+
+  return {
+    symbol: cleanSymbol(symbol),
+    trailingPE: detail?.trailingPE ? num(detail.trailingPE) : undefined,
+    forwardPE: detail?.forwardPE ? num(detail.forwardPE) : undefined,
+    priceToBook: stats?.priceToBook ? num(stats.priceToBook) : undefined,
+    dividendYield: detail?.dividendYield ? num(detail.dividendYield) : undefined,
+    returnOnEquity: fin?.returnOnEquity ? num(fin.returnOnEquity) : undefined,
+    operatingMargin: fin?.operatingMargins ? num(fin.operatingMargins) : undefined,
+    profitMargin: fin?.profitMargins ? num(fin.profitMargins) : undefined,
+    debtToEquity: fin?.debtToEquity ? num(fin.debtToEquity) : undefined,
+    marketCap: mcap,
+    marketCapCategory: category,
+    trailingEps: stats?.trailingEps ? num(stats.trailingEps) : undefined,
+    bookValue: stats?.bookValue ? num(stats.bookValue) : undefined,
+    beta: stats?.beta ? num(stats.beta) : undefined,
+  };
+}
+

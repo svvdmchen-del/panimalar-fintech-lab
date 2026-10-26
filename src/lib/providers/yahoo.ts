@@ -1,5 +1,10 @@
+import YahooFinance from "yahoo-finance2";
 import { displayName, YAHOO_INDEX_MAP } from "@/lib/symbols";
-import type { Candle, ChartRange, Quote } from "@/lib/types";
+import type { Candle, ChartRange, MarketCapCategory, Quote, StockFundamentals } from "@/lib/types";
+
+const yf = new YahooFinance({
+  suppressNotices: ["yahooSurvey", "ripHistorical"],
+});
 
 /**
  * Yahoo Finance fallback provider.
@@ -153,3 +158,74 @@ export async function yahooHistory(
   const prevClose = result.meta?.chartPreviousClose ?? candles.at(-2)!.close;
   return { candles, prevClose };
 }
+
+export function categorizeMarketCap(mcap?: number): MarketCapCategory {
+  if (!mcap || mcap <= 0) return "Mid Cap";
+  // Large Cap: >= 20,000 Cr (~2e11 INR)
+  if (mcap >= 200_000_000_000) return "Large Cap";
+  // Mid Cap: 5,000 Cr to 20,000 Cr (~5e10 to 2e11 INR)
+  if (mcap >= 50_000_000_000) return "Mid Cap";
+  // Small Cap: < 5,000 Cr (< 5e10 INR)
+  return "Small Cap";
+}
+
+export async function yahooFundamentals(symbol: string): Promise<StockFundamentals> {
+  const code = symbol.toUpperCase().replace(/\.(NS|BO)$/, "");
+  const sym = yahooSymbol(code);
+
+  const res = (await yf.quoteSummary(sym, {
+    modules: ["financialData", "defaultKeyStatistics", "summaryDetail"],
+  })) as any;
+
+  const fin = res.financialData;
+  const stats = res.defaultKeyStatistics;
+  const detail = res.summaryDetail;
+
+  const marketCap = detail?.marketCap ?? fin?.totalCash ?? 0;
+  const trailingEps = stats?.trailingEps;
+  const bookValue = stats?.bookValue;
+  const currentPrice = fin?.currentPrice ?? detail?.regularMarketPrice;
+
+  let returnOnEquity = fin?.returnOnEquity;
+  if (!returnOnEquity && trailingEps && bookValue && bookValue > 0) {
+    returnOnEquity = trailingEps / bookValue;
+  }
+
+  const trailingPE =
+    detail?.trailingPE ??
+    (currentPrice && trailingEps && trailingEps > 0 ? currentPrice / trailingEps : undefined);
+
+  const forwardPE =
+    detail?.forwardPE ??
+    (currentPrice && stats?.forwardEps && stats.forwardEps > 0
+      ? currentPrice / stats.forwardEps
+      : undefined);
+
+  const priceToBook =
+    stats?.priceToBook ??
+    (currentPrice && bookValue && bookValue > 0 ? currentPrice / bookValue : undefined);
+
+  const dividendYield =
+    detail?.dividendYield ??
+    (detail?.dividendRate && currentPrice && currentPrice > 0
+      ? detail.dividendRate / currentPrice
+      : undefined);
+
+  return {
+    symbol: code,
+    trailingPE,
+    forwardPE,
+    priceToBook,
+    dividendYield,
+    returnOnEquity,
+    operatingMargin: fin?.operatingMargins,
+    profitMargin: fin?.profitMargins,
+    debtToEquity: fin?.debtToEquity,
+    marketCap,
+    marketCapCategory: categorizeMarketCap(marketCap),
+    trailingEps,
+    bookValue,
+    beta: stats?.beta,
+  };
+}
+

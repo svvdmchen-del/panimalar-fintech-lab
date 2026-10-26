@@ -12,6 +12,8 @@ import type {
   OptionStrike,
   Quote,
   SectorPerf,
+  MarketCapCategory,
+  StockFundamentals,
 } from "@/lib/types";
 
 /**
@@ -435,3 +437,39 @@ export function mockHistory(symbol: string, range: ChartRange): { candles: Candl
 }
 
 export const MOCK_SOURCE = "Simulated feed (offline demo)";
+
+export function mockFundamentals(symbol: string): StockFundamentals {
+  const code = symbol.toUpperCase();
+  const rnd = mulberry32(hash(`fund-${code}`));
+  const base = basePrice(code);
+  const mcap = Math.round(base * (6e8 + rnd() * 4e9));
+  const category: MarketCapCategory =
+    mcap >= 200_000_000_000 ? "Large Cap" : mcap >= 50_000_000_000 ? "Mid Cap" : "Small Cap";
+
+  const trailingPE = round2(12 + rnd() * 32);
+  const forwardPE = round2(trailingPE * (0.85 + rnd() * 0.2));
+  const priceToBook = round2(1.2 + rnd() * 6.5);
+  const dividendYield = round2((0.2 + rnd() * 2.8) / 100);
+  const returnOnEquity = round2((8 + rnd() * 24) / 100);
+  const operatingMargin = round2((10 + rnd() * 22) / 100);
+  const profitMargin = round2(operatingMargin * (0.5 + rnd() * 0.35));
+  const debtToEquity = round2(10 + rnd() * 75);
+
+  return {
+    symbol: code,
+    trailingPE,
+    forwardPE,
+    priceToBook,
+    dividendYield,
+    returnOnEquity,
+    operatingMargin,
+    profitMargin,
+    debtToEquity,
+    marketCap: mcap,
+    marketCapCategory: category,
+    trailingEps: round2(base / trailingPE),
+    bookValue: round2(base / priceToBook),
+    beta: round2(0.6 + rnd() * 0.8),
+  };
+}
+

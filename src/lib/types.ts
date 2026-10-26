@@ -38,6 +38,29 @@ export interface IndexQuote {
   dividendYield?: number;
 }
 
+export type MarketCapCategory = "Large Cap" | "Mid Cap" | "Small Cap";
+
+export interface StockFundamentals {
+  symbol: string;
+  // Valuation
+  trailingPE?: number;
+  forwardPE?: number;
+  priceToBook?: number;
+  dividendYield?: number;
+  // Profitability
+  returnOnEquity?: number;
+  operatingMargin?: number;
+  profitMargin?: number;
+  // Financial Health
+  debtToEquity?: number;
+  marketCap?: number;
+  marketCapCategory: MarketCapCategory;
+  // Additional Metrics
+  trailingEps?: number;
+  bookValue?: number;
+  beta?: number;
+}
+
 export interface Quote {
   symbol: string;
   name: string;

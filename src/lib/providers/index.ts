@@ -11,13 +11,14 @@ import type {
   OptionChain,
   Quote,
   SectorPerf,
+  StockFundamentals,
 } from "@/lib/types";
 import { INDEX_CARDS, SECTOR_INDICES } from "@/lib/symbols";
-import { MOCK_NEWS, MOCK_SOURCE, mockFiiDii, mockHistory, mockIndices, mockMovers, mockOptions, mockQuotes, mockSectors, mockStatus } from "./mock";
+import { MOCK_NEWS, MOCK_SOURCE, mockFiiDii, mockFundamentals, mockHistory, mockIndices, mockMovers, mockOptions, mockQuotes, mockSectors, mockStatus } from "./mock";
 import { fetchSectors, fetchFiiDii, fetchAllIndices, fetchMarketStatus, fetchMovers, pickIndices, toSectors, NSE_ATTRIBUTION } from "./nse";
-import { MCP_SERVER_NAME, mcpHistory, mcpIndices, mcpMarketStatus, mcpMovers, mcpOptionChain, mcpQuotes } from "./mcp";
+import { MCP_SERVER_NAME, mcpFundamentals, mcpHistory, mcpIndices, mcpMarketStatus, mcpMovers, mcpOptionChain, mcpQuotes } from "./mcp";
 import { fetchNews } from "./news";
-import { yahooHistory, yahooQuotes } from "./yahoo";
+import { yahooFundamentals, yahooHistory, yahooQuotes } from "./yahoo";
 
 /**
  * Provider orchestration.
@@ -175,3 +176,16 @@ export function getNews(limit = 8) {
     "News",
   );
 }
+
+export function getFundamentals(symbol: string) {
+  const code = symbol.trim().toUpperCase();
+  return resolveMany<StockFundamentals>(
+    [
+      { source: SOURCES.mcp, status: "delayed", run: () => mcpFundamentals(code) },
+      { source: SOURCES.yahoo, status: "delayed", run: () => yahooFundamentals(code) },
+      { source: SOURCES.demo, status: "demo", run: async () => mockFundamentals(code) },
+    ],
+    `${code} fundamentals`,
+  );
+}
+

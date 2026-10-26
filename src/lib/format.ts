@@ -43,6 +43,15 @@ export function crore(value: number | null | undefined): string {
   return `${num(value, 2)} L`;
 }
 
+/** Formats raw market capitalization in Indian convention (Lakh Crore / Crore). */
+export function formatMarketCap(value: number | null | undefined): string {
+  if (value === null || value === undefined || Number.isNaN(value) || value <= 0) return "—";
+  if (value >= 1e12) return `₹${num(value / 1e12, 2)} L Cr`;
+  if (value >= 1e7) return `₹${num(value / 1e7, 2)} Cr`;
+  if (value >= 1e5) return `₹${num(value / 1e5, 2)} L`;
+  return `₹${num(value, 0)}`;
+}
+
 export function compact(value: number | null | undefined): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "—";
   const abs = Math.abs(value);

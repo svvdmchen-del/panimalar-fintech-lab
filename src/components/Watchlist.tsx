@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { compact, price, pct, toneClass } from "@/lib/format";
 import { useSymbolSearch } from "@/lib/usePoll";
 import type { Quote } from "@/lib/types";
@@ -46,6 +46,41 @@ export function Watchlist({
   });
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [flashes, setFlashes] = useState<Record<string, "up" | "down">>({});
+  const prevPricesRef = useRef<Map<string, number>>(new Map());
+
+  // Tick flash detection: compare LTP on updates and flash row green/red for 650ms
+  useEffect(() => {
+    if (!quotes.length) return;
+    const prev = prevPricesRef.current;
+    const newFlashes: Record<string, "up" | "down"> = {};
+    let hasTicks = false;
+
+    for (const q of quotes) {
+      const oldPrice = prev.get(q.symbol);
+      if (oldPrice !== undefined && oldPrice !== q.price) {
+        newFlashes[q.symbol] = q.price > oldPrice ? "up" : "down";
+        hasTicks = true;
+      }
+      prev.set(q.symbol, q.price);
+    }
+
+    if (hasTicks) {
+      setFlashes((curr) => ({ ...curr, ...newFlashes }));
+      const timer = window.setTimeout(() => {
+        setFlashes((curr) => {
+          const updated = { ...curr };
+          for (const sym of Object.keys(newFlashes)) {
+            if (updated[sym] === newFlashes[sym]) {
+              delete updated[sym];
+            }
+          }
+          return updated;
+        });
+      }, 650);
+      return () => window.clearTimeout(timer);
+    }
+  }, [quotes]);
 
   /** Requested symbols drive the table, so a delisted ticker shows up as a gap instead of vanishing. */
   const rows = useMemo<Row[]>(() => {
@@ -203,6 +238,15 @@ export function Watchlist({
           <tbody>
             {rows.map(({ symbol, quote }) => {
               const isSelected = selected === symbol;
+              const flash = flashes[symbol];
+              const flashRowClass =
+                flash === "up"
+                  ? "bg-up/[0.16]"
+                  : flash === "down"
+                  ? "bg-down/[0.16]"
+                  : isSelected
+                  ? "bg-cyan/[0.06]"
+                  : "";
 
               if (!quote) {
                 return (
@@ -235,9 +279,7 @@ export function Watchlist({
                 <tr
                   key={symbol}
                   onClick={() => onSelect(symbol)}
-                  className={`group cursor-pointer border-b border-line/60 transition-colors last:border-0 hover:bg-wash/[0.035] ${
-                    isSelected ? "bg-cyan/[0.06]" : ""
-                  }`}
+                  className={`group cursor-pointer border-b border-line/60 transition-colors duration-500 last:border-0 hover:bg-wash/[0.035] ${flashRowClass}`}
                 >
                   <td className="relative px-3 py-1.5">
                     {isSelected ? (
@@ -258,7 +300,28 @@ export function Watchlist({
                       {quote.name}
                     </span>
                   </td>
-                  <td className="px-3 py-1.5 text-right font-mono tabular-nums text-ink">{price(quote.price)}</td>
+                  <td
+                    className={`px-3 py-1.5 text-right font-mono tabular-nums transition-colors duration-300 ${
+                      flash === "up"
+                        ? "font-semibold text-up"
+                        : flash === "down"
+                        ? "font-semibold text-down"
+                        : "text-ink"
+                    }`}
+                  >
+                    <span className="inline-flex items-center justify-end gap-1">
+                      {flash === "up" ? (
+                        <span className="text-[10px] text-up" aria-hidden>
+                          ▲
+                        </span>
+                      ) : flash === "down" ? (
+                        <span className="text-[10px] text-down" aria-hidden>
+                          ▼
+                        </span>
+                      ) : null}
+                      {price(quote.price)}
+                    </span>
+                  </td>
                   <td className={`px-3 py-1.5 text-right font-mono tabular-nums ${toneClass(quote.changePct)}`}>
                     <span className="block">{pct(quote.changePct)}</span>
                     <span className="block text-[10px] opacity-70">

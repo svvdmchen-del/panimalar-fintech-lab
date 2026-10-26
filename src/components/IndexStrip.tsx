@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { num, pct, toneClass } from "@/lib/format";
 import { INDEX_CARDS } from "@/lib/symbols";
 import type { IndexQuote } from "@/lib/types";
@@ -15,6 +16,41 @@ export function IndexStrip({
   onSelect: (symbol: string) => void;
 }) {
   const byName = new Map(indices.map((index) => [index.symbol, index]));
+  const [flashes, setFlashes] = useState<Record<string, "up" | "down">>({});
+  const prevPricesRef = useRef<Map<string, number>>(new Map());
+
+  // Tick flash detection for benchmark indices
+  useEffect(() => {
+    if (!indices.length) return;
+    const prev = prevPricesRef.current;
+    const newFlashes: Record<string, "up" | "down"> = {};
+    let hasTicks = false;
+
+    for (const idx of indices) {
+      const oldPrice = prev.get(idx.symbol);
+      if (oldPrice !== undefined && oldPrice !== idx.last) {
+        newFlashes[idx.symbol] = idx.last > oldPrice ? "up" : "down";
+        hasTicks = true;
+      }
+      prev.set(idx.symbol, idx.last);
+    }
+
+    if (hasTicks) {
+      setFlashes((curr) => ({ ...curr, ...newFlashes }));
+      const timer = window.setTimeout(() => {
+        setFlashes((curr) => {
+          const updated = { ...curr };
+          for (const sym of Object.keys(newFlashes)) {
+            if (updated[sym] === newFlashes[sym]) {
+              delete updated[sym];
+            }
+          }
+          return updated;
+        });
+      }, 650);
+      return () => window.clearTimeout(timer);
+    }
+  }, [indices]);
 
   return (
     <div className="grid grid-cols-2 gap-2.5 md:grid-cols-3 xl:grid-cols-6">
@@ -32,13 +68,20 @@ export function IndexStrip({
 
         const isVix = card.symbol === "INDIA VIX";
         const total = (index.advances ?? 0) + (index.declines ?? 0) + (index.unchanged ?? 0);
+        const flash = flashes[card.symbol];
+        const flashCardClass =
+          flash === "up"
+            ? "border-up/50 bg-up/[0.12]"
+            : flash === "down"
+            ? "border-down/50 bg-down/[0.12]"
+            : "border-line bg-panel/80 hover:border-line-strong hover:bg-panel2";
 
         return (
           <button
             key={card.symbol}
             type="button"
             onClick={() => onSelect(card.symbol)}
-            className="group rounded-xl border border-line bg-panel/80 p-3 text-left transition-colors hover:border-line-strong hover:bg-panel2"
+            className={`group rounded-xl border p-3 text-left transition-colors duration-500 ${flashCardClass}`}
           >
             <div className="flex items-baseline justify-between gap-2">
               <span className="truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
@@ -48,7 +91,11 @@ export function IndexStrip({
             </div>
 
             <div className="mt-1.5 flex items-baseline justify-between gap-2">
-              <span className="font-mono text-[19px] leading-none tabular-nums text-ink">
+              <span
+                className={`font-mono text-[19px] leading-none tabular-nums transition-colors duration-300 ${
+                  flash === "up" ? "text-up font-bold" : flash === "down" ? "text-down font-bold" : "text-ink"
+                }`}
+              >
                 {num(index.last, isVix ? 2 : 2)}
               </span>
               <span className={`font-mono text-[12px] tabular-nums ${toneClass(index.changePct)}`}>
