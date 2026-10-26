@@ -21,6 +21,7 @@ const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
       { keys: ["↑", "↓"], action: "Navigate search dropdown & watchlist" },
       { keys: ["Enter"], action: "Open Stock Valuation Modal" },
       { keys: ["Esc"], action: "Close modal / dismiss search" },
+      { keys: ["L"], action: "Toggle NSE MarketLens Research Cockpit" },
     ],
   },
   {

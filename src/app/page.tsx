@@ -6,6 +6,7 @@ import { BreadthStrip } from "@/components/BreadthStrip";
 import { FiiDiiPanel } from "@/components/FiiDiiPanel";
 import { IndexStrip } from "@/components/IndexStrip";
 import { KeyboardShortcutsHUD } from "@/components/KeyboardShortcutsHUD";
+import { MarketLensDrawer } from "@/components/MarketLensDrawer";
 import { MoversPanel } from "@/components/MoversPanel";
 import { NewsFeed } from "@/components/NewsFeed";
 import { OptionChainPanel } from "@/components/OptionChainPanel";
@@ -42,6 +43,7 @@ export default function Page() {
   const [detail, setDetail] = useState<string | null>(null);
   const [dockBottomTicker, setDockBottomTicker] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [marketLensOpen, setMarketLensOpen] = useState(false);
 
   const now = useNow(30_000);
   const marketOpen = now ? isMarketOpen(now) : false;
@@ -249,6 +251,11 @@ export default function Page() {
         applyTheme(current === "light" ? "dark" : "light");
         return;
       }
+      if (e.key === "l" || e.key === "L") {
+        e.preventDefault();
+        setMarketLensOpen((open) => !open);
+        return;
+      }
       if (e.key === "m" || e.key === "M") {
         e.preventDefault();
         setDockBottomTicker((d) => !d);
@@ -275,6 +282,7 @@ export default function Page() {
         onSelect={setSelected}
         onDetails={setDetail}
         onOpenShortcuts={() => setShortcutsOpen(true)}
+        onOpenMarketLens={() => setMarketLensOpen(true)}
         updatedAt={lastUpdated}
       />
 
@@ -409,6 +417,7 @@ export default function Page() {
       ) : null}
 
       <KeyboardShortcutsHUD open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      <MarketLensDrawer isOpen={marketLensOpen} onClose={() => setMarketLensOpen(false)} selectedSymbol={selected} />
     </div>
   );
 }

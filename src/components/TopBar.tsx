@@ -28,6 +28,7 @@ export function TopBar({
   onSelect,
   onDetails,
   onOpenShortcuts,
+  onOpenMarketLens,
   updatedAt,
 }: {
   dataStatus: DataStatus;
@@ -40,6 +41,7 @@ export function TopBar({
   onSelect: (symbol: string) => void;
   onDetails: (symbol: string) => void;
   onOpenShortcuts?: () => void;
+  onOpenMarketLens?: () => void;
   updatedAt?: number;
 }) {
   const now = useNow(1000);
@@ -264,6 +266,21 @@ export function TopBar({
 
           <ZoomToggle />
           <ThemeToggle />
+
+          {/* NSE MarketLens Launcher */}
+          {onOpenMarketLens ? (
+            <button
+              type="button"
+              onClick={onOpenMarketLens}
+              title="Open NSE MarketLens Research Cockpit (or press L)"
+              aria-label="Open NSE MarketLens Research Cockpit"
+              className="hidden items-center gap-1.5 rounded-md border border-cyan/40 bg-cyan/10 px-2 py-1 text-[10px] font-semibold text-cyan transition-colors hover:bg-cyan/20 sm:inline-flex"
+            >
+              <span className="text-[11px]" aria-hidden>🔍</span>
+              <span>MarketLens</span>
+              <span className="rounded bg-cyan/20 px-1 py-0.2 text-[8px] font-mono text-cyan/90">L</span>
+            </button>
+          ) : null}
 
           {onOpenShortcuts ? (
             <button

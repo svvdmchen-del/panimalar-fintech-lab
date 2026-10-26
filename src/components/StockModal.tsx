@@ -585,6 +585,15 @@ export function StockModal({
             >
               Open on NSE ↗
             </a>
+            <a
+              href="https://marketlens.nseindia.com/"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center gap-1.5 rounded-md border border-cyan/40 bg-cyan/10 px-3 py-1 text-xs font-semibold text-cyan hover:bg-cyan/20 transition-colors"
+            >
+              <span>🔍</span>
+              <span>NSE MarketLens ↗</span>
+            </a>
           </div>
         </footer>
       </div>
