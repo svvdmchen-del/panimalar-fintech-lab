@@ -20,10 +20,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" data-theme="dark" suppressHydrationWarning className="h-full antialiased">
       <head>
         <script
-          // Runs before paint: applies the saved theme so a reload never flashes dark.
+          // Runs before paint: applies saved theme and zoom scale so page never flashes or jumps.
           dangerouslySetInnerHTML={{
             __html:
-              'try{var t=localStorage.getItem("nse-lab.theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}addEventListener("DOMContentLoaded",function(){var m=document.querySelector(\'meta[name="theme-color"]\');if(m){m.setAttribute("content",t==="light"?"#eef2f8":"#05070b");}});}catch(e){}',
+              'try{var t=localStorage.getItem("nse-lab.theme");if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t;}var z=localStorage.getItem("nse-lab.zoom");if(z){document.documentElement.style.zoom=String(parseFloat(z)/100);}else{document.documentElement.style.zoom="1.25";}addEventListener("DOMContentLoaded",function(){var m=document.querySelector(\'meta[name="theme-color"]\');if(m){m.setAttribute("content",t==="light"?"#eef2f8":"#05070b");}});}catch(e){}',
           }}
         />
       </head>

@@ -7,6 +7,7 @@ import { sessionLabel } from "@/lib/marketHours";
 import type { DataStatus, MarketSession } from "@/lib/types";
 import { useNow, useSymbolSearch } from "@/lib/usePoll";
 import { ThemeToggle } from "./ThemeToggle";
+import { ZoomToggle } from "./ZoomToggle";
 import { DataBadge } from "./ui";
 
 const INTERVALS = [
@@ -187,6 +188,7 @@ export function TopBar({
             </span>
           </button>
 
+          <ZoomToggle />
           <ThemeToggle />
         </div>
       </div>
