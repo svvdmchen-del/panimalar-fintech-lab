@@ -62,10 +62,12 @@ export function PriceChart({
   symbol,
   intervalMs,
   height = 320,
+  hideTitle = false,
 }: {
   symbol: string;
   intervalMs: number;
   height?: number;
+  hideTitle?: boolean;
 }) {
   const [range, setRange] = useState<ChartRange>("1D");
   const [chartType, setChartType] = useState<"area" | "candle">("area");
@@ -318,12 +320,14 @@ export function PriceChart({
       aria-label={`${symbol} price chart`}
       className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-line bg-panel/90"
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3.5 py-2.5">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-3.5 py-2">
         <div className="flex min-w-0 items-baseline gap-3">
-          <h2 className="truncate text-sm font-semibold tracking-wide text-ink">{symbol}</h2>
-          {activeDisplay ? (
+          {!hideTitle ? (
+            <h2 className="truncate text-sm font-semibold tracking-wide text-ink">{symbol}</h2>
+          ) : null}
+          {activeDisplay && (!hideTitle || hoveredCandle) ? (
             <>
-              <span className="font-mono text-lg tabular-nums text-ink">{price(activeDisplay.close)}</span>
+              <span className="font-mono text-base tabular-nums text-ink">{price(activeDisplay.close)}</span>
               <span className={`font-mono text-xs tabular-nums ${toneClass(activeDisplay.changePct)}`}>
                 {activeDisplay.change > 0 ? "+" : ""}
                 {num(activeDisplay.change)} ({pct(activeDisplay.changePct)})
@@ -334,6 +338,8 @@ export function PriceChart({
                 </span>
               ) : null}
             </>
+          ) : hideTitle ? (
+            <span className="text-[11px] font-medium text-muted">Intraday & Technical View</span>
           ) : null}
         </div>
 

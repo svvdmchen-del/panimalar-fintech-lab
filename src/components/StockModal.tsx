@@ -164,6 +164,8 @@ export function StockModal({
   inWatchlist: boolean;
   onToggleWatchlist: () => void;
 }) {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const fallbackQuote = usePoll<Envelope<Quote[]>>(
     !initialQuote ? `/api/market/quotes?symbols=${encodeURIComponent(symbol)}` : null,
     intervalMs,
@@ -190,25 +192,12 @@ export function StockModal({
     };
   }, [onClose]);
 
-  const stats = quote
-    ? [
-        { label: "Open", value: price(quote.open) },
-        { label: "High", value: price(quote.high) },
-        { label: "Low", value: price(quote.low) },
-        { label: "Prev close", value: price(quote.prevClose) },
-        { label: "Volume", value: compact(quote.volume) },
-        { label: "52w high", value: quote.yearHigh ? price(quote.yearHigh) : "—" },
-        { label: "52w low", value: quote.yearLow ? price(quote.yearLow) : "—" },
-        { label: "P/E", value: quote.peRatio ? `${num(quote.peRatio, 1)}x` : "—" },
-      ]
-    : [];
-
   return (
     <div
       role="dialog"
       aria-modal="true"
       aria-label={`${symbol} details`}
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
     >
       <button
         type="button"
@@ -217,11 +206,18 @@ export function StockModal({
         className="fixed inset-0 cursor-default bg-[var(--color-scrim)] backdrop-blur-sm"
       />
 
-      <div className="relative z-10 w-full max-w-3xl animate-[rise_180ms_ease-out] overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-2xl">
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-4 py-3">
-          <div className="min-w-0">
+      <div
+        className={`relative z-10 flex flex-col overflow-hidden rounded-2xl border border-line-strong bg-bg shadow-2xl transition-all duration-200 ${
+          isFullscreen
+            ? "h-[95vh] w-[98vw] max-w-[1640px]"
+            : "h-auto max-h-[90vh] w-full max-w-6xl"
+        }`}
+      >
+        {/* Header: Clean Stock Identity & Actions */}
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-panel/70 px-5 py-3">
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold tracking-wide text-ink">{symbol}</h2>
+              <h2 className="text-base font-bold tracking-wide text-ink">{symbol}</h2>
               <span className="rounded border border-line px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-muted">
                 NSE
               </span>
@@ -239,87 +235,137 @@ export function StockModal({
                 </span>
               ) : null}
             </div>
-            <p className="truncate text-[11px] text-muted">{quote?.name ?? "Loading quote…"}</p>
+            <span className="hidden text-sm text-muted/50 sm:inline">·</span>
+            <p className="hidden truncate text-xs text-muted sm:inline">{quote?.name ?? "Loading quote…"}</p>
           </div>
 
           <div className="flex items-center gap-3">
             {quote ? (
-              <div className="text-right">
-                <div className="font-mono text-xl tabular-nums text-ink">{price(quote.price)}</div>
-                <div className={`font-mono text-[11px] tabular-nums ${toneClass(quote.changePct)}`}>
+              <div className="flex items-baseline gap-2 text-right">
+                <span className="font-mono text-xl font-bold tabular-nums text-ink">{price(quote.price)}</span>
+                <span className={`font-mono text-xs tabular-nums ${toneClass(quote.changePct)}`}>
                   {quote.change > 0 ? "+" : ""}
                   {num(quote.change)} ({pct(quote.changePct)})
-                </div>
+                </span>
               </div>
             ) : null}
+
+            {/* Fullscreen Cockpit Toggle */}
+            <button
+              type="button"
+              onClick={() => setIsFullscreen((f) => !f)}
+              title={isFullscreen ? "Restore windowed view" : "Expand to fullscreen analysis cockpit"}
+              className="rounded-md border border-line bg-panel px-2.5 py-1 text-[11px] font-mono text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
+            >
+              {isFullscreen ? "⛷ Windowed" : "⛶ Expand"}
+            </button>
+
             <button
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="rounded-md border border-line bg-panel px-2 py-1 text-[11px] text-muted hover:border-down/40 hover:text-down"
+              className="rounded-md border border-line bg-panel px-2.5 py-1 text-xs text-muted hover:border-down/40 hover:text-down"
             >
               ✕
             </button>
           </div>
         </header>
 
-        <div className="max-h-[72vh] overflow-y-auto">
-          {quote ? (
-            <div className="border-b border-line/70 px-4 py-2.5">
-              <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} showLabels />
-            </div>
-          ) : null}
+        {/* 2-Column Split Desk Body */}
+        <div className="grid min-h-0 flex-1 grid-cols-1 divide-y divide-line overflow-y-auto lg:grid-cols-12 lg:divide-x lg:divide-y-0">
+          {/* Left Column: Live Chart & Technical Ribbon (Col span 7) */}
+          <div className="flex flex-col space-y-3 p-4 lg:col-span-7">
+            {/* Range Bar & 52-Week Limits */}
+            {quote ? (
+              <div className="rounded-xl border border-line bg-panel2/70 px-3.5 py-2.5">
+                <div className="mb-1.5 flex items-center justify-between text-[10px] font-medium text-muted">
+                  <span>Intraday Range</span>
+                  <span>
+                    52W: {quote.yearLow ? price(quote.yearLow) : "—"} – {quote.yearHigh ? price(quote.yearHigh) : "—"}
+                  </span>
+                </div>
+                <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} showLabels />
+              </div>
+            ) : null}
 
-          <div className="px-2 py-2">
-            <PriceChart symbol={symbol} intervalMs={intervalMs} height={260} />
+            {/* TradingView-Grade Chart without duplicate header title */}
+            <div className="flex-1">
+              <PriceChart
+                symbol={symbol}
+                intervalMs={intervalMs}
+                height={isFullscreen ? 420 : 300}
+                hideTitle={true}
+              />
+            </div>
+
+            {/* Consolidated Session Ribbon (Single Clean Row) */}
+            {quote ? (
+              <div className="grid grid-cols-3 divide-x divide-line/60 rounded-xl border border-line bg-panel2/50 p-2 text-center sm:grid-cols-6">
+                <div className="px-1.5 py-1">
+                  <div className="text-[9px] uppercase tracking-wider text-muted">Open</div>
+                  <div className="font-mono text-[11px] tabular-nums text-ink">{price(quote.open)}</div>
+                </div>
+                <div className="px-1.5 py-1">
+                  <div className="text-[9px] uppercase tracking-wider text-muted">High</div>
+                  <div className="font-mono text-[11px] tabular-nums text-up">{price(quote.high)}</div>
+                </div>
+                <div className="px-1.5 py-1">
+                  <div className="text-[9px] uppercase tracking-wider text-muted">Low</div>
+                  <div className="font-mono text-[11px] tabular-nums text-down">{price(quote.low)}</div>
+                </div>
+                <div className="px-1.5 py-1">
+                  <div className="text-[9px] uppercase tracking-wider text-muted">Prev Close</div>
+                  <div className="font-mono text-[11px] tabular-nums text-muted">{price(quote.prevClose)}</div>
+                </div>
+                <div className="px-1.5 py-1">
+                  <div className="text-[9px] uppercase tracking-wider text-muted">Volume</div>
+                  <div className="font-mono text-[11px] tabular-nums text-ink">{compact(quote.volume)}</div>
+                </div>
+                <div className="px-1.5 py-1">
+                  <div className="text-[9px] uppercase tracking-wider text-muted">P/E Ratio</div>
+                  <div className="font-mono text-[11px] tabular-nums text-cyan">
+                    {quote.peRatio
+                      ? `${num(quote.peRatio, 1)}x`
+                      : fundamentals?.trailingPE
+                      ? `${num(fundamentals.trailingPE, 1)}x`
+                      : "—"}
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
 
-          {stats.length ? (
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-2 px-4 pb-3 sm:grid-cols-4">
-              {stats.map((stat) => (
-                <div key={stat.label} className="rounded-lg border border-line/60 bg-panel/60 px-2 py-1.5">
-                  <dt className="text-[9px] uppercase tracking-wider text-muted/70">{stat.label}</dt>
-                  <dd className="font-mono text-[11px] tabular-nums text-ink/90">{stat.value}</dd>
-                </div>
-              ))}
-            </dl>
-          ) : null}
-
-          {/* Fundamental & Valuation Hub */}
-          <section className="border-t border-line/70 bg-panel/40 px-4 py-3">
-            <div className="mb-2.5 flex items-center justify-between">
+          {/* Right Column: MBA Valuation & Fundamentals Hub (Col span 5) */}
+          <div className="flex flex-col space-y-3.5 overflow-y-auto bg-panel/30 p-4 lg:col-span-5">
+            <div className="flex items-center justify-between border-b border-line/70 pb-2">
               <div className="flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-cyan" aria-hidden />
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-ink">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-ink">
                   Fundamental & Valuation Hub
                 </h3>
-                <span className="rounded bg-panel2 px-1.5 py-0.5 text-[9px] text-muted">
-                  Hover ⓘ for MBA concept explainers
-                </span>
               </div>
-              {fundamentalsRes.loading && !fundamentals ? (
-                <span className="text-[10px] text-muted">Loading metrics…</span>
-              ) : fundamentals?.marketCap ? (
+              {fundamentals?.marketCap ? (
                 <span className="font-mono text-[10px] text-muted">
                   Cap: {formatMarketCap(fundamentals.marketCap)}
                 </span>
               ) : null}
             </div>
 
-            {/* Visual Gauges: Valuation & Solvency */}
-            <div className="mb-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            {/* Visual Gauges: Valuation & Solvency side by side */}
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <ValuationMeter pe={fundamentals?.trailingPE ?? quote?.peRatio} />
               <HealthGauge de={fundamentals?.debtToEquity} roe={fundamentals?.returnOnEquity} />
             </div>
 
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-              {/* Card 1: Valuation */}
+            {/* 3 Grouped Valuation Cards with Educational Tooltips */}
+            <div className="space-y-2.5">
+              {/* Card 1: Valuation Multiples */}
               <div className="rounded-xl border border-line bg-panel2/80 p-3">
                 <div className="mb-2 flex items-center justify-between border-b border-line/60 pb-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-ink/90">Valuation</span>
-                  <span className="text-[9px] text-muted">Multiples</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-ink/90">Valuation Multiples</span>
+                  <span className="text-[9px] text-muted">Market Pricing</span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <MetricWithEdu
                     label="Trailing P/E"
                     value={
@@ -349,13 +395,13 @@ export function StockModal({
                 </div>
               </div>
 
-              {/* Card 2: Profitability */}
+              {/* Card 2: Profitability & Returns */}
               <div className="rounded-xl border border-line bg-panel2/80 p-3">
                 <div className="mb-2 flex items-center justify-between border-b border-line/60 pb-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-ink/90">Profitability</span>
-                  <span className="text-[9px] text-muted">Returns & Margins</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-ink/90">Profitability & Margins</span>
+                  <span className="text-[9px] text-muted">Earnings Quality</span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <MetricWithEdu
                     label="Return on Equity (ROE)"
                     value={fundamentals?.returnOnEquity !== undefined ? formatRate(fundamentals.returnOnEquity) : "—"}
@@ -380,13 +426,13 @@ export function StockModal({
                 </div>
               </div>
 
-              {/* Card 3: Financial Health */}
+              {/* Card 3: Financial Health & Size */}
               <div className="rounded-xl border border-line bg-panel2/80 p-3">
                 <div className="mb-2 flex items-center justify-between border-b border-line/60 pb-1.5">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-ink/90">Financial Health</span>
                   <span className="text-[9px] text-muted">Capital Structure</span>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <MetricWithEdu
                     label="Debt-to-Equity (D/E)"
                     value={
@@ -394,18 +440,7 @@ export function StockModal({
                         ? num(fundamentals.debtToEquity > 10 ? fundamentals.debtToEquity / 100 : fundamentals.debtToEquity, 2)
                         : "—"
                     }
-                    explanation="Total Liabilities / Total Equity. D/E < 0.5 is conservative solvency; D/E > 1.5 indicates significant financial leverage."
-                  />
-                  <MetricWithEdu
-                    label="Market Cap"
-                    value={
-                      fundamentals?.marketCap
-                        ? formatMarketCap(fundamentals.marketCap)
-                        : quote?.marketCap
-                        ? formatMarketCap(quote.marketCap)
-                        : "—"
-                    }
-                    explanation="Total equity value calculated as share price × total outstanding shares."
+                    explanation="Total Liabilities / Total Equity. D/E < 0.5 is conservative solvency; D/E > 1.5 indicates high leverage risk during rate hikes."
                   />
                   <MetricWithEdu
                     label="SEBI Category"
@@ -421,30 +456,31 @@ export function StockModal({
                 </div>
               </div>
             </div>
-          </section>
+          </div>
         </div>
 
-        <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2.5">
-          <p className="text-[9px] text-muted/60">
-            Valuation & fundamentals sourced from NSE & Yahoo Finance. Not investment advice.
+        {/* Footer Actions */}
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-line bg-panel/70 px-5 py-2.5">
+          <p className="text-[9px] text-muted/70">
+            Valuation & fundamentals sourced from NSE & Yahoo Finance. Built for classroom case studies, not financial advice.
           </p>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onToggleWatchlist}
-              className={`rounded-md border px-2.5 py-1 text-[10px] transition-colors ${
+              className={`rounded-md border px-3 py-1 text-xs transition-colors ${
                 inWatchlist
                   ? "border-line bg-panel text-muted hover:border-down/40 hover:text-down"
                   : "border-cyan/40 bg-cyan/10 text-cyan hover:bg-cyan/15"
               }`}
             >
-              {inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+              {inWatchlist ? "Remove from watchlist" : "+ Add to watchlist"}
             </button>
             <a
               href={`https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(symbol)}`}
               target="_blank"
               rel="noreferrer noopener"
-              className="rounded-md border border-line bg-panel px-2.5 py-1 text-[10px] text-muted hover:text-ink"
+              className="rounded-md border border-line bg-panel px-3 py-1 text-xs text-muted hover:text-ink"
             >
               Open on NSE ↗
             </a>
