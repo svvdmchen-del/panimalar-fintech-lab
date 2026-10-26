@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { dateIST, timeIST, weekdayIST } from "@/lib/format";
 import { sessionLabel } from "@/lib/marketHours";
-import { searchUniverse } from "@/lib/symbols";
 import type { DataStatus, MarketSession } from "@/lib/types";
-import { useNow } from "@/lib/usePoll";
+import { useNow, useSymbolSearch } from "@/lib/usePoll";
 import { ThemeToggle } from "./ThemeToggle";
 import { DataBadge } from "./ui";
 
@@ -26,6 +25,7 @@ export function TopBar({
   onIntervalChange,
   onRefresh,
   onSelect,
+  onDetails,
   updatedAt,
 }: {
   dataStatus: DataStatus;
@@ -36,6 +36,7 @@ export function TopBar({
   onIntervalChange: (interval: number) => void;
   onRefresh: () => void;
   onSelect: (symbol: string) => void;
+  onDetails: (symbol: string) => void;
   updatedAt?: number;
 }) {
   const now = useNow(1000);
@@ -43,10 +44,12 @@ export function TopBar({
   const [open, setOpen] = useState(false);
   const [justRefreshed, setJustRefreshed] = useState(false);
 
-  const results = useMemo(() => searchUniverse(query, 6), [query]);
+  const results = useSymbolSearch(query, 8);
 
   const pick = (symbol: string) => {
-    onSelect(symbol);
+    const clean = symbol.trim().toUpperCase();
+    onSelect(clean);
+    onDetails(clean);
     setQuery("");
     setOpen(false);
   };
@@ -84,19 +87,26 @@ export function TopBar({
               setOpen(true);
             }}
             onFocus={() => setOpen(true)}
-            onBlur={() => window.setTimeout(() => setOpen(false), 120)}
+            onBlur={() => window.setTimeout(() => setOpen(false), 140)}
             onKeyDown={(event) => {
-              if (event.key === "Enter" && results.length) pick(results[0].symbol);
+              if (event.key === "Enter") {
+                event.preventDefault();
+                if (results.length > 0) {
+                  pick(results[0].symbol);
+                } else if (query.trim()) {
+                  pick(query.trim());
+                }
+              }
               if (event.key === "Escape") setOpen(false);
             }}
-            placeholder="Search a symbol or company…"
-            aria-label="Search for a symbol"
+            placeholder="Search any NSE stock (e.g. Suzlon, IRCTC)…"
+            aria-label="Search for an NSE stock"
             className="w-full rounded-lg border border-line bg-panel px-3 py-1.5 text-[11px] text-ink placeholder:text-muted/60 focus:border-cyan/40 focus:outline-none focus:ring-1 focus:ring-cyan/40"
           />
           {open && results.length > 0 ? (
             <ul
               role="listbox"
-              className="absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-lg border border-line bg-panel2 shadow-2xl"
+              className="absolute left-0 top-full z-50 mt-1 w-72 max-w-[90vw] overflow-hidden rounded-lg border border-line bg-panel2 shadow-2xl"
             >
               {results.map((entry) => (
                 <li key={entry.symbol} role="presentation">
@@ -106,10 +116,17 @@ export function TopBar({
                     aria-selected={false}
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => pick(entry.symbol)}
-                    className="flex w-full items-baseline justify-between gap-3 px-3 py-2 text-left text-[11px] hover:bg-wash/5"
+                    className="flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left text-[11px] hover:bg-wash/5"
                   >
-                    <span className="font-semibold text-ink">{entry.symbol}</span>
-                    <span className="truncate text-[10px] text-muted">{entry.name}</span>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-semibold text-ink">{entry.symbol}</span>
+                      <span className="ml-2 truncate text-[10px] text-muted">{entry.name}</span>
+                    </div>
+                    {entry.sector ? (
+                      <span className="shrink-0 rounded border border-line/60 bg-panel px-1 py-0.5 text-[8px] uppercase tracking-wider text-muted/80">
+                        {entry.sector}
+                      </span>
+                    ) : null}
                   </button>
                 </li>
               ))}

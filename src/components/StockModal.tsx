@@ -2,13 +2,14 @@
 
 import { useEffect } from "react";
 import { compact, num, price, pct, toneClass } from "@/lib/format";
-import type { Quote } from "@/lib/types";
+import { usePoll } from "@/lib/usePoll";
+import type { Envelope, Quote } from "@/lib/types";
 import { PriceChart } from "./PriceChart";
 import { RangeBar } from "./ui";
 
 export function StockModal({
   symbol,
-  quote,
+  quote: initialQuote,
   intervalMs,
   onClose,
   inWatchlist,
@@ -21,6 +22,12 @@ export function StockModal({
   inWatchlist: boolean;
   onToggleWatchlist: () => void;
 }) {
+  const fallbackQuote = usePoll<Envelope<Quote[]>>(
+    !initialQuote ? `/api/market/quotes?symbols=${encodeURIComponent(symbol)}` : null,
+    intervalMs,
+  );
+
+  const quote = initialQuote ?? fallbackQuote.data?.data?.[0];
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();

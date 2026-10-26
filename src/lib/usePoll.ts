@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { searchUniverse } from "@/lib/symbols";
 
 export interface PollState<T> {
   data?: T;
@@ -125,3 +126,54 @@ export function useStoredList(key: string, fallback: string[]) {
 
   return [value, setValue, ready] as const;
 }
+
+export interface SymbolSearchResult {
+  symbol: string;
+  name: string;
+  sector: string;
+}
+
+/** Instant local lookup + debounced server query for all ~2000+ NSE stocks. */
+export function useSymbolSearch(query: string, limit = 8) {
+  const [results, setResults] = useState<SymbolSearchResult[]>(() =>
+    searchUniverse(query, limit),
+  );
+
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setResults([]);
+      return;
+    }
+
+    // 1. Instant local matches
+    const local = searchUniverse(q, limit);
+    setResults(local);
+
+    // 2. Debounced query to search API (covers all 2000+ NSE stocks via Yahoo Finance)
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/market/search?q=${encodeURIComponent(q)}`, {
+          signal: controller.signal,
+        });
+        if (res.ok) {
+          const json = (await res.json()) as { data?: SymbolSearchResult[] };
+          if (Array.isArray(json.data) && json.data.length > 0) {
+            setResults(json.data.slice(0, limit));
+          }
+        }
+      } catch {
+        // preserve local results
+      }
+    }, 180);
+
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query, limit]);
+
+  return results;
+}
+

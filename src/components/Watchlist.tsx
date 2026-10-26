@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { compact, price, pct, toneClass } from "@/lib/format";
-import { searchUniverse } from "@/lib/symbols";
+import { useSymbolSearch } from "@/lib/usePoll";
 import type { Quote } from "@/lib/types";
 import { Empty, Panel, RangeBar, Skeleton } from "./ui";
 
@@ -66,9 +66,10 @@ export function Watchlist({
 
   const missing = rows.filter((row) => !row.quote).length;
 
+  const searchResults = useSymbolSearch(query, 8);
   const suggestions = useMemo(
-    () => searchUniverse(query).filter((entry) => !watchlist.includes(entry.symbol)),
-    [query, watchlist],
+    () => searchResults.filter((entry) => !watchlist.includes(entry.symbol)),
+    [searchResults, watchlist],
   );
 
   const addSymbol = (symbol: string) => {

@@ -146,6 +146,7 @@ export default function Page() {
         onIntervalChange={setIntervalMs}
         onRefresh={() => setRefreshToken((value) => value + 1)}
         onSelect={setSelected}
+        onDetails={setDetail}
         updatedAt={lastUpdated}
       />
 
