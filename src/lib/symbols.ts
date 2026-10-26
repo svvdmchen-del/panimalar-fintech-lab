@@ -164,23 +164,6 @@ export const SYMBOL_UNIVERSE: { symbol: string; name: string; sector: string }[]
   { symbol: "GODREJCP", name: "Godrej Consumer", sector: "FMCG" },
   { symbol: "VEDL", name: "Vedanta", sector: "Metals" },
   { symbol: "ZOMATO", name: "Zomato", sector: "Consumer Tech" },
-  { symbol: "TRENT", name: "Trent Limited", sector: "Retail" },
-  { symbol: "BEL", name: "Bharat Electronics", sector: "Defence" },
-  { symbol: "HAL", name: "Hindustan Aeronautics", sector: "Defence" },
-  { symbol: "RVNL", name: "Rail Vikas Nigam", sector: "Railways" },
-  { symbol: "SUZLON", name: "Suzlon Energy", sector: "Renewable Energy" },
-  { symbol: "IREDA", name: "Indian Renewable Energy Dev", sector: "Financials" },
-  { symbol: "BSE", name: "BSE Limited", sector: "Financials" },
-  { symbol: "CDSL", name: "Central Depository Services", sector: "Financials" },
-  { symbol: "MAZDOCK", name: "Mazagon Dock Shipbuilders", sector: "Defence" },
-  { symbol: "COCHINSHIP", name: "Cochin Shipyard", sector: "Defence" },
-  { symbol: "DIXON", name: "Dixon Technologies", sector: "Consumer Tech" },
-  { symbol: "PERSISTENT", name: "Persistent Systems", sector: "IT" },
-  { symbol: "KPITTECH", name: "KPIT Technologies", sector: "IT" },
-  { symbol: "POLICYBZR", name: "PB Fintech", sector: "FinTech" },
-  { symbol: "KALYANKJIL", name: "Kalyan Jewellers", sector: "Retail" },
-  { symbol: "PRESTIGE", name: "Prestige Estates Projects", sector: "Realty" },
-  { symbol: "ANGELONE", name: "Angel One", sector: "Financials" },
 ];
 
 const NAME_MAP = new Map(SYMBOL_UNIVERSE.map((s) => [s.symbol, s.name]));
@@ -238,4 +221,3 @@ export function sectorFrom(indexName: string): SectorPerf | null {
 }
 
 export const NIFTY50_SYMBOLS = SYMBOL_UNIVERSE.slice(0, 50).map((s) => s.symbol);
-export const NIFTY500_SYMBOLS = SYMBOL_UNIVERSE.map((s) => s.symbol);

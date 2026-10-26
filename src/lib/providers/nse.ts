@@ -1,4 +1,4 @@
-import type { FiiDiiRow, IndexQuote, MarketSession, Mover, Movers, SectorPerf } from "@/lib/types";
+import type { FiiDiiRow, IndexQuote, MarketSession, Mover, SectorPerf } from "@/lib/types";
 import { SECTOR_INDICES, displayName } from "@/lib/symbols";
 
 /**
@@ -218,53 +218,30 @@ function mapVariation(raw: RawVariation): Mover | null {
   };
 }
 
-export async function fetchMovers(
-  count = 8,
-  universe: "NIFTY 50" | "NIFTY 500" = "NIFTY 500",
-): Promise<Movers> {
-  const [gainersPayload, losersPayload, high52Payload, low52Payload] = await Promise.allSettled([
-    nseJson<VariationsPayload>(`/api/live-analysis-variations?index=gainers`),
-    nseJson<VariationsPayload>(`/api/live-analysis-variations?index=loosers`),
-    nseJson<{ data?: RawVariation[] }>(`/api/live-analysis-52week-high-low?index=high`),
-    nseJson<{ data?: RawVariation[] }>(`/api/live-analysis-52week-high-low?index=low`),
+export async function fetchMovers(count = 8): Promise<{ gainers: Mover[]; losers: Mover[]; volume: Mover[] }> {
+  const [gainersPayload, losersPayload] = await Promise.all([
+    nseJson<VariationsPayload>("/api/live-analysis-variations?index=gainers"),
+    nseJson<VariationsPayload>("/api/live-analysis-variations?index=loosers"),
   ]);
 
-  const gainers = (
-    gainersPayload.status === "fulfilled" ? gainersPayload.value.NIFTY?.data ?? [] : []
-  )
+  const gainers = (gainersPayload.NIFTY?.data ?? [])
     .map(mapVariation)
     .filter((row): row is Mover => row !== null)
     .sort((a, b) => b.changePct - a.changePct)
     .slice(0, count);
 
-  const losers = (
-    losersPayload.status === "fulfilled" ? losersPayload.value.NIFTY?.data ?? [] : []
-  )
+  const losers = (losersPayload.NIFTY?.data ?? [])
     .map(mapVariation)
     .filter((row): row is Mover => row !== null)
     .sort((a, b) => a.changePct - b.changePct)
     .slice(0, count);
 
-  const high52 = (
-    high52Payload.status === "fulfilled" ? high52Payload.value.data ?? [] : []
-  )
-    .map(mapVariation)
-    .filter((row): row is Mover => row !== null)
-    .slice(0, count);
-
-  const low52 = (
-    low52Payload.status === "fulfilled" ? low52Payload.value.data ?? [] : []
-  )
-    .map(mapVariation)
-    .filter((row): row is Mover => row !== null)
-    .slice(0, count);
-
   if (!gainers.length && !losers.length) throw new Error("NSE movers endpoints returned no data");
 
-  const combined = [...gainers, ...losers];
-  const volume = [...combined].sort((a, b) => b.volume - a.volume).slice(0, count);
+  const universe = [...gainers, ...losers];
+  const volume = [...universe].sort((a, b) => b.volume - a.volume).slice(0, count);
 
-  return { gainers, losers, volume, high52, low52, universe };
+  return { gainers, losers, volume };
 }
 
 export const NSE_ATTRIBUTION = "NSE India (nseindia.com public endpoints)";

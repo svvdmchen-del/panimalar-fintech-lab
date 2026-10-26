@@ -36,7 +36,6 @@ import { useNow, usePoll, useStoredList } from "@/lib/usePoll";
 export default function Page() {
   const [watchlist, setWatchlist] = useStoredList("nse-lab.watchlist", DEFAULT_WATCHLIST);
   const [selected, setSelected] = useState("RELIANCE");
-  const [moversUniverse, setMoversUniverse] = useState<"NIFTY 50" | "NIFTY 500">("NIFTY 500");
   const [intervalMs, setIntervalMs] = useState(15_000);
   const [refreshToken, setRefreshToken] = useState(0);
   const [optionUnderlying, setOptionUnderlying] = useState("NIFTY");
@@ -52,14 +51,9 @@ export default function Page() {
     [watchlist],
   );
 
-  const moversUrl = useMemo(
-    () => `/api/market/movers?universe=${encodeURIComponent(moversUniverse)}&count=12`,
-    [moversUniverse],
-  );
-
   const quotes = usePoll<Envelope<Quote[]>>(quotesUrl, intervalMs, refreshToken);
   const indices = usePoll<Envelope<IndexQuote[]>>("/api/market/indices", intervalMs, refreshToken);
-  const movers = usePoll<Envelope<Movers>>(moversUrl, Math.max(intervalMs, 30_000), refreshToken);
+  const movers = usePoll<Envelope<Movers>>("/api/market/movers?count=12", Math.max(intervalMs, 30_000), refreshToken);
   const sectors = usePoll<Envelope<SectorPerf[]>>("/api/market/sectors", Math.max(intervalMs, 30_000), refreshToken);
   const flows = usePoll<Envelope<FiiDiiRow[]>>("/api/market/fii-dii", 300_000, refreshToken);
   const status = usePoll<Envelope<MarketSession[]>>("/api/market/status", 60_000, refreshToken);
@@ -323,10 +317,7 @@ export default function Page() {
             <MoversPanel
               movers={movers.data?.data}
               loading={movers.loading}
-              universe={moversUniverse}
-              onUniverseChange={setMoversUniverse}
               onSelect={setSelected}
-              onDetails={setDetail}
               badge={movers.data ? <DataBadge status={movers.data.status} source={movers.data.source} /> : null}
             />
           </div>

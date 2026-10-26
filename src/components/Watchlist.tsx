@@ -8,7 +8,7 @@ import type { Quote } from "@/lib/types";
 import { Empty, Panel, RangeBar, Skeleton } from "./ui";
 
 type SortKey = "symbol" | "price" | "changePct" | "volume";
-type FilterKey = "all" | "nifty50" | "banking" | "it" | "auto" | "gainers" | "losers" | "high52" | "low52";
+type FilterKey = "all" | "nifty50" | "banking" | "it" | "auto" | "gainers" | "losers";
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All" },
@@ -18,8 +18,6 @@ const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "auto", label: "Auto" },
   { key: "gainers", label: "▲ Gainers" },
   { key: "losers", label: "▼ Losers" },
-  { key: "high52", label: "★ 52W High" },
-  { key: "low52", label: "⚠️ 52W Low" },
 ];
 
 const SECTOR_BY_SYMBOL = new Map(SYMBOL_UNIVERSE.map((item) => [item.symbol, item.sector]));
@@ -114,7 +112,6 @@ export function Watchlist({
     direction: "desc",
   });
   const [filter, setFilter] = useState<FilterKey>("all");
-  const [rangeMode, setRangeMode] = useState<"day" | "52w">("day");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [flashes, setFlashes] = useState<Record<string, "up" | "down">>({});
@@ -199,20 +196,6 @@ export function Watchlist({
     }
     if (filter === "losers") {
       return rows.filter((r) => r.quote && r.quote.changePct < 0);
-    }
-    if (filter === "high52") {
-      return rows.filter((r) => {
-        if (!r.quote) return false;
-        const yHigh = r.quote.yearHigh ?? r.quote.high;
-        return yHigh > 0 && r.quote.price >= yHigh * 0.975;
-      });
-    }
-    if (filter === "low52") {
-      return rows.filter((r) => {
-        if (!r.quote) return false;
-        const yLow = r.quote.yearLow ?? r.quote.low;
-        return yLow > 0 && r.quote.price <= yLow * 1.025;
-      });
     }
     return rows;
   }, [rows, filter]);
@@ -350,19 +333,7 @@ export function Watchlist({
                   scope="col"
                   className={`px-3 py-2 font-medium ${header.align} ${header.visible}`}
                 >
-                  {header.id === "range" ? (
-                    <div className="flex items-center gap-1.5">
-                      <span>{rangeMode === "day" ? "Day Range & Trend" : "52W Price Channel"}</span>
-                      <button
-                        type="button"
-                        onClick={() => setRangeMode((m) => (m === "day" ? "52w" : "day"))}
-                        title={`Switch to ${rangeMode === "day" ? "52-Week Range" : "Day Range"}`}
-                        className="rounded border border-line bg-panel2 px-1 py-0.5 text-[8px] font-bold tracking-wider text-cyan hover:bg-cyan/15 hover:border-cyan/40"
-                      >
-                        {rangeMode === "day" ? "⇄ 52W" : "⇄ Day"}
-                      </button>
-                    </div>
-                  ) : header.sortKey ? (
+                  {header.sortKey ? (
                     <button
                       type="button"
                       onClick={() => toggleSort(header.sortKey as SortKey)}
@@ -477,38 +448,19 @@ export function Watchlist({
                       {quote.change.toFixed(2)}
                     </span>
                   </td>
-                  <td className="hidden w-52 px-3 py-2 md:table-cell">
-                    {rangeMode === "day" ? (
-                      <div className="flex items-center gap-3">
-                        <MiniSparkline
-                          open={quote.open}
-                          low={quote.low}
-                          high={quote.high}
-                          current={quote.price}
-                          prevClose={quote.prevClose}
-                        />
-                        <div className="flex-1">
-                          <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} />
-                        </div>
+                  <td className="hidden w-48 px-3 py-2 md:table-cell">
+                    <div className="flex items-center gap-3">
+                      <MiniSparkline
+                        open={quote.open}
+                        low={quote.low}
+                        high={quote.high}
+                        current={quote.price}
+                        prevClose={quote.prevClose}
+                      />
+                      <div className="flex-1">
+                        <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} />
                       </div>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center justify-between font-mono text-[9px] text-muted">
-                          <span>52L: {quote.yearLow ? price(quote.yearLow) : "—"}</span>
-                          {quote.yearHigh && quote.yearHigh > 0 ? (
-                            <span className={quote.price >= quote.yearHigh * 0.975 ? "font-bold text-up" : "text-cyan"}>
-                              {(((quote.price - quote.yearHigh) / quote.yearHigh) * 100).toFixed(1)}% off H
-                            </span>
-                          ) : null}
-                          <span>52H: {quote.yearHigh ? price(quote.yearHigh) : "—"}</span>
-                        </div>
-                        <RangeBar
-                          low={quote.yearLow ?? quote.low}
-                          high={quote.yearHigh ?? quote.high}
-                          value={quote.price}
-                        />
-                      </div>
-                    )}
+                    </div>
                   </td>
                   <td className="hidden px-3 py-1.5 text-right font-mono tabular-nums text-muted lg:table-cell">
                     {compact(quote.volume)}
