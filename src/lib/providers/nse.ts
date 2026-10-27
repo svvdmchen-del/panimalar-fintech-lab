@@ -246,6 +246,75 @@ export async function fetchMovers(count = 8): Promise<{ gainers: Mover[]; losers
 
 export const NSE_ATTRIBUTION = "NSE India (nseindia.com public endpoints)";
 
+function cnd(x: number): number {
+  const a1 = 0.31938153;
+  const a2 = -0.356563782;
+  const a3 = 1.781477937;
+  const a4 = -1.821255978;
+  const a5 = 1.330274429;
+  const p = 0.2316419;
+
+  if (x < 0) return 1 - cnd(-x);
+  const k = 1 / (1 + p * x);
+  const poly = k * (a1 + k * (a2 + k * (a3 + k * (a4 + k * a5))));
+  return 1 - (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x) * poly;
+}
+
+function pdf(x: number): number {
+  return (1 / Math.sqrt(2 * Math.PI)) * Math.exp(-0.5 * x * x);
+}
+
+function computeGreeks(
+  spot: number,
+  strike: number,
+  daysToExpiry: number,
+  ivPct: number,
+  r = 0.065,
+): { ceDelta: number; peDelta: number; ceTheta: number; peTheta: number } {
+  const T = Math.max(0.5, daysToExpiry) / 365;
+  const sigma = (ivPct > 0 ? ivPct : 13.5) / 100;
+  const S = spot;
+  const K = strike;
+
+  const d1 = (Math.log(S / K) + (r + (sigma * sigma) / 2) * T) / (sigma * Math.sqrt(T));
+  const d2 = d1 - sigma * Math.sqrt(T);
+
+  const ceDelta = cnd(d1);
+  const peDelta = ceDelta - 1;
+
+  const term1 = -(S * pdf(d1) * sigma) / (2 * Math.sqrt(T));
+  const ceTheta = (term1 - r * K * Math.exp(-r * T) * cnd(d2)) / 365;
+  const peTheta = (term1 + r * K * Math.exp(-r * T) * cnd(-d2)) / 365;
+
+  return {
+    ceDelta: Math.round(ceDelta * 100) / 100,
+    peDelta: Math.round(peDelta * 100) / 100,
+    ceTheta: Math.round(ceTheta * 100) / 100,
+    peTheta: Math.round(peTheta * 100) / 100,
+  };
+}
+
+function calculateMaxPain(strikes: OptionStrike[]): number {
+  if (!strikes.length) return 0;
+  let minLoss = Number.POSITIVE_INFINITY;
+  let maxPainStrike = strikes[0].strike;
+
+  for (const candidate of strikes) {
+    const s = candidate.strike;
+    let totalLoss = 0;
+    for (const row of strikes) {
+      const k = row.strike;
+      if (s > k) totalLoss += (s - k) * row.ce.oi;
+      if (s < k) totalLoss += (k - s) * row.pe.oi;
+    }
+    if (totalLoss < minLoss) {
+      minLoss = totalLoss;
+      maxPainStrike = s;
+    }
+  }
+  return maxPainStrike;
+}
+
 function normaliseLeg(leg: {
   lastPrice?: number;
   openInterest?: number;
@@ -264,7 +333,11 @@ function normaliseLeg(leg: {
 
 const OPTION_INDEX_SET = new Set(["NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY"]);
 
-export async function fetchOptionChain(symbol = "NIFTY", window = 5): Promise<OptionChain> {
+export async function fetchOptionChain(
+  symbol = "NIFTY",
+  requestedExpiry?: string,
+  window = 10,
+): Promise<OptionChain> {
   const cleanSym = symbol.toUpperCase().trim();
   const type = OPTION_INDEX_SET.has(cleanSym) ? "Indices" : "Equity";
 
@@ -273,7 +346,7 @@ export async function fetchOptionChain(symbol = "NIFTY", window = 5): Promise<Op
   );
   const expiries = info.expiryDates ?? [];
   if (!expiries.length) throw new Error(`NSE contract-info returned no expiries for ${cleanSym}`);
-  const expiry = expiries[0];
+  const expiry = requestedExpiry && expiries.includes(requestedExpiry) ? requestedExpiry : expiries[0];
 
   const payload = await nseJson<{
     records?: {
@@ -306,13 +379,24 @@ export async function fetchOptionChain(symbol = "NIFTY", window = 5): Promise<Op
   if (!rows.length) throw new Error(`NSE option-chain-v3 returned no strikes for ${cleanSym}`);
 
   const underlying = toNum(records.underlyingValue);
+  const expiryParsed = Date.parse(expiry.replace(/-/g, " "));
+  const daysToExpiry = Number.isFinite(expiryParsed)
+    ? Math.max(0.5, Math.ceil((expiryParsed - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 1;
+
   const allStrikes: OptionStrike[] = rows
     .filter((row) => Number.isFinite(row.strikePrice))
-    .map((row) => ({
-      strike: toNum(row.strikePrice),
-      ce: normaliseLeg(row.CE),
-      pe: normaliseLeg(row.PE),
-    }))
+    .map((row) => {
+      const strike = toNum(row.strikePrice);
+      const ce = normaliseLeg(row.CE);
+      const pe = normaliseLeg(row.PE);
+      const greeks = computeGreeks(underlying, strike, daysToExpiry, ce.iv || pe.iv);
+      ce.delta = greeks.ceDelta;
+      ce.theta = greeks.ceTheta;
+      pe.delta = greeks.peDelta;
+      pe.theta = greeks.peTheta;
+      return { strike, ce, pe };
+    })
     .sort((a, b) => a.strike - b.strike);
 
   if (!allStrikes.length) throw new Error(`No valid strikes parsed for ${cleanSym}`);
@@ -335,6 +419,15 @@ export async function fetchOptionChain(symbol = "NIFTY", window = 5): Promise<Op
   const maxCeOi = allStrikes.reduce((max, row) => Math.max(max, row.ce.oi), 0);
   const maxPeOi = allStrikes.reduce((max, row) => Math.max(max, row.pe.oi), 0);
 
+  const maxPain = calculateMaxPain(allStrikes);
+
+  const atmCeLtp = allStrikes[best]?.ce.ltp ?? 0;
+  const atmPeLtp = allStrikes[best]?.pe.ltp ?? 0;
+  const straddlePremium = Math.round((atmCeLtp + atmPeLtp) * 100) / 100;
+  const expectedMovePct = underlying > 0 ? Math.round((straddlePremium / underlying) * 10000) / 100 : 0;
+  const lowerBreakeven = Math.round((underlying - straddlePremium) * 100) / 100;
+  const upperBreakeven = Math.round((underlying + straddlePremium) * 100) / 100;
+
   let updatedAtIso = new Date().toISOString();
   if (records.timestamp) {
     const parsed = Date.parse(records.timestamp);
@@ -347,12 +440,18 @@ export async function fetchOptionChain(symbol = "NIFTY", window = 5): Promise<Op
     expiry,
     expiries: expiries.slice(0, 12),
     strikes,
+    allStrikes,
     atmStrike,
     pcr: totalCeOi ? totalPeOi / totalCeOi : 0,
     maxCeOi,
     maxPeOi,
     totalCeOi,
     totalPeOi,
+    maxPain,
+    straddlePremium,
+    expectedMovePct,
+    lowerBreakeven,
+    upperBreakeven,
     updatedAt: updatedAtIso,
   };
 }

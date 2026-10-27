@@ -123,6 +123,8 @@ export interface OptionLeg {
   oiChange: number;
   volume: number;
   iv: number;
+  delta?: number;
+  theta?: number;
 }
 
 export interface OptionStrike {
@@ -143,6 +145,12 @@ export interface OptionChain {
   maxPeOi: number;
   totalCeOi: number;
   totalPeOi: number;
+  maxPain?: number;
+  straddlePremium?: number;
+  expectedMovePct?: number;
+  lowerBreakeven?: number;
+  upperBreakeven?: number;
+  allStrikes?: OptionStrike[];
   updatedAt: string;
 }
 

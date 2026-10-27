@@ -37,6 +37,7 @@ function PopoutContent() {
   const [intervalMs, setIntervalMs] = useState(15_000);
   const [refreshToken, setRefreshToken] = useState(0);
   const [optionUnderlying, setOptionUnderlying] = useState("NIFTY");
+  const [optionExpiry, setOptionExpiry] = useState<string>("");
   const [detail, setDetail] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [windowHeight, setWindowHeight] = useState(650);
@@ -95,7 +96,7 @@ function PopoutContent() {
   const sectors = usePoll<Envelope<SectorPerf[]>>("/api/market/sectors", Math.max(intervalMs, 30_000), refreshToken);
   const flows = usePoll<Envelope<FiiDiiRow[]>>("/api/market/fii-dii", 300_000, refreshToken);
   const options = usePoll<Envelope<OptionChain>>(
-    `/api/market/options?symbol=${optionUnderlying}`,
+    `/api/market/options?symbol=${optionUnderlying}${optionExpiry ? `&expiry=${encodeURIComponent(optionExpiry)}` : ""}`,
     60_000,
     refreshToken,
   );
@@ -213,7 +214,12 @@ function PopoutContent() {
               chain={options.data?.data}
               loading={options.loading}
               underlying={optionUnderlying}
-              onUnderlyingChange={setOptionUnderlying}
+              onUnderlyingChange={(sym) => {
+                setOptionUnderlying(sym);
+                setOptionExpiry("");
+              }}
+              expiry={optionExpiry}
+              onExpiryChange={setOptionExpiry}
               badge={options.data ? <DataBadge status={options.data.status} source={options.data.source} /> : null}
             />
           </div>

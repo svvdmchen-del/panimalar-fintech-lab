@@ -315,6 +315,12 @@ export function mockOptions(symbol = "NIFTY"): OptionChain {
     maxPeOi: Math.max(...strikes.map((row) => row.pe.oi)),
     totalCeOi,
     totalPeOi,
+    maxPain: atm,
+    straddlePremium: 240,
+    expectedMovePct: 1.05,
+    lowerBreakeven: underlying - 240,
+    upperBreakeven: underlying + 240,
+    allStrikes: strikes,
     updatedAt: new Date().toISOString(),
   };
 }

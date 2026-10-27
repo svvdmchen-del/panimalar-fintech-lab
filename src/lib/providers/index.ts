@@ -135,10 +135,10 @@ export function getMarketStatus() {
   );
 }
 
-export function getOptionChain(symbol = "NIFTY") {
+export function getOptionChain(symbol = "NIFTY", expiry?: string) {
   return resolveMany<OptionChain>(
     [
-      { source: SOURCES.nse, status: "live", run: () => fetchOptionChain(symbol) },
+      { source: SOURCES.nse, status: "live", run: () => fetchOptionChain(symbol, expiry) },
       { source: SOURCES.mcp, status: "live", run: () => mcpOptionChain(symbol) },
       { source: SOURCES.demo, status: "demo", run: async () => mockOptions(symbol) },
     ],
