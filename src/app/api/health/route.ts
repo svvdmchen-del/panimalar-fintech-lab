@@ -50,7 +50,7 @@ export async function GET() {
       providers: {
         indices: "NSE direct -> MCP -> demo",
         quotes: "MCP -> Yahoo -> demo",
-        options: "MCP -> demo",
+        options: "NSE direct -> MCP -> demo",
       },
       mcp: {
         connected: checks.find((check) => check.name === "MCP server")?.ok ?? false,

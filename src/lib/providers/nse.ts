@@ -1,4 +1,4 @@
-import type { FiiDiiRow, IndexQuote, MarketSession, Mover, SectorPerf } from "@/lib/types";
+import type { FiiDiiRow, IndexQuote, MarketSession, Mover, OptionChain, OptionLeg, OptionStrike, SectorPerf } from "@/lib/types";
 import { SECTOR_INDICES, displayName } from "@/lib/symbols";
 
 /**
@@ -245,3 +245,114 @@ export async function fetchMovers(count = 8): Promise<{ gainers: Mover[]; losers
 }
 
 export const NSE_ATTRIBUTION = "NSE India (nseindia.com public endpoints)";
+
+function normaliseLeg(leg: {
+  lastPrice?: number;
+  openInterest?: number;
+  changeinOpenInterest?: number;
+  totalTradedVolume?: number;
+  impliedVolatility?: number;
+} | undefined): OptionLeg {
+  return {
+    ltp: toNum(leg?.lastPrice),
+    oi: toNum(leg?.openInterest),
+    oiChange: toNum(leg?.changeinOpenInterest),
+    volume: toNum(leg?.totalTradedVolume),
+    iv: toNum(leg?.impliedVolatility),
+  };
+}
+
+const OPTION_INDEX_SET = new Set(["NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY"]);
+
+export async function fetchOptionChain(symbol = "NIFTY", window = 5): Promise<OptionChain> {
+  const cleanSym = symbol.toUpperCase().trim();
+  const type = OPTION_INDEX_SET.has(cleanSym) ? "Indices" : "Equity";
+
+  const info = await nseJson<{ expiryDates?: string[] }>(
+    `/api/option-chain-contract-info?symbol=${encodeURIComponent(cleanSym)}`,
+  );
+  const expiries = info.expiryDates ?? [];
+  if (!expiries.length) throw new Error(`NSE contract-info returned no expiries for ${cleanSym}`);
+  const expiry = expiries[0];
+
+  const payload = await nseJson<{
+    records?: {
+      underlyingValue?: number;
+      timestamp?: string;
+      data?: {
+        strikePrice?: number;
+        CE?: {
+          lastPrice?: number;
+          openInterest?: number;
+          changeinOpenInterest?: number;
+          totalTradedVolume?: number;
+          impliedVolatility?: number;
+        };
+        PE?: {
+          lastPrice?: number;
+          openInterest?: number;
+          changeinOpenInterest?: number;
+          totalTradedVolume?: number;
+          impliedVolatility?: number;
+        };
+      }[];
+    };
+  }>(
+    `/api/option-chain-v3?type=${type}&symbol=${encodeURIComponent(cleanSym)}&expiry=${encodeURIComponent(expiry)}`,
+  );
+
+  const records = payload.records ?? {};
+  const rows = records.data ?? [];
+  if (!rows.length) throw new Error(`NSE option-chain-v3 returned no strikes for ${cleanSym}`);
+
+  const underlying = toNum(records.underlyingValue);
+  const allStrikes: OptionStrike[] = rows
+    .filter((row) => Number.isFinite(row.strikePrice))
+    .map((row) => ({
+      strike: toNum(row.strikePrice),
+      ce: normaliseLeg(row.CE),
+      pe: normaliseLeg(row.PE),
+    }))
+    .sort((a, b) => a.strike - b.strike);
+
+  if (!allStrikes.length) throw new Error(`No valid strikes parsed for ${cleanSym}`);
+
+  let best = 0;
+  let bestDelta = Number.POSITIVE_INFINITY;
+  allStrikes.forEach((row, index) => {
+    const delta = Math.abs(row.strike - underlying);
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      best = index;
+    }
+  });
+
+  const atmStrike = allStrikes[best]?.strike ?? underlying;
+  const strikes = allStrikes.slice(Math.max(0, best - window), best + window + 1);
+
+  const totalCeOi = allStrikes.reduce((sum, row) => sum + row.ce.oi, 0);
+  const totalPeOi = allStrikes.reduce((sum, row) => sum + row.pe.oi, 0);
+  const maxCeOi = allStrikes.reduce((max, row) => Math.max(max, row.ce.oi), 0);
+  const maxPeOi = allStrikes.reduce((max, row) => Math.max(max, row.pe.oi), 0);
+
+  let updatedAtIso = new Date().toISOString();
+  if (records.timestamp) {
+    const parsed = Date.parse(records.timestamp);
+    if (Number.isFinite(parsed)) updatedAtIso = new Date(parsed).toISOString();
+  }
+
+  return {
+    symbol: cleanSym,
+    underlying,
+    expiry,
+    expiries: expiries.slice(0, 12),
+    strikes,
+    atmStrike,
+    pcr: totalCeOi ? totalPeOi / totalCeOi : 0,
+    maxCeOi,
+    maxPeOi,
+    totalCeOi,
+    totalPeOi,
+    updatedAt: updatedAtIso,
+  };
+}

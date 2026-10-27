@@ -15,7 +15,7 @@ import type {
 } from "@/lib/types";
 import { INDEX_CARDS, SECTOR_INDICES } from "@/lib/symbols";
 import { MOCK_NEWS, MOCK_SOURCE, mockFiiDii, mockFundamentals, mockHistory, mockIndices, mockMovers, mockOptions, mockQuotes, mockSectors, mockStatus } from "./mock";
-import { fetchSectors, fetchFiiDii, fetchAllIndices, fetchMarketStatus, fetchMovers, pickIndices, toSectors, NSE_ATTRIBUTION } from "./nse";
+import { fetchSectors, fetchFiiDii, fetchAllIndices, fetchMarketStatus, fetchMovers, fetchOptionChain, pickIndices, toSectors, NSE_ATTRIBUTION } from "./nse";
 import { MCP_SERVER_NAME, mcpFundamentals, mcpHistory, mcpIndices, mcpMarketStatus, mcpMovers, mcpOptionChain, mcpQuotes } from "./mcp";
 import { fetchNews } from "./news";
 import { yahooFundamentals, yahooHistory, yahooQuotes } from "./yahoo";
@@ -138,6 +138,7 @@ export function getMarketStatus() {
 export function getOptionChain(symbol = "NIFTY") {
   return resolveMany<OptionChain>(
     [
+      { source: SOURCES.nse, status: "live", run: () => fetchOptionChain(symbol) },
       { source: SOURCES.mcp, status: "live", run: () => mcpOptionChain(symbol) },
       { source: SOURCES.demo, status: "demo", run: async () => mockOptions(symbol) },
     ],
