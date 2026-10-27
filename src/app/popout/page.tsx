@@ -141,18 +141,26 @@ function PopoutContent() {
             <div className="flex items-center gap-1.5 text-[9px] text-muted">
               <span className="size-1.5 rounded-full bg-up animate-pulse" />
               <span className="font-semibold text-up">LIVE SYNC ACTIVE</span>
-              <span>· Target:</span>
-              <span className="font-mono font-bold text-ink">{selected}</span>
+              <span className="text-muted/50">·</span>
+              <span className="text-muted/80">Classroom Broadcast Channel</span>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Symbol Switcher in Header */}
-          <div className="hidden items-center gap-1.5 rounded-md border border-line bg-panel2/80 px-2 py-0.5 text-xs sm:flex">
-            <span className="text-[10px] text-muted uppercase">Symbol:</span>
-            <span className="font-mono font-bold text-cyan">{selected}</span>
-          </div>
+          {/* Symbol / Context indicator only when relevant */}
+          {widget === "chart" && (
+            <div className="hidden items-center gap-1.5 rounded-md border border-line bg-panel2/80 px-2 py-0.5 text-xs sm:flex">
+              <span className="text-[10px] text-muted uppercase">Symbol:</span>
+              <span className="font-mono font-bold text-cyan">{selected}</span>
+            </div>
+          )}
+          {widget === "options" && (
+            <div className="hidden items-center gap-1.5 rounded-md border border-line bg-panel2/80 px-2 py-0.5 text-xs sm:flex">
+              <span className="text-[10px] text-muted uppercase">Index:</span>
+              <span className="font-mono font-bold text-cyan">{optionUnderlying}</span>
+            </div>
+          )}
 
           <button
             type="button"
