@@ -92,7 +92,7 @@ function PopoutContent() {
   );
 
   const quotes = usePoll<Envelope<Quote[]>>(quotesUrl, intervalMs, refreshToken);
-  const movers = usePoll<Envelope<Movers>>("/api/market/movers?count=12", Math.max(intervalMs, 30_000), refreshToken);
+  const movers = usePoll<Envelope<Movers>>("/api/market/movers?count=20", Math.max(intervalMs, 30_000), refreshToken);
   const sectors = usePoll<Envelope<SectorPerf[]>>("/api/market/sectors", Math.max(intervalMs, 30_000), refreshToken);
   const flows = usePoll<Envelope<FiiDiiRow[]>>("/api/market/fii-dii", 300_000, refreshToken);
   const options = usePoll<Envelope<OptionChain>>(
@@ -206,11 +206,15 @@ function PopoutContent() {
         )}
 
         {widget === "movers" && (
-          <div className="max-w-3xl mx-auto">
+          <div className="h-full w-full">
             <MoversPanel
               movers={movers.data?.data}
+              quotes={quoteList}
               loading={movers.loading}
+              selected={selected}
               onSelect={handleSelectSymbol}
+              onDetails={setDetail}
+              fullView={true}
               badge={movers.data ? <DataBadge status={movers.data.status} source={movers.data.source} /> : null}
             />
           </div>

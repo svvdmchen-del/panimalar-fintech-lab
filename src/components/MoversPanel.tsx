@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { compact, price, pct, toneClass } from "@/lib/format";
-import type { Mover, Movers } from "@/lib/types";
-import { Empty, Panel, Skeleton } from "./ui";
+import { SYMBOL_UNIVERSE } from "@/lib/symbols";
+import type { Mover, Movers, Quote } from "@/lib/types";
+import { Empty, Panel, RangeBar, Skeleton } from "./ui";
 
 type Tab = "gainers" | "losers" | "volume";
+type DeskFilter = "all" | "gainers" | "losers" | "volume" | "banking" | "it" | "auto";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "gainers", label: "Gainers" },
@@ -13,18 +15,290 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "volume", label: "Volume" },
 ];
 
+const DESK_FILTERS: { key: DeskFilter; label: string }[] = [
+  { key: "all", label: "All Movers" },
+  { key: "gainers", label: "▲ Gainers" },
+  { key: "losers", label: "▼ Losers" },
+  { key: "volume", label: "⚡ High Volume" },
+  { key: "banking", label: "Banking" },
+  { key: "it", label: "IT" },
+  { key: "auto", label: "Auto" },
+];
+
+const SECTOR_BY_SYMBOL = new Map(SYMBOL_UNIVERSE.map((item) => [item.symbol, item.sector]));
+
+function MiniSparkline({
+  open,
+  low,
+  high,
+  current,
+  prevClose,
+}: {
+  open: number;
+  low: number;
+  high: number;
+  current: number;
+  prevClose: number;
+}) {
+  const min = Math.min(open, low, high, current, prevClose);
+  const max = Math.max(open, low, high, current, prevClose);
+  const range = max - min || 1;
+  const height = 18;
+  const width = 56;
+  const pad = 2;
+
+  const getY = (val: number) => {
+    const norm = (val - min) / range;
+    return height - pad - norm * (height - pad * 2);
+  };
+
+  const isUp = current >= prevClose;
+  const strokeColor = isUp ? "var(--color-up)" : "var(--color-down)";
+
+  const p0 = `0,${getY(open).toFixed(1)}`;
+  const p1 = `14,${getY(open + (low - open) * 0.65).toFixed(1)}`;
+  const p2 = `28,${getY((low + high) / 2).toFixed(1)}`;
+  const p3 = `42,${getY(high - (high - current) * 0.35).toFixed(1)}`;
+  const p4 = `${width},${getY(current).toFixed(1)}`;
+  const points = `${p0} ${p1} ${p2} ${p3} ${p4}`;
+
+  return (
+    <svg width={width} height={height} className="shrink-0 overflow-visible" aria-hidden>
+      <polyline
+        points={points}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle cx={width} cy={getY(current)} r="2" fill={strokeColor} />
+    </svg>
+  );
+}
+
 export function MoversPanel({
   movers,
+  quotes = [],
   loading,
   badge,
+  selected,
   onSelect,
+  onDetails,
+  fullView = false,
 }: {
   movers?: Movers;
+  quotes?: Quote[];
   loading: boolean;
   badge?: React.ReactNode;
+  selected?: string;
   onSelect: (symbol: string) => void;
+  onDetails?: (symbol: string) => void;
+  fullView?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("gainers");
+  const [deskFilter, setDeskFilter] = useState<DeskFilter>("gainers");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const quoteMap = useMemo(() => new Map(quotes.map((q) => [q.symbol, q])), [quotes]);
+
+  // Combine universe of movers for fullView mode
+  const allMoversList = useMemo(() => {
+    if (!movers) return [];
+    const seen = new Set<string>();
+    const list: Mover[] = [];
+
+    const addList = (sourceList: Mover[] = []) => {
+      for (const m of sourceList) {
+        if (!seen.has(m.symbol)) {
+          seen.add(m.symbol);
+          list.push(m);
+        }
+      }
+    };
+
+    if (deskFilter === "gainers") return movers.gainers ?? [];
+    if (deskFilter === "losers") return movers.losers ?? [];
+    if (deskFilter === "volume") return movers.volume ?? [];
+
+    // "all" or sector filter: combine gainers, losers, and volume
+    addList(movers.gainers);
+    addList(movers.losers);
+    addList(movers.volume);
+
+    if (deskFilter === "banking") {
+      return list.filter((m) => SECTOR_BY_SYMBOL.get(m.symbol) === "Banking");
+    }
+    if (deskFilter === "it") {
+      return list.filter((m) => SECTOR_BY_SYMBOL.get(m.symbol) === "IT");
+    }
+    if (deskFilter === "auto") {
+      return list.filter((m) => SECTOR_BY_SYMBOL.get(m.symbol) === "Auto");
+    }
+
+    return list;
+  }, [movers, deskFilter]);
+
+  const filteredDeskRows = useMemo(() => {
+    if (!searchQuery.trim()) return allMoversList;
+    const q = searchQuery.trim().toUpperCase();
+    return allMoversList.filter(
+      (m) => m.symbol.toUpperCase().includes(q) || (m.name && m.name.toUpperCase().includes(q)),
+    );
+  }, [allMoversList, searchQuery]);
+
+  // --- FULL VIEW (MATCHING WATCHLIST VIEW ON UNDOCKING) ---
+  if (fullView) {
+    return (
+      <Panel
+        title="Market Movers & Radar"
+        subtitle={`${filteredDeskRows.length} active movers · NIFTY universe · click to chart`}
+        badge={badge}
+        actions={
+          <div className="relative">
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search movers…"
+              aria-label="Filter movers"
+              className="w-32 rounded-md border border-line bg-panel2 px-2 py-1 text-[11px] text-ink placeholder:text-muted/60 focus:w-44 focus:outline-none focus:ring-1 focus:ring-cyan/50 sm:w-36 transition-all"
+            />
+          </div>
+        }
+        bodyClassName="overflow-x-auto p-0 flex flex-col h-full"
+      >
+        {/* Quick Movers & Sector Filter Tabs (Same as Watchlist) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto border-b border-line/60 bg-panel2/40 px-3 py-1.5 no-scrollbar shrink-0">
+          {DESK_FILTERS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setDeskFilter(f.key)}
+              className={`rounded-md px-2 py-0.5 text-[10px] font-medium whitespace-nowrap transition-colors ${
+                deskFilter === f.key
+                  ? "border border-cyan/40 bg-cyan/15 text-cyan"
+                  : "border border-transparent text-muted hover:bg-wash/5 hover:text-ink"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Loading / Empty States */}
+        {!filteredDeskRows.length && loading ? (
+          <div className="space-y-2 p-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-8 w-full" />
+            ))}
+          </div>
+        ) : !filteredDeskRows.length ? (
+          <div className="p-6">
+            <Empty>No market movers match the selected filter.</Empty>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-auto">
+            <table className="w-full border-collapse text-[12px]">
+              <thead className="sticky top-0 z-10 bg-panel border-b border-line">
+                <tr className="text-[10px] uppercase tracking-[0.1em] text-muted">
+                  <th scope="col" className="px-3 py-2 text-left font-medium">Symbol</th>
+                  <th scope="col" className="px-3 py-2 text-right font-medium">LTP</th>
+                  <th scope="col" className="px-3 py-2 text-right font-medium">Chg %</th>
+                  <th scope="col" className="hidden md:table-cell px-3 py-2 text-left font-medium">Day Range & Trend</th>
+                  <th scope="col" className="hidden lg:table-cell px-3 py-2 text-right font-medium">Volume</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredDeskRows.map((mover) => {
+                  const quote = quoteMap.get(mover.symbol);
+                  const isSelected = selected === mover.symbol;
+
+                  const ltp = mover.price;
+                  const changePct = mover.changePct;
+                  const change = mover.change || (quote ? quote.change : (ltp * changePct) / (100 + changePct));
+                  const prevClose = quote?.prevClose ?? (ltp - change);
+                  const open = quote?.open ?? prevClose;
+                  const high = quote?.high ?? Math.max(ltp, open, prevClose);
+                  const low = quote?.low ?? Math.min(ltp, open, prevClose);
+                  const volume = mover.volume || quote?.volume || 0;
+                  const companyName = quote?.name ?? mover.name ?? mover.symbol;
+
+                  return (
+                    <tr
+                      key={mover.symbol}
+                      onClick={() => onSelect(mover.symbol)}
+                      className={`group cursor-pointer border-b border-line/60 transition-colors last:border-0 hover:bg-wash/[0.04] ${
+                        isSelected ? "bg-cyan/[0.07]" : ""
+                      }`}
+                    >
+                      {/* Symbol Column */}
+                      <td className="relative px-3 py-2">
+                        {isSelected ? (
+                          <span className="absolute inset-y-0 left-0 w-0.5 bg-cyan" aria-hidden />
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            if (onDetails) onDetails(mover.symbol);
+                            else onSelect(mover.symbol);
+                          }}
+                          className="block max-w-[10rem] truncate text-left font-semibold text-ink group-hover:text-cyan sm:max-w-[15rem]"
+                          title={`Open ${mover.symbol} details`}
+                        >
+                          {mover.symbol}
+                        </button>
+                        <span className="block max-w-[10rem] truncate text-[10px] text-muted sm:max-w-[15rem]">
+                          {companyName}
+                        </span>
+                      </td>
+
+                      {/* LTP Column */}
+                      <td className="px-3 py-2 text-right font-mono tabular-nums text-ink font-medium">
+                        {price(ltp)}
+                      </td>
+
+                      {/* Chg % Column */}
+                      <td className={`px-3 py-2 text-right font-mono tabular-nums ${toneClass(changePct)}`}>
+                        <span className="block font-semibold">{pct(changePct)}</span>
+                        <span className="block text-[10px] opacity-75">
+                          {change > 0 ? "+" : ""}
+                          {change.toFixed(2)}
+                        </span>
+                      </td>
+
+                      {/* Day Range & Trend Column (Sparkline + RangeBar) */}
+                      <td className="hidden w-56 px-3 py-2 md:table-cell">
+                        <div className="flex items-center gap-3">
+                          <MiniSparkline
+                            open={open}
+                            low={low}
+                            high={high}
+                            current={ltp}
+                            prevClose={prevClose}
+                          />
+                          <div className="flex-1">
+                            <RangeBar low={low} high={high} value={ltp} prevClose={prevClose} />
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Volume Column */}
+                      <td className="hidden px-3 py-2 text-right font-mono tabular-nums text-muted lg:table-cell">
+                        {compact(volume)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Panel>
+    );
+  }
+
+  // --- COMPACT VIEW (DEFAULT FOR MAIN HOME DASHBOARD) ---
   const rows: Mover[] = movers?.[tab] ?? [];
   const maxPct = rows.reduce((max, row) => Math.max(max, Math.abs(row.changePct)), 0.01);
 
