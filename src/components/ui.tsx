@@ -103,24 +103,49 @@ export function RangeBar({
   value,
   prevClose,
   showLabels = false,
+  pivotAtPrevClose = false,
+  fill = true,
+  tone,
+  digits = 2,
+  className = "",
 }: {
   low: number;
   high: number;
   value: number;
   prevClose?: number;
   showLabels?: boolean;
+  /** Draw the coloured fill between previous close and last instead of low → last. */
+  pivotAtPrevClose?: boolean;
+  /** Disable the coloured fill (e.g. a 52-week rail that only needs the marker). */
+  fill?: boolean;
+  /** Force a fill tone instead of deriving it from previous close. */
+  tone?: "up" | "down" | "flat";
+  /** Decimal places used by `showLabels`. */
+  digits?: number;
+  className?: string;
 }) {
   const position = pctOf(value, low, high);
-  const prevPosition = prevClose ? pctOf(prevClose, low, high) : null;
-  const tone = value >= (prevClose ?? low) ? "bg-up" : "bg-down";
+  const prevPosition =
+    prevClose !== undefined && Number.isFinite(prevClose) ? pctOf(prevClose, low, high) : null;
+  const direction: "up" | "down" = value >= (prevClose ?? low) ? "up" : "down";
+  const fillTone = tone ?? direction;
+  const fillClass = fillTone === "up" ? "bg-up" : fillTone === "down" ? "bg-down" : "bg-muted";
+
+  const fillLeft = pivotAtPrevClose && prevPosition !== null ? Math.min(prevPosition, position) : 0;
+  const fillWidth = pivotAtPrevClose && prevPosition !== null ? Math.abs(position - prevPosition) : position;
 
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       <div className="relative h-1 w-full rounded-full bg-track/60">
-        <div className={`absolute inset-y-0 left-0 rounded-full ${tone} opacity-45`} style={{ width: `${position}%` }} />
+        {fill && fillWidth > 0 ? (
+          <div
+            className={`absolute inset-y-0 rounded-full ${fillClass} opacity-45`}
+            style={{ left: `${fillLeft}%`, width: `${fillWidth}%` }}
+          />
+        ) : null}
         {prevPosition !== null ? (
           <span
-            className="absolute -top-1 h-3 w-px bg-ink/45"
+            className="absolute -top-1 h-3 w-px bg-ink/60"
             style={{ left: `${prevPosition}%` }}
             aria-hidden
           />
@@ -133,8 +158,8 @@ export function RangeBar({
       </div>
       {showLabels ? (
         <div className="mt-1 flex justify-between font-mono text-[10px] tabular-nums text-muted">
-          <span>{low.toFixed(2)}</span>
-          <span>{high.toFixed(2)}</span>
+          <span>{low.toFixed(digits)}</span>
+          <span>{high.toFixed(digits)}</span>
         </div>
       ) : null}
     </div>

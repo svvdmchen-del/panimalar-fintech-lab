@@ -373,7 +373,14 @@ export default function Page() {
           </div>
         ) : null}
 
-        <IndexStrip indices={indexList} loading={indices.loading} onSelect={handleSelectSymbol} />
+        <IndexStrip
+          indices={indexList}
+          loading={indices.loading}
+          selected={selected}
+          live={marketOpen}
+          asOf={indices.updatedAt}
+          onSelect={handleSelectSymbol}
+        />
 
         <BreadthStrip index={nifty50} />
 
@@ -400,7 +407,7 @@ export default function Page() {
             />
           </div>
 
-          <div id="chart" className="min-w-0 xl:col-span-8">
+          <div id="chart" className="min-w-0 scroll-mt-24 xl:col-span-8">
             <PriceChart
               symbol={selected}
               intervalMs={intervalMs}
