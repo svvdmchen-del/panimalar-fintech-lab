@@ -134,6 +134,33 @@ export function persistReplay(presetId: string, body: ReplayBody): void {
   writeJson(`${REPLAY_PREFIX}${presetId}`, { ...body, schemaVersion: 2 });
 }
 
+export interface ReplayLedgerSummary {
+  presetId: string;
+  positions: number;
+  trades: number;
+}
+
+/** Every replay ledger in this browser, for the footer's session panel. */
+export function listReplayLedgers(): ReplayLedgerSummary[] {
+  if (!canUseStorage()) return [];
+  const ledgers: ReplayLedgerSummary[] = [];
+  try {
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index);
+      if (!key?.startsWith(REPLAY_PREFIX)) continue;
+      const body = readJson<ReplayBody>(key);
+      ledgers.push({
+        presetId: key.slice(REPLAY_PREFIX.length),
+        positions: body?.positions.length ?? 0,
+        trades: body?.history.length ?? 0,
+      });
+    }
+  } catch {
+    // Storage disabled: report an empty session rather than failing the footer.
+  }
+  return ledgers;
+}
+
 export function resetDesk(): void {
   if (!canUseStorage()) return;
   window.localStorage.removeItem(DESK_KEY);

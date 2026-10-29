@@ -80,6 +80,9 @@ export interface StudentProfile {
   section: string;
 }
 
+/** Fired with `{ groupId }` to open the lab drawer on one activity or case. */
+export const LAB_FOCUS_EVENT = "nse:lab-focus";
+
 export interface SimulationPreset {
   id: string;
   title: string;

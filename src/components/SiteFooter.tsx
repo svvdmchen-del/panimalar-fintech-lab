@@ -3,18 +3,20 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { CASE_STUDIES, LAB_ACTIVITIES } from "@/lib/caseStudiesData";
-import { simClockLabel } from "@/lib/desk/replay";
+import { presetById, simClockLabel } from "@/lib/desk/replay";
 import { gradedTrades } from "@/lib/desk/report";
 import {
   ANSWERS_EVENT,
+  listReplayLedgers,
   loadDeskState,
   readLabAnswers,
   resetDesk,
   UPDATE_EVENT,
+  type ReplayLedgerSummary,
 } from "@/lib/desk/store";
 import type { DeskState } from "@/lib/desk/types";
-import { formatDuration, ms, timeIST, weekdayIST } from "@/lib/format";
-import type { SimulationPreset } from "@/lib/labTypes";
+import { formatDuration, integer, ms, signed, timeIST, weekdayIST } from "@/lib/format";
+import type { SimulationPreset, StudentProfile } from "@/lib/labTypes";
 import { isMarketOpen, sessionLabel } from "@/lib/marketHours";
 import type { HealthReport } from "@/lib/types";
 import { useNow, usePoll } from "@/lib/usePoll";
@@ -26,20 +28,36 @@ interface SiteFooterProps {
   replay: { preset: SimulationPreset; progressPct: number } | null;
   onOpenShortcuts: () => void;
   onOpenLab: () => void;
+  onOpenLabAt: (groupId: string) => void;
   onOpenPaperDesk: () => void;
   onOpenReport: () => void;
 }
 
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-const SOURCE_LABEL: Record<string, string> = {
-  "NSE direct endpoints": "NSE",
-  "MCP server": "MCP",
-  "Yahoo Finance": "Yahoo",
-  "Market news RSS": "News",
+type FooterPanel = "readiness" | "session" | "sources";
+
+const PANEL_ID: Record<FooterPanel, string> = {
+  readiness: "footer-panel-readiness",
+  session: "footer-panel-session",
+  sources: "footer-panel-sources",
 };
 
-const SECTION_LABEL =
-  "text-[9px] font-bold uppercase tracking-[0.14em] text-muted";
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+const SECTION_LABEL = "text-[9px] font-bold uppercase tracking-[0.14em] text-muted";
+const PROFILE_KEY = "nse-lab.student-profile";
+
+function pillClass(active: boolean): string {
+  return `inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-mono text-[10px] transition-colors ${
+    active
+      ? "border-cyan/60 bg-cyan/10 text-cyan"
+      : "border-line bg-panel text-muted hover:border-cyan/50 hover:text-ink"
+  }`;
+}
+
+const PRIMARY_BUTTON =
+  "rounded-md border border-cyan/50 bg-cyan/10 px-2.5 py-1 text-[10px] font-semibold text-cyan transition-colors hover:bg-cyan/20";
+const GHOST_BUTTON =
+  "rounded-md border border-line px-2.5 py-1 text-[10px] text-muted transition-colors hover:border-cyan/50 hover:text-cyan";
 
 interface SessionBoundary {
   at: number;
@@ -73,32 +91,80 @@ function answered(value?: string): boolean {
   return Boolean(value && value.trim());
 }
 
-function ReadinessTile({
-  label,
-  value,
-  fraction,
-  done,
-  hint,
+function readProfile(): StudentProfile | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(PROFILE_KEY);
+    return raw ? (JSON.parse(raw) as StudentProfile) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Approximate footprint of everything this origin stores, in KB. */
+function storageFootprintKb(): number {
+  if (typeof window === "undefined") return 0;
+  let characters = 0;
+  try {
+    for (let index = 0; index < window.localStorage.length; index += 1) {
+      const key = window.localStorage.key(index);
+      if (!key) continue;
+      characters += key.length + (window.localStorage.getItem(key)?.length ?? 0);
+    }
+  } catch {
+    return 0;
+  }
+  return (characters * 2) / 1024;
+}
+
+function ReadinessGroup({
+  title,
+  questions,
+  answers,
+  onOpen,
 }: {
-  label: string;
-  value: string;
-  fraction: number;
-  done: boolean;
-  hint: string;
+  title: string;
+  questions: Array<{ id: string; label: string }>;
+  answers?: Record<string, string>;
+  onOpen: () => void;
 }) {
+  const done = questions.filter((question) => answered(answers?.[question.id])).length;
+  const missing = questions.filter((question) => !answered(answers?.[question.id]));
+  const complete = done === questions.length;
+
   return (
-    <div className="rounded-lg border border-line bg-panel/60 px-2.5 py-1.5" title={hint}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="truncate text-[10px] text-muted">{label}</span>
-        <span className={`shrink-0 font-mono text-[10px] ${done ? "text-up" : "text-ink"}`}>{value}</span>
+    <details className="min-w-0 border-b border-line/40 py-1 last:border-0">
+      <summary className="flex w-full min-w-0 cursor-pointer list-none items-center justify-between gap-2 text-[10px] transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
+        <span className="flex min-w-0 flex-1 items-center gap-1.5 text-ink/80">
+          <span
+            className={`size-1.5 shrink-0 rounded-full ${complete ? "bg-up" : done ? "bg-accent" : "bg-track"}`}
+            aria-hidden
+          />
+          <span className="min-w-0 truncate">{title}</span>
+        </span>
+        <span className={`shrink-0 font-mono ${complete ? "text-up" : "text-muted"}`}>
+          {done}/{questions.length}
+        </span>
+      </summary>
+      <div className="pb-1.5 pl-3">
+        {missing.length ? (
+          <ul className="list-disc space-y-0.5 pl-3 text-[10px] leading-relaxed text-muted">
+            {missing.map((question) => (
+              <li key={question.id}>{question.label}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-[10px] text-up">All answers saved.</p>
+        )}
+        <button
+          type="button"
+          onClick={onOpen}
+          className="mt-1 text-[10px] text-cyan transition-colors hover:underline"
+        >
+          Open in Lab →
+        </button>
       </div>
-      <div className="mt-1 h-1 overflow-hidden rounded-full bg-track/60">
-        <div
-          className={`h-full rounded-full transition-[width] duration-300 ${done ? "bg-up" : "bg-cyan"}`}
-          style={{ width: `${Math.round(Math.min(1, Math.max(0, fraction)) * 100)}%` }}
-        />
-      </div>
-    </div>
+    </details>
   );
 }
 
@@ -108,18 +174,26 @@ export function SiteFooter({
   replay,
   onOpenShortcuts,
   onOpenLab,
+  onOpenLabAt,
   onOpenPaperDesk,
   onOpenReport,
 }: SiteFooterProps) {
   const now = useNow(1000);
   const health = usePoll<HealthReport>("/api/health", 120_000);
+  const [panel, setPanel] = useState<FooterPanel | null>(null);
   const [desk, setDesk] = useState<DeskState | null>(null);
   const [answers, setAnswers] = useState<Record<string, Record<string, string>>>({});
+  const [profile, setProfile] = useState<StudentProfile | null>(null);
+  const [ledgers, setLedgers] = useState<ReplayLedgerSummary[]>([]);
+  const [storageKb, setStorageKb] = useState(0);
   const [confirmReset, setConfirmReset] = useState(false);
 
   const refresh = useCallback(() => {
     setDesk(loadDeskState());
     setAnswers(readLabAnswers());
+    setProfile(readProfile());
+    setLedgers(listReplayLedgers());
+    setStorageKb(storageFootprintKb());
   }, []);
 
   // The desk and the lab drawer both write to localStorage; a custom event
@@ -138,6 +212,11 @@ export function SiteFooter({
       window.removeEventListener("storage", onUpdate);
     };
   }, [refresh]);
+
+  const togglePanel = (next: FooterPanel) => {
+    setConfirmReset(false);
+    setPanel((current) => (current === next ? null : next));
+  };
 
   const activityTotal = LAB_ACTIVITIES.reduce((sum, activity) => sum + activity.questions.length, 0);
   const activityAnswered = LAB_ACTIVITIES.reduce(
@@ -161,31 +240,28 @@ export function SiteFooter({
 
   const trades = desk ? gradedTrades(desk.history) : [];
   const openPositions = desk?.positions.length ?? 0;
+  const blockedMargin = desk?.positions.reduce((sum, position) => sum + position.blockedMargin, 0) ?? 0;
+  const debriefed = trades.filter((trade) => trade.postMortem?.trim()).length;
+  const wins = trades.filter((trade) => trade.netPnl > 0).length;
+  const losses = trades.filter((trade) => trade.netPnl < 0).length;
+  const netPnl = trades.reduce((sum, trade) => sum + trade.netPnl, 0);
+  const replayTrades = ledgers.reduce((sum, ledger) => sum + ledger.trades, 0);
 
   const gates = [
     {
       key: "activities",
-      label: "Part 1 · Activities",
-      value: `${activityDone}/${LAB_ACTIVITIES.length}`,
       fraction: activityTotal ? activityAnswered / activityTotal : 0,
       done: activityDone === LAB_ACTIVITIES.length,
-      hint: `${activityAnswered} of ${activityTotal} activity answers saved`,
     },
     {
       key: "cases",
-      label: "Part 2 · Case studies",
-      value: `${caseDone}/${CASE_STUDIES.length}`,
       fraction: caseTotal ? caseAnswered / caseTotal : 0,
       done: caseDone === CASE_STUDIES.length,
-      hint: `${caseAnswered} of ${caseTotal} case-study answers saved`,
     },
     {
       key: "journal",
-      label: "Part 3 · Graded journal",
-      value: trades.length ? `${trades.length} live` : "0",
       fraction: trades.length ? 1 : 0,
       done: trades.length > 0,
-      hint: `${trades.length} closed LIVE paper trade${trades.length === 1 ? "" : "s"} — replay fills excluded`,
     },
   ];
   const gatesMet = gates.filter((gate) => gate.done).length;
@@ -211,6 +287,31 @@ export function SiteFooter({
     context = `Still pending: ${pending.join(" and ")} before this session is submission-ready.`;
   }
 
+  const nextActivity = LAB_ACTIVITIES.find((activity) =>
+    activity.questions.some((question) => !answered(answers[activity.id]?.[question.id])),
+  );
+  const nextCase = CASE_STUDIES.find((study) =>
+    study.guidedQuestions.some((question) => !answered(answers[study.id]?.[question.id])),
+  );
+
+  let nextLabel: string;
+  let nextAction: () => void;
+  if (gatesMet === gates.length) {
+    nextLabel = "Open report";
+    nextAction = onOpenReport;
+  } else if (nextActivity) {
+    const left = activityTotal - activityAnswered;
+    nextLabel = `Continue Part 1 · ${left} left`;
+    nextAction = () => onOpenLabAt(nextActivity.id);
+  } else if (nextCase) {
+    const left = caseTotal - caseAnswered;
+    nextLabel = `Continue Part 2 · ${left} left`;
+    nextAction = () => onOpenLabAt(nextCase.id);
+  } else {
+    nextLabel = "Place a graded trade";
+    nextAction = onOpenPaperDesk;
+  }
+
   const marketLive = now ? isMarketOpen(now) : false;
   const boundary = now ? nextBoundary(now) : null;
   const untilBoundary = boundary && now ? Math.max(0, boundary.at - now.getTime()) : 0;
@@ -224,10 +325,22 @@ export function SiteFooter({
 
   const checks = health.data?.checks ?? [];
   const failingChecks = checks.filter((check) => !check.ok).length;
+  const mcpServer = health.data?.mcp.server ?? "";
+  const mcpLabel =
+    mcpServer.match(/node_modules[\\/]([^\\/]+)/)?.[1] ?? (mcpServer || "india-stock-mcp");
   const nothingToReset = !desk || (openPositions === 0 && trades.length === 0);
+  const storageText = storageKb >= 10 ? `${Math.round(storageKb)} KB` : `${storageKb.toFixed(1)} KB`;
+  const replayTitle = ledgers
+    .map((ledger) => `${presetById(ledger.presetId).title}: ${ledger.trades} closed`)
+    .join("\n");
+  const candidateSet = Boolean(profile?.studentName?.trim() && profile?.rollNumber?.trim());
 
   return (
-    <footer className="mt-6 overflow-hidden rounded-xl border border-line bg-panel2/70 pb-8 text-xs shadow-xs backdrop-blur-sm">
+    <footer
+      className={`mt-6 overflow-hidden rounded-xl border border-line bg-panel2/70 text-xs shadow-xs backdrop-blur-sm ${
+        replay ? "pb-52" : "pb-8"
+      }`}
+    >
       {/* Tier 1 — institutional identity and live session clock */}
       <div className="flex flex-col gap-3 border-b border-line/60 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3 sm:items-center">
@@ -238,7 +351,7 @@ export function SiteFooter({
             height={64}
             className="size-8 shrink-0 rounded-full object-contain ring-1 ring-line/80 shadow-xs"
           />
-          <div className="leading-tight">
+          <div className="min-w-0 flex-1 leading-tight">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-black tracking-wider text-ink uppercase">
                 Panimalar Engineering College
@@ -294,176 +407,8 @@ export function SiteFooter({
         </div>
       </div>
 
-      {/* Tier 2 — submission readiness */}
+      {/* Tier 2 — disclosure (always expanded) */}
       <div className="border-b border-line/60 px-4 py-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className={SECTION_LABEL}>Submission readiness</span>
-            <span
-              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider ${
-                gatesMet === gates.length
-                  ? "border-up/40 bg-up/10 text-up"
-                  : gatesMet > 0
-                    ? "border-accent/40 bg-accent/10 text-accent"
-                    : "border-line bg-panel text-muted"
-              }`}
-            >
-              <span
-                className={`size-1 rounded-full ${
-                  gatesMet === gates.length ? "bg-up" : gatesMet > 0 ? "bg-accent" : "bg-muted"
-                }`}
-                aria-hidden
-              />
-              {gatesMet}/{gates.length} gates met
-            </span>
-          </div>
-          <span className="font-mono text-[10px] tabular-nums text-muted">{overallPct}% complete</span>
-        </div>
-
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
-          {gates.map((gate) => (
-            <ReadinessTile
-              key={gate.key}
-              label={gate.label}
-              value={gate.value}
-              fraction={gate.fraction}
-              done={gate.done}
-              hint={gate.hint}
-            />
-          ))}
-        </div>
-
-        <p className="mt-2 text-[10px] leading-relaxed text-muted">{context}</p>
-      </div>
-
-      {/* Tier 3 — local session summary and source health */}
-      <div className="grid gap-3 border-b border-line/60 px-4 py-3 sm:grid-cols-2">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={SECTION_LABEL}>This browser session</span>
-            {replay ? (
-              <span
-                className="rounded-full border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent"
-                title={`Replay preset: ${replay.preset.title} (${replay.preset.dateStr})`}
-              >
-                Replay ledger
-              </span>
-            ) : null}
-          </div>
-
-          <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-[10px] text-muted">
-            <span>
-              <strong className="font-semibold text-ink">{openPositions}</strong> open
-            </span>
-            <span className="text-line" aria-hidden>
-              ·
-            </span>
-            <span>
-              <strong className="font-semibold text-ink">{trades.length}</strong> closed graded
-            </span>
-            <span className="text-line" aria-hidden>
-              ·
-            </span>
-            <span title="Positions, journal and replay ledgers live in this browser only">
-              saved locally
-            </span>
-          </div>
-
-          {confirmReset ? (
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px]">
-              <span className="text-down">
-                Clear {openPositions} open and {trades.length} graded? Answers and student details stay.
-              </span>
-              <button
-                type="button"
-                onClick={() => {
-                  resetDesk();
-                  setConfirmReset(false);
-                }}
-                className="rounded border border-down/50 bg-down/10 px-2 py-0.5 font-semibold text-down transition-colors hover:bg-down/20"
-              >
-                Clear desk
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmReset(false)}
-                className="rounded border border-line px-2 py-0.5 text-muted transition-colors hover:text-ink"
-              >
-                Keep
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmReset(true)}
-              disabled={nothingToReset}
-              title={
-                nothingToReset
-                  ? "Nothing to clear in this browser yet"
-                  : "Clear open positions, the trade journal and replay ledgers from this browser"
-              }
-              className="mt-2 rounded border border-line px-2 py-0.5 text-[10px] text-muted transition-colors hover:border-down/50 hover:text-down disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line disabled:hover:text-muted"
-            >
-              Reset local desk
-            </button>
-          )}
-        </div>
-
-        <div className="sm:border-l sm:border-line/60 sm:pl-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className={SECTION_LABEL}>Source health</span>
-            <a
-              href="/api/health"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[10px] text-muted transition-colors hover:text-cyan"
-              title="Open the raw API health report"
-            >
-              details ↗
-            </a>
-          </div>
-
-          {checks.length ? (
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px]">
-              {checks.map((check) => (
-                <a
-                  key={check.name}
-                  href="/api/health"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 text-muted transition-colors hover:text-ink"
-                  title={`${check.name}: ${check.ok ? "healthy" : "failing"} · ${check.detail} · ${ms(check.ms)}`}
-                  aria-label={`${check.name} ${check.ok ? "healthy" : "failing"}`}
-                >
-                  <span
-                    className={`size-1.5 rounded-full ${check.ok ? "bg-up" : "bg-down"}`}
-                    aria-hidden
-                  />
-                  {SOURCE_LABEL[check.name] ?? check.name}
-                </a>
-              ))}
-              <span className="text-muted/70">
-                {failingChecks ? `${failingChecks} failing` : "all responding"}
-                {health.updatedAt ? ` · ${timeIST(health.updatedAt, true)}` : ""}
-              </span>
-            </div>
-          ) : health.error ? (
-            <a
-              href="/api/health"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1.5 block text-[10px] text-down hover:underline"
-            >
-              Health probe unreachable — open details ↗
-            </a>
-          ) : (
-            <span className="mt-1.5 block text-[10px] text-muted">Probing NSE, MCP, Yahoo and news…</span>
-          )}
-        </div>
-      </div>
-
-      {/* Tier 4 — disclosure, utilities and legal */}
-      <div className="px-4 pt-3">
         <div className="rounded-lg border border-line bg-panel/50 px-3 py-2">
           <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted">
             <span className="size-1.5 rounded-full bg-accent" aria-hidden />
@@ -480,8 +425,500 @@ export function SiteFooter({
             Yahoo Finance and public market-news RSS.
           </p>
         </div>
+      </div>
 
-        <div className="mt-3 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+      {/* Tier 3 — status pills and their detail panels */}
+      <div className="px-4 py-3">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => togglePanel("readiness")}
+              aria-expanded={panel === "readiness"}
+              aria-controls={PANEL_ID.readiness}
+              className={pillClass(panel === "readiness")}
+              title={`${gatesMet}/${gates.length} gates met · ${overallPct}% complete · click for the readiness ledger`}
+            >
+              <span className="flex h-2 items-end gap-0.5" aria-hidden>
+                {gates.map((gate) => (
+                  <span
+                    key={gate.key}
+                    className={`h-full w-1 rounded-sm ${
+                      gate.done ? "bg-up" : gate.fraction > 0 ? "bg-accent" : "bg-track"
+                    }`}
+                  />
+                ))}
+              </span>
+              <span>Readiness</span>
+              <span className={`font-semibold ${gatesMet === gates.length ? "text-up" : "text-ink"}`}>
+                {overallPct}%
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => togglePanel("session")}
+              aria-expanded={panel === "session"}
+              aria-controls={PANEL_ID.session}
+              className={pillClass(panel === "session")}
+              title={`${openPositions} open · ${trades.length} closed graded · saved in this browser`}
+            >
+              <span
+                className={`size-1.5 rounded-full ${
+                  replay
+                    ? "animate-pulse bg-accent"
+                    : openPositions || trades.length
+                      ? "bg-up"
+                      : "bg-track"
+                }`}
+                aria-hidden
+              />
+              <span>Session</span>
+              <span className="font-semibold text-ink">
+                {!desk
+                  ? "…"
+                  : replay
+                    ? "Replay"
+                    : openPositions
+                      ? `${openPositions} open`
+                      : trades.length
+                        ? `${trades.length} closed`
+                        : "idle"}
+              </span>
+              {desk && !replay && openPositions && trades.length ? (
+                <span className="text-muted/70">· {trades.length} closed</span>
+              ) : null}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => togglePanel("sources")}
+              aria-expanded={panel === "sources"}
+              aria-controls={PANEL_ID.sources}
+              className={pillClass(panel === "sources")}
+              title={
+                checks.length
+                  ? `${checks.length - failingChecks}/${checks.length} sources responding · click for diagnostics`
+                  : "Click for source diagnostics"
+              }
+            >
+              {checks.length ? (
+                <span className="flex items-center gap-0.5" aria-hidden>
+                  {checks.map((check) => (
+                    <span
+                      key={check.name}
+                      className={`size-1 rounded-full ${check.ok ? "bg-up" : "bg-down"}`}
+                    />
+                  ))}
+                </span>
+              ) : (
+                <span
+                  className={`size-1.5 rounded-full ${health.error ? "bg-down" : "bg-track"}`}
+                  aria-hidden
+                />
+              )}
+              <span>Sources</span>
+              <span className={`font-semibold ${failingChecks ? "text-down" : "text-ink"}`}>
+                {checks.length
+                  ? `${checks.length - failingChecks}/${checks.length}`
+                  : health.error
+                    ? "offline"
+                    : "…"}
+              </span>
+            </button>
+          </div>
+
+          <p className="max-w-xl text-[10px] leading-relaxed text-muted lg:text-right">{context}</p>
+        </div>
+
+        {panel === "readiness" ? (
+          <section
+            id={PANEL_ID.readiness}
+            role="region"
+            aria-label="Submission readiness detail"
+            className="mt-2.5 rounded-lg border border-line bg-panel/60 p-3"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className={SECTION_LABEL}>Readiness ledger</span>
+              <span className="text-[10px] text-muted">
+                {activityAnswered + caseAnswered}/{activityTotal + caseTotal} answers · {trades.length}{" "}
+                graded trade{trades.length === 1 ? "" : "s"}
+              </span>
+            </div>
+
+            <div className="mt-2 grid gap-3 md:grid-cols-2">
+              <div className="min-w-0">
+                <div className="mb-1 text-[10px] font-semibold text-ink/80">
+                  Part 1 · Classroom activities
+                </div>
+                {LAB_ACTIVITIES.map((activity) => (
+                  <ReadinessGroup
+                    key={activity.id}
+                    title={activity.title}
+                    questions={activity.questions.map((question) => ({
+                      id: question.id,
+                      label: question.label,
+                    }))}
+                    answers={answers[activity.id]}
+                    onOpen={() => {
+                      setPanel(null);
+                      onOpenLabAt(activity.id);
+                    }}
+                  />
+                ))}
+              </div>
+
+              <div className="min-w-0">
+                <div className="mb-1 text-[10px] font-semibold text-ink/80">
+                  Part 2 · Curated case studies
+                </div>
+                {CASE_STUDIES.map((study) => (
+                  <ReadinessGroup
+                    key={study.id}
+                    title={study.title}
+                    questions={study.guidedQuestions.map((question) => ({
+                      id: question.id,
+                      label: question.question,
+                    }))}
+                    answers={answers[study.id]}
+                    onOpen={() => {
+                      setPanel(null);
+                      onOpenLabAt(study.id);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="rounded-md border border-line bg-panel2/40 px-2.5 py-1.5 text-[10px]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted">Part 3 · Graded journal</span>
+                  <span className={`font-mono ${trades.length ? "text-up" : "text-muted"}`}>
+                    {trades.length} live
+                  </span>
+                </div>
+                <div className="mt-0.5 text-muted/80">
+                  {debriefed}/{trades.length} debriefed · L2 unlocks at 3
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPanel(null);
+                    onOpenPaperDesk();
+                  }}
+                  className="mt-1 text-cyan transition-colors hover:underline"
+                >
+                  Open journal →
+                </button>
+              </div>
+
+              <div className="rounded-md border border-line bg-panel2/40 px-2.5 py-1.5 text-[10px]">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-muted">Candidate details</span>
+                  <span className={candidateSet ? "text-up" : "text-muted"}>
+                    {candidateSet ? "set" : "pending"}
+                  </span>
+                </div>
+                <div className="mt-0.5 truncate text-muted/80">
+                  {profile?.studentName?.trim()
+                    ? `${profile.studentName}${profile.rollNumber ? ` · ${profile.rollNumber}` : " · roll pending"}`
+                    : "Name and roll number are added in the report"}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPanel(null);
+                    onOpenReport();
+                  }}
+                  className="mt-1 text-cyan transition-colors hover:underline"
+                >
+                  {candidateSet ? "Edit in report" : "Add in report"} →
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPanel(null);
+                  nextAction();
+                }}
+                className={PRIMARY_BUTTON}
+              >
+                {nextLabel} →
+              </button>
+              {gatesMet !== gates.length ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPanel(null);
+                    onOpenReport();
+                  }}
+                  className={GHOST_BUTTON}
+                >
+                  Preview report
+                </button>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
+        {panel === "session" ? (
+          <section
+            id={PANEL_ID.session}
+            role="region"
+            aria-label="Local session detail"
+            className="mt-2.5 rounded-lg border border-line bg-panel/60 p-3"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className={SECTION_LABEL}>Session ledger</span>
+              <span className="text-[10px] text-muted">
+                {replay ? (
+                  <span className="mr-2 rounded-full border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent">
+                    Replay · {replay.preset.title}
+                  </span>
+                ) : null}
+                Saved in this browser only
+              </span>
+            </div>
+
+            <div className="mt-2 grid gap-3 md:grid-cols-2">
+              <div className="min-w-0">
+                <div className="mb-1 text-[10px] font-semibold text-ink/80">
+                  Open positions · {openPositions}
+                </div>
+                {desk?.positions.length ? (
+                  <ul className="space-y-1">
+                    {desk.positions.map((position) => (
+                      <li key={position.id} className="flex items-center justify-between gap-2 text-[10px]">
+                        <span className="truncate text-ink/80">
+                          {position.symbol}{" "}
+                          <span className="text-muted">
+                            ·{" "}
+                            {position.kind === "OPTIONS"
+                              ? `${position.strategyName} · ${position.legs.length} leg${position.legs.length === 1 ? "" : "s"}`
+                              : `${position.quantity} qty`}
+                          </span>
+                        </span>
+                        <span className="shrink-0 font-mono text-muted">
+                          ₹{integer(position.blockedMargin)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[10px] text-muted">No open positions.</p>
+                )}
+                <div className="mt-1 border-t border-line/40 pt-1 text-[10px] text-muted">
+                  Blocked margin <span className="font-mono text-ink">₹{integer(blockedMargin)}</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-1 text-[10px] font-semibold text-ink/80">Graded journal</div>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
+                  <div>
+                    <div className="text-muted">Closed</div>
+                    <div className="font-mono text-ink">{trades.length}</div>
+                  </div>
+                  <div>
+                    <div className="text-muted">Wins / losses</div>
+                    <div className="font-mono text-ink">
+                      {wins} / {losses}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-muted">Net P&amp;L</div>
+                    <div
+                      className={`font-mono ${
+                        netPnl > 0 ? "text-up" : netPnl < 0 ? "text-down" : "text-ink"
+                      }`}
+                    >
+                      ₹{signed(netPnl, 0)}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-muted">Debriefed</div>
+                    <div className="font-mono text-ink">
+                      {debriefed}/{trades.length}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-2 grid gap-1.5 border-t border-line/40 pt-2 text-[10px] text-muted sm:grid-cols-2">
+              <div title={replayTitle || undefined}>
+                Replay archives:{" "}
+                <span className="text-ink/80">
+                  {ledgers.length
+                    ? `${ledgers.length} · ${replayTrades} trade${replayTrades === 1 ? "" : "s"}`
+                    : "none"}
+                </span>{" "}
+                · excluded from grading
+              </div>
+              <div className="sm:text-right">
+                Storage <span className="font-mono text-ink/80">~{storageText}</span> · last write{" "}
+                <span className="font-mono text-ink/80">
+                  {desk?.updatedAt ? timeIST(desk.updatedAt, true) : "—"}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setPanel(null);
+                  onOpenPaperDesk();
+                }}
+                className={PRIMARY_BUTTON}
+              >
+                Open paper desk →
+              </button>
+
+              {confirmReset ? (
+                <span className="flex flex-wrap items-center gap-2 text-[10px]">
+                  <span className="text-down">
+                    Clear {openPositions} open and {trades.length} graded? Answers stay.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetDesk();
+                      setConfirmReset(false);
+                    }}
+                    className="rounded border border-down/50 bg-down/10 px-2 py-0.5 font-semibold text-down transition-colors hover:bg-down/20"
+                  >
+                    Clear desk
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmReset(false)}
+                    className="rounded border border-line px-2 py-0.5 text-muted transition-colors hover:text-ink"
+                  >
+                    Keep
+                  </button>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmReset(true)}
+                  disabled={nothingToReset}
+                  title={
+                    nothingToReset
+                      ? "Nothing to clear in this browser yet"
+                      : "Clear open positions, the trade journal and replay ledgers from this browser"
+                  }
+                  className="rounded border border-line px-2 py-0.5 text-[10px] text-muted transition-colors hover:border-down/50 hover:text-down disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line disabled:hover:text-muted"
+                >
+                  Reset local desk
+                </button>
+              )}
+            </div>
+          </section>
+        ) : null}
+
+        {panel === "sources" ? (
+          <section
+            id={PANEL_ID.sources}
+            role="region"
+            aria-label="Source health diagnostics"
+            className="mt-2.5 rounded-lg border border-line bg-panel/60 p-3"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className={SECTION_LABEL}>Source diagnostics</span>
+              <div className="flex items-center gap-2 text-[10px]">
+                <button
+                  type="button"
+                  onClick={health.refresh}
+                  className="rounded border border-line px-2 py-0.5 text-muted transition-colors hover:border-cyan/50 hover:text-cyan"
+                >
+                  Re-probe now
+                </button>
+                <a
+                  href="/api/health"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-muted transition-colors hover:text-cyan"
+                >
+                  Raw JSON ↗
+                </a>
+              </div>
+            </div>
+
+            {health.data ? (
+              <>
+                <div className="mt-2 divide-y divide-line/40">
+                  {checks.map((check) => (
+                    <div
+                      key={check.name}
+                      className="flex flex-wrap items-center gap-x-2 gap-y-0.5 py-1.5 text-[10px]"
+                    >
+                      <span
+                        className={`size-1.5 shrink-0 rounded-full ${check.ok ? "bg-up" : "bg-down"}`}
+                        aria-hidden
+                      />
+                      <span className="w-40 shrink-0 text-ink/80">{check.name}</span>
+                      <span className="min-w-0 flex-1 truncate text-muted" title={check.detail}>
+                        {check.detail}
+                      </span>
+                      <span className="shrink-0 font-mono text-muted/70">{ms(check.ms)}</span>
+                      <span
+                        className={`w-6 shrink-0 text-right font-mono ${check.ok ? "text-up" : "text-down"}`}
+                      >
+                        {check.ok ? "ok" : "fail"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-2 grid gap-2 border-t border-line/40 pt-2 text-[10px] sm:grid-cols-2">
+                  <div>
+                    <div className="text-muted">Fallback chains</div>
+                    <div className="mt-0.5 space-y-0.5 text-ink/70">
+                      <div>Indices · {health.data.providers.indices}</div>
+                      <div>Quotes · {health.data.providers.quotes}</div>
+                      <div>Options · {health.data.providers.options}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-muted">MCP</div>
+                    <div className="mt-0.5 text-ink/70">
+                      <span title={mcpServer || undefined}>{mcpLabel}</span> ·{" "}
+                      {health.data.mcp.tools.length} tools ·{" "}
+                      <span className={health.data.mcp.connected ? "text-up" : "text-down"}>
+                        {health.data.mcp.connected ? "connected" : "not connected"}
+                      </span>
+                    </div>
+                    {health.data.mcp.error ? (
+                      <div className="mt-0.5 text-down">{health.data.mcp.error}</div>
+                    ) : null}
+                  </div>
+                </div>
+
+                <div className="mt-1.5 text-[9px] text-muted/70">
+                  Probes cached 30 s · last checked{" "}
+                  {health.updatedAt ? timeIST(health.updatedAt, true) : "—"}
+                </div>
+              </>
+            ) : health.error ? (
+              <p className="mt-2 text-[10px] text-down">
+                Health probe unreachable: {health.error}.{" "}
+                <a href="/api/health" target="_blank" rel="noreferrer" className="underline">
+                  Open raw report ↗
+                </a>
+              </p>
+            ) : (
+              <p className="mt-2 text-[10px] text-muted">Probing NSE, MCP, Yahoo and news…</p>
+            )}
+          </section>
+        ) : null}
+
+        {/* Utility links and legal */}
+        <div className="mt-3 flex flex-col gap-2.5 border-t border-line/60 pt-2.5 sm:flex-row sm:items-center sm:justify-between">
           <nav
             aria-label="Desk utilities"
             className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] text-muted"

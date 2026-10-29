@@ -37,7 +37,7 @@ import type {
   Quote,
   SectorPerf,
 } from "@/lib/types";
-import type { SimulationPreset } from "@/lib/labTypes";
+import { LAB_FOCUS_EVENT, type SimulationPreset } from "@/lib/labTypes";
 import { useNow, usePoll, useStoredList } from "@/lib/usePoll";
 
 export default function Page() {
@@ -69,6 +69,12 @@ export default function Page() {
         ? previous
         : { preset, progressPct },
     );
+  }, []);
+
+  /** Footer readiness rows jump straight to the activity or case they name. */
+  const openLabAt = useCallback((groupId: string) => {
+    window.dispatchEvent(new CustomEvent(LAB_FOCUS_EVENT, { detail: { groupId } }));
+    setLabModeOpen(true);
   }, []);
 
   const now = useNow(30_000);
@@ -448,6 +454,7 @@ export default function Page() {
           replay={simulationActive ? simulationTick : null}
           onOpenShortcuts={() => setShortcutsOpen(true)}
           onOpenLab={() => setLabModeOpen(true)}
+          onOpenLabAt={openLabAt}
           onOpenPaperDesk={() => setPaperTradeOpen(true)}
           onOpenReport={() => setReportModalOpen(true)}
         />

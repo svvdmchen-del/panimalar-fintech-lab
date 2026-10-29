@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { LAB_ACTIVITIES, CASE_STUDIES } from "@/lib/caseStudiesData";
 import { ANSWERS_EVENT } from "@/lib/desk/store";
+import { LAB_FOCUS_EVENT } from "@/lib/labTypes";
 
 export function LabModeDrawer({
   isOpen,
@@ -46,6 +47,25 @@ export function LabModeDrawer({
     // Deferred so the first read happens after mount (never during hydration).
     const first = setTimeout(load, 0);
     return () => clearTimeout(first);
+  }, []);
+
+  // The footer readiness ledger can target one activity or case directly.
+  useEffect(() => {
+    const onFocus = (event: Event) => {
+      const groupId = (event as CustomEvent<{ groupId?: string }>).detail?.groupId;
+      if (!groupId) return;
+      if (LAB_ACTIVITIES.some((activity) => activity.id === groupId)) {
+        setActiveTab("activities");
+        setSelectedActivityId(groupId);
+        return;
+      }
+      if (CASE_STUDIES.some((study) => study.id === groupId)) {
+        setActiveTab("cases");
+        setSelectedCaseId(groupId);
+      }
+    };
+    window.addEventListener(LAB_FOCUS_EVENT, onFocus);
+    return () => window.removeEventListener(LAB_FOCUS_EVENT, onFocus);
   }, []);
 
   // Save answers to localStorage
