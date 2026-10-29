@@ -92,9 +92,24 @@ export async function fetchAllIndices(): Promise<IndexQuote[]> {
 
 export function pickIndices(all: IndexQuote[], symbols: readonly string[]): IndexQuote[] {
   const byName = new Map(all.map((entry) => [entry.symbol, entry]));
+  const ALIASES: Record<string, string[]> = {
+    "NIFTY FIN SERVICE": ["NIFTY FINANCIAL SERVICES", "FINNIFTY", "NIFTY FIN SERVICE"],
+    "NIFTY FINANCIAL SERVICES": ["NIFTY FIN SERVICE", "FINNIFTY"],
+    "NIFTY SMALLCAP 100": ["NIFTY SMALLCAP 100", "NIFTY SMLCAP 100"],
+    "NIFTY 200": ["NIFTY 200", "CNX 200", "NIFTY200"],
+  };
+
   const picked: IndexQuote[] = [];
   for (const symbol of symbols) {
-    const found = byName.get(symbol);
+    let found = byName.get(symbol);
+    if (!found && ALIASES[symbol]) {
+      for (const alt of ALIASES[symbol]) {
+        if (byName.has(alt)) {
+          found = { ...byName.get(alt)!, symbol };
+          break;
+        }
+      }
+    }
     if (found) picked.push(found);
   }
   if (!picked.length) throw new Error(`NSE did not return any of: ${symbols.join(", ")}`);

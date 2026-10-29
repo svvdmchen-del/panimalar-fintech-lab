@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Panimalar MBA Fintech Lab Terminal — Prospectus 2026–27</title>
+<meta name="author" content="Department of Management Studies, Panimalar Engineering College">
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    color: #0A1526; font-size: 8.6pt; line-height: 1.5; background: #fff;
+    -webkit-font-smoothing: antialiased;
+  }
+  :root {
+    --ink:#0A1526; --ink2:#26364E; --muted:#65758C; --line:#DCE6F1; --line2:#EDF2F8;
+    --wash:#F5F8FC; --teal:#0B7285; --cyan:#0891B2; --up:#0E9F6E; --down:#D64550; --amber:#B45309;
+  }
+  .page {
+    width: 210mm; height: 296.8mm; position: relative; overflow: hidden;
+    padding: 10mm 14mm 8mm; page-break-after: always; background: #fff;
+    display: flex; flex-direction: column;
+  }
+  .page:last-child { page-break-after: auto; }
+  p { color: #2A3A52; }
+  b, strong { font-weight: 700; color: var(--ink); }
+  em { font-style: normal; }
+  .mono { font-family: Consolas, "Cascadia Mono", monospace; }
+  .mut { color: var(--muted); }
+  .up { color: var(--up); } .down { color: var(--down); }
+  .tiny { font-size: 6.9pt; line-height: 1.45; }
+  .mini { font-size: 7.4pt; line-height: 1.45; }
+
+  /* ---------- running head ---------- */
+  .ph {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: .5pt solid var(--line); padding-bottom: 2.2mm; margin-bottom: 5.5mm;
+    font-size: 6.8pt; letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
+    flex: none;
+  }
+  .ph b { color: var(--ink); font-family: Consolas, monospace; letter-spacing: 0; font-size: 7.4pt; }
+  .ph .dot { color: var(--teal); }
+
+  /* ---------- section head ---------- */
+  .sechead { display: flex; gap: 4.5mm; align-items: flex-start; margin-bottom: 4.5mm; flex: none; }
+  .sno {
+    flex: none; width: 10.5mm; height: 10.5mm; border-radius: 50%; background: var(--ink); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-family: Consolas, monospace;
+    font-size: 8pt; margin-top: .8mm;
+  }
+  .kicker { font-size: 6.9pt; letter-spacing: .19em; text-transform: uppercase; color: var(--teal); font-weight: 700; margin-bottom: 1.4mm; }
+  h2 { font-size: 19.5pt; line-height: 1.07; letter-spacing: -.028em; font-weight: 700; color: var(--ink); }
+  h3 { font-size: 9.6pt; line-height: 1.25; letter-spacing: -.01em; color: var(--ink); }
+  h4 { font-size: 7.2pt; letter-spacing: .13em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .lead { font-size: 9.1pt; line-height: 1.58; color: #2A3A52; }
+  .lede-big { font-size: 12.5pt; line-height: 1.4; color: #16243A; letter-spacing: -.01em; }
+
+  /* ---------- generic blocks ---------- */
+  .row { display: flex; gap: 4mm; }
+  .col { flex: 1; min-width: 0; }
+  .card { border: .5pt solid var(--line); border-radius: 2.2mm; background: #fff; padding: 3.4mm 3.6mm; }
+  .card.wash { background: var(--wash); }
+  .card.ink { background: var(--ink); border-color: var(--ink); color: #E8F0F9; }
+  .card.ink h3, .card.ink b { color: #fff; }
+  .card.ink p { color: #B9C7D8; }
+  .rule { height: .5pt; background: var(--line); }
+  .tag {
+    display: inline-block; font-size: 6.4pt; font-weight: 600; letter-spacing: .04em;
+    padding: .5mm 1.6mm; border-radius: 1mm; background: #EAF4F7; color: var(--teal); border: .4pt solid #CFE6EC;
+  }
+  .tag.grey { background: #F2F5F9; color: #56677E; border-color: #E1E9F2; }
+  .tag.green { background: #E8F7F1; color: #0B7A55; border-color: #CBEBDE; }
+  .tag.red { background: #FCEDEF; color: #B02E3B; border-color: #F5D3D7; }
+  .tag.amber { background: #FDF4E7; color: #9A5B06; border-color: #F2DFC2; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 1.2mm; font-size: 5.9pt; font-weight: 700;
+    letter-spacing: .1em; padding: .45mm 1.5mm; border-radius: .8mm; border: .4pt solid;
+  }
+  .badge i { width: 1.5mm; height: 1.5mm; border-radius: 50%; background: currentColor; display: block; }
+  .b-live { color: #0B7A55; background: #E8F7F1; border-color: #C4E8D8; }
+  .b-delay { color: #9A5B06; background: #FDF4E7; border-color: #F0DBB7; }
+  .b-demo { color: #B02E3B; background: #FCEDEF; border-color: #F4CFD4; }
+
+  .ico { width: 4.6mm; height: 4.6mm; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .spark { width: 100%; height: 100%; display: block; }
+  .chart-svg { width: 100%; height: 100%; display: block; }
+
+  /* ---------- cover ---------- */
+  .cover {
+    padding: 0; background:
+      radial-gradient(120mm 95mm at 88% 8%, rgba(8,145,178,.30), transparent 72%),
+      radial-gradient(95mm 85mm at 4% 96%, rgba(14,159,110,.20), transparent 70%),
+      #070F1D;
+    color: #fff;
+  }
+  .cover:before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size: 9mm 9mm;
+    mask-image: radial-gradient(120mm 120mm at 50% 40%, #000 20%, transparent 78%);
+  }
+  .cover-inner { position: relative; z-index: 2; height: 100%; padding: 13mm 15mm 11mm; display: flex; flex-direction: column; }
+  .c-top { display: flex; justify-content: space-between; align-items: flex-start; flex: none; }
+  .brand { display: flex; align-items: center; gap: 3.4mm; }
+  .brand img { width: 13mm; height: 13mm; border-radius: 50%; background: #fff; padding: .8mm; }
+  .brand strong { display: block; font-size: 7.4pt; letter-spacing: .16em; color: #fff; font-weight: 600; }
+  .brand span { display: block; font-size: 6.6pt; color: #8FA5BE; letter-spacing: .04em; margin-top: .6mm; }
+  .c-edition { text-align: right; font-size: 6.4pt; letter-spacing: .2em; color: #7E94AD; line-height: 1.7; }
+  .c-edition b { color: #fff; font-size: 8.4pt; letter-spacing: .12em; }
+  .c-hero { margin-top: 16mm; flex: none; }
+  .c-kicker { font-size: 6.8pt; letter-spacing: .26em; color: #5FD3E8; font-weight: 600; }
+  .c-hero h1 {
+    font-size: 43pt; line-height: .96; letter-spacing: -.045em; font-weight: 700; margin: 4.5mm 0 0;
+  }
+  .c-hero h1 span { color: #5FD3E8; }
+  .c-hero p { margin-top: 5mm; width: 132mm; font-size: 9.6pt; line-height: 1.6; color: #B6C6D8; }
+  .c-hero p b { color: #fff; font-weight: 600; }
+  .c-rule { width: 26mm; height: .7mm; background: linear-gradient(90deg,#5FD3E8,transparent); margin-top: 5mm; }
+
+  /* terminal mock */
+  .term-wrap { margin-top: 8mm; flex: none; position: relative; }
+  .term {
+    width: 100%; border-radius: 2.4mm; border: .5pt solid rgba(120,200,220,.28);
+    background: #0B1727; box-shadow: 0 0 0 3mm rgba(95,211,232,.035), 0 6mm 18mm rgba(0,0,0,.35);
+    overflow: hidden;
+  }
+  .term-top { display: flex; align-items: center; gap: 3mm; padding: 2mm 3mm; background: #0E1D30; border-bottom: .4pt solid rgba(255,255,255,.07); }
+  .dots { display: flex; gap: 1.1mm; }
+  .dots i { width: 1.7mm; height: 1.7mm; border-radius: 50%; background: #2C4258; display: block; }
+  .dots i:first-child { background: #C4575F; }
+  .dots i:nth-child(2) { background: #C79A4C; }
+  .dots i:nth-child(3) { background: #4FA37E; }
+  .term-url { font-size: 6.2pt; color: #7E96AE; font-family: Consolas, monospace; letter-spacing: .02em; }
+  .term-live { margin-left: auto; font-size: 6pt; font-weight: 700; letter-spacing: .12em; color: #59D3A7; display: flex; align-items: center; gap: 1.2mm; }
+  .term-live em { width: 1.5mm; height: 1.5mm; border-radius: 50%; background: #59D3A7; box-shadow: 0 0 2mm #59D3A7; }
+  .tape { display: flex; gap: 5mm; padding: 1.6mm 3mm; background: #081320; border-bottom: .4pt solid rgba(255,255,255,.06); overflow: hidden; white-space: nowrap; }
+  .tape span { font-family: Consolas, monospace; font-size: 6.1pt; color: #93A9C0; }
+  .tape b { color: #E6EFF8; font-weight: 600; }
+  .tape i { font-style: normal; }
+  .term-body { padding: 2.6mm 3mm 2mm; }
+  .term-cards { display: flex; gap: 2.2mm; }
+  .tcard { flex: 1; border: .4pt solid rgba(255,255,255,.08); border-radius: 1.4mm; background: #0D1B2C; padding: 2mm 2.2mm 0; overflow: hidden; }
+  .tcard .lbl { font-size: 5.6pt; letter-spacing: .12em; color: #7E96AE; }
+  .tcard .val { font-family: Consolas, monospace; font-size: 9.2pt; color: #F2F7FC; margin-top: .4mm; }
+  .tcard .chg { font-family: Consolas, monospace; font-size: 5.8pt; margin-left: 1.4mm; }
+  .tcard .s { height: 9mm; margin: 1mm -2.2mm 0; }
+  .tcard .s svg { width: 100%; height: 100%; }
+  .term-grid { display: flex; gap: 2.2mm; margin-top: 2.2mm; }
+  .tchart { flex: 1.55; border: .4pt solid rgba(255,255,255,.08); border-radius: 1.4mm; background: #0D1B2C; padding: 2mm 2.2mm 1mm; }
+  .tchart-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .8mm; }
+  .tchart-h b { font-size: 6.2pt; color: #E6EFF8; letter-spacing: .06em; }
+  .tchart-h span { font-family: Consolas, monospace; font-size: 5.8pt; color: #59D3A7; }
+  .tchart .c { height: 36mm; }
+  .tchart .c svg { width: 100%; height: 100%; }
+  .tside { flex: 1; display: flex; flex-direction: column; gap: 1.6mm; }
+  .tside-h { font-size: 5.4pt; letter-spacing: .14em; color: #7E96AE; }
+  .miniheat { display: grid; grid-template-columns: repeat(4, 1fr); gap: .8mm; }
+  .miniheat i { height: 5.2mm; border-radius: .5mm; display: flex; align-items: center; justify-content: center; font-size: 4.4pt; font-style: normal; color: rgba(255,255,255,.9); font-family: Consolas, monospace; }
+  .trows { display: flex; flex-direction: column; gap: .7mm; }
+  .trow { display: flex; justify-content: space-between; font-family: Consolas, monospace; font-size: 5.2pt; color: #9FB4C9; border-bottom: .3pt solid rgba(255,255,255,.05); padding-bottom: .5mm; }
+  .trow b { color: #DCE8F4; font-weight: 500; }
+  .term-foot { display: flex; align-items: center; gap: 4mm; padding: 1.4mm 3mm; background: #081320; border-top: .4pt solid rgba(255,255,255,.06); font-size: 5.6pt; color: #7E96AE; letter-spacing: .06em; }
+  .term-foot .demo-chip { margin-left: auto; color: #E8B25C; border: .4pt solid rgba(232,178,92,.35); padding: .3mm 1.4mm; border-radius: .8mm; }
+
+  .c-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 6mm; padding-top: 5mm; }
+  .c-badges { display: flex; gap: 2mm; }
+  .c-badges .badge { background: rgba(255,255,255,.04); border-color: rgba(255,255,255,.14); color: #B9CADB; }
+  .c-badges .badge i { background: #5FD3E8; }
+  .c-contents { text-align: right; font-size: 6.2pt; letter-spacing: .18em; color: #7E94AD; line-height: 1.9; }
+  .c-contents b { color: #D9E5F1; font-weight: 500; }
+  .c-steps { display: flex; gap: 0; border-top: .5pt solid rgba(255,255,255,.13); padding-top: 4mm; margin-top: 8mm; }
+  .c-step { flex: 1; padding-right: 6mm; }
+  .c-step b { display: block; font-family: Consolas, monospace; font-size: 7pt; color: #5FD3E8; }
+  .c-step span { display: block; font-size: 8pt; color: #E4EEF8; font-weight: 600; margin-top: .8mm; }
+  .c-step p { font-size: 6.5pt; color: #7E94AD; margin-top: .5mm; line-height: 1.45; }
+  .tape { mask-image: linear-gradient(90deg, #000 93%, transparent); }
+  .c-stats { display: flex; margin-top: 5mm; border-top: .5pt solid rgba(255,255,255,.1); padding-top: 3.5mm; }
+  .c-stat { flex: 1; text-align: left; border-right: .4pt solid rgba(255,255,255,.1); padding-left: 0; }
+  .c-stat:last-child { border-right: 0; }
+  .c-stat b { display: block; font-family: Consolas, monospace; font-size: 13pt; color: #E8F2FA; line-height: 1; }
+  .c-stat span { display: block; font-size: 5.6pt; letter-spacing: .13em; text-transform: uppercase; color: #7E94AD; margin-top: 1.2mm; }
+
+  /* ---------- page 2 exec summary ---------- */
+  .exec-top { display: flex; gap: 8mm; }
+  .exec-top .l { flex: 1.25; }
+  .exec-top .r { flex: .75; border-left: .5pt solid var(--line); padding-left: 6mm; }
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.4mm; }
+  .feat { border: .5pt solid var(--line); border-radius: 2mm; padding: 2.8mm 3mm; background: #fff; }
+  .feat .fh { display: flex; align-items: center; gap: 2mm; margin-bottom: 1.2mm; }
+  .feat .fh .ico { width: 4mm; height: 4mm; color: var(--teal); flex: none; }
+  .feat .fh b { font-size: 7.8pt; letter-spacing: -.005em; }
+  .feat p { font-size: 6.6pt; line-height: 1.42; color: var(--muted); }
+  .stats { display: flex; background: var(--ink); border-radius: 2.2mm; padding: 4mm 4mm; color: #fff; }
+  .stat { flex: 1; text-align: center; border-right: .4pt solid rgba(255,255,255,.12); }
+  .stat:last-child { border-right: 0; }
+  .stat b { display: block; font-family: Consolas, monospace; font-size: 15pt; line-height: 1; color: #fff; }
+  .stat span { display: block; font-size: 5.9pt; letter-spacing: .12em; text-transform: uppercase; color: #93A9C0; margin-top: 1.4mm; }
+  .personas { display: flex; gap: 2mm; }
+  .persona { flex: 1; border-left: 1.6pt solid var(--teal); padding: 1mm 0 1mm 2.6mm; }
+  .persona b { display: block; font-size: 7.4pt; }
+  .persona span { font-size: 6.4pt; color: var(--muted); }
+  .readmap { display: flex; gap: 0; border: .5pt solid var(--line); border-radius: 2mm; overflow: hidden; }
+  .readmap div { flex: 1; padding: 2.4mm 3mm; border-right: .5pt solid var(--line); }
+  .readmap div:last-child { border-right: 0; }
+  .readmap b { display: block; font-family: Consolas, monospace; font-size: 7pt; color: var(--teal); }
+  .readmap span { font-size: 6.6pt; color: var(--muted); }
+  .compare { width: 100%; border-collapse: collapse; margin-top: 3.6mm; }
+  .compare th { font-size: 6pt; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; text-align: left; padding: 1.3mm 2mm; border-bottom: .7pt solid var(--line); }
+  .compare th.hl { color: var(--teal); }
+  .compare td { font-size: 6.8pt; padding: 1.5mm 2mm; border-bottom: .4pt solid var(--line2); color: #33455C; vertical-align: top; }
+  .compare td:first-child { font-size: 6.2pt; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); width: 27mm; }
+  .compare td.hl { background: #F2FAFC; color: var(--ink); font-weight: 600; }
+  .cap-table { margin-top: 1.2mm; }
+  .cap-table th { padding: 1mm 2mm; font-size: 5.8pt; }
+  .cap-table td { padding: .95mm 2mm; font-size: 6.4pt; }
+  .cap-table td.mono { font-size: 6.2pt; }
+
+  /* ---------- page 3 architecture ---------- */
+  .json {
+    background: #0B1727; border-radius: 2mm; padding: 3mm 3.4mm; color: #C9D8E8;
+    font-family: Consolas, monospace; font-size: 6.6pt; line-height: 1.7;
+  }
+  .json .k { color: #7BD3E8; } .json .s { color: #8BD9A8; } .json .n { color: #E8B25C; }
+  .json .c { color: #5C748C; }
+  .badge-legend { display: flex; flex-direction: column; gap: 1.6mm; }
+  .bl-row { display: flex; gap: 2.2mm; align-items: flex-start; }
+  .bl-row .badge { flex: none; margin-top: .2mm; }
+  .bl-row p { font-size: 6.5pt; line-height: 1.4; }
+  .principle { flex: 1; padding: 3mm 3.2mm; border-top: 1.8pt solid var(--ink); background: var(--wash); }
+  .principle b { display: block; font-size: 8pt; margin-bottom: 1mm; }
+  .principle p { font-size: 6.7pt; line-height: 1.45; color: var(--muted); }
+  .citerule { margin-top: 3mm; border-left: 2pt solid var(--teal); background: #F4FAFC; padding: 2mm 3mm; font-size: 6.6pt; line-height: 1.45; color: #33455C; }
+  .citerule b { color: var(--ink); }
+  .pr { flex: 1; border: .5pt solid var(--line); border-radius: 2mm; padding: 2.4mm 3mm; background: #fff; }
+  .pr b { display: block; font-size: 6.9pt; margin-bottom: .5mm; }
+  .pr p { font-size: 6.2pt; line-height: 1.4; color: var(--muted); }
+  .lifecycle { display: flex; align-items: center; gap: 1.6mm; margin-top: 3.2mm; font-size: 6.2pt; color: var(--muted); flex-wrap: wrap; }
+  .lifecycle b { padding: .7mm 2mm; border: .4pt solid var(--line); border-radius: 1mm; background: #fff; font-weight: 600; color: var(--ink); font-size: 6.2pt; }
+  .lifecycle i { font-style: normal; color: var(--teal); }
+
+  /* ---------- page 4 market pulse ---------- */
+  .ticker-demo { display: flex; align-items: center; gap: 4mm; background: #0B1727; color: #C9D8E8; border-radius: 1.6mm; padding: 1.8mm 3mm; font-family: Consolas, monospace; font-size: 5.9pt; overflow: hidden; white-space: nowrap; }
+  .ticker-demo .tk-time { margin-left: auto; color: #8FA6BE; font-size: 5.8pt; letter-spacing: .04em; }
+  .ticker-demo b { color: #fff; }
+  .idx-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2mm; }
+  .idx { border: .5pt solid var(--line); border-radius: 1.8mm; padding: 2.4mm 2.6mm 0; overflow: hidden; background: #fff; }
+  .idx .ih { display: flex; justify-content: space-between; align-items: baseline; }
+  .idx .ih b { font-size: 6.6pt; letter-spacing: .04em; }
+  .idx .ih span { font-size: 5.6pt; color: var(--muted); }
+  .idx .iv { font-family: Consolas, monospace; font-size: 10.4pt; margin-top: .6mm; }
+  .idx .ic { font-family: Consolas, monospace; font-size: 6.2pt; }
+  .idx .ispark { height: 11.4mm; margin: 1mm -2.6mm 0; }
+  .idx .irange { display: flex; justify-content: space-between; font-size: 5.4pt; color: var(--muted); padding: .8mm 0 1.2mm; border-top: .4pt solid var(--line2); margin-top: .6mm; font-family: Consolas, monospace; }
+  .breadth { border: .5pt solid var(--line); border-radius: 1.8mm; padding: 2.6mm 3mm; }
+  .bbar { display: flex; height: 3.4mm; border-radius: .8mm; overflow: hidden; margin: 1.6mm 0 1.2mm; }
+  .bbar i { display: block; }
+  .blast { display: flex; justify-content: space-between; font-size: 5.8pt; color: var(--muted); font-family: Consolas, monospace; }
+  .anat { margin-top: 1.6mm; display: flex; flex-direction: column; gap: 1.8mm; }
+  .anat div { display: flex; align-items: baseline; gap: 1.8mm; }
+  .anat i { flex: none; width: 3.6mm; height: 3.6mm; border-radius: 50%; background: #E8F1F7; color: var(--teal); font-style: normal; font-size: 5.6pt; font-weight: 700; text-align: center; line-height: 3.6mm; }
+  .anat b { flex: none; width: 17mm; font-size: 6.4pt; }
+  .anat span { font-size: 6.2pt; line-height: 1.38; color: var(--muted); }
+  .annos { display: flex; flex-direction: column; gap: 2.1mm; }
+  .anno { display: flex; gap: 2.2mm; }
+  .anno .n { flex: none; width: 4.4mm; height: 4.4mm; border-radius: 50%; background: var(--teal); color: #fff; font-size: 6pt; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: Consolas, monospace; }
+  .anno b { display: block; font-size: 7.3pt; margin-bottom: .3mm; }
+  .anno p { font-size: 6.4pt; line-height: 1.38; color: var(--muted); }
+  .movers-mini { border: .5pt solid var(--line); border-radius: 1.8mm; overflow: hidden; }
+  .mm-row { display: flex; justify-content: space-between; padding: 1.15mm 2.6mm; border-bottom: .4pt solid var(--line2); font-size: 6.3pt; }
+  .mm-row:last-child { border-bottom: 0; }
+  .mm-row b { font-family: Consolas, monospace; font-weight: 500; font-size: 6.2pt; }
+  .dayline { display: flex; align-items: flex-start; gap: 0; position: relative; margin-top: 2mm; }
+  .dayline:before { content: ""; position: absolute; left: 2mm; right: 2mm; top: 2.1mm; height: .6pt; background: var(--line); }
+  .dstep { flex: 1; position: relative; padding-top: 5mm; }
+  .dstep:before { content: ""; position: absolute; top: 1.3mm; left: 0; width: 2mm; height: 2mm; border-radius: 50%; background: #fff; border: .8pt solid var(--teal); }
+  .dstep b { display: block; font-family: Consolas, monospace; font-size: 6.6pt; }
+  .dstep span { font-size: 5.9pt; color: var(--muted); }
+
+  /* ---------- generic table ---------- */
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl th {
+    font-size: 6.1pt; letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+    text-align: right; padding: 1.3mm 2mm; border-bottom: .7pt solid var(--line); font-weight: 700;
+  }
+  .tbl th.l { text-align: left; }
+  .tbl td { padding: 1.55mm 2mm; border-bottom: .4pt solid var(--line2); font-size: 7.3pt; text-align: right; }
+  .tbl td.l { text-align: left; }
+  .tbl tr.sel td { background: #F0F9FA; }
+  .tbl tr.sel td:first-child { box-shadow: inset 1.6pt 0 0 var(--teal); }
+  .tbl tfoot td { border-bottom: 0; background: #F7FAFD; font-size: 6.6pt; color: var(--muted); }
+  .rangebar { height: 1.4mm; border-radius: 1mm; background: #E8EEF6; position: relative; width: 20mm; display: inline-block; vertical-align: middle; }
+  .rangebar i { position: absolute; top: -.5mm; width: 1.3mm; height: 2.4mm; border-radius: .4mm; background: var(--teal); }
+
+  /* ---------- page 5 research ---------- */
+  .chart-panel { border: .5pt solid var(--line); border-radius: 2.4mm; padding: 3mm 3.4mm 2.4mm; background: #fff; }
+  .chart-head { display: flex; align-items: baseline; gap: 3mm; }
+  .chart-head .sym { font-size: 10.5pt; font-weight: 700; letter-spacing: -.01em; }
+  .chart-head .px { font-family: Consolas, monospace; font-size: 10.5pt; }
+  .chart-head .ch { font-family: Consolas, monospace; font-size: 7pt; }
+  .ranges { margin-left: auto; display: flex; gap: .8mm; }
+  .ranges span { font-family: Consolas, monospace; font-size: 5.8pt; padding: .5mm 1.3mm; border-radius: .7mm; color: var(--muted); border: .4pt solid var(--line); }
+  .ranges span.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chart-body { height: 70mm; margin-top: 1.6mm; }
+  .chart-foot { display: flex; justify-content: space-between; font-size: 5.8pt; color: var(--muted); border-top: .4pt solid var(--line2); padding-top: 1.2mm; margin-top: 1.2mm; }
+  .reading { display: flex; flex-direction: column; gap: 2.4mm; }
+  .reading .r { border-left: 1.4pt solid var(--line); padding-left: 2.6mm; }
+  .reading .r b { display: block; font-size: 7.5pt; margin-bottom: .4mm; }
+  .reading .r p { font-size: 6.7pt; line-height: 1.4; color: var(--muted); }
+  .ratio { display: flex; justify-content: space-between; align-items: baseline; padding: 1.2mm 0; border-bottom: .4pt solid var(--line2); }
+  .ratio:last-child { border-bottom: 0; }
+  .ratio span { font-size: 7.4pt; }
+  .ratio b { font-family: Consolas, monospace; font-size: 8.4pt; }
+  .ratio em { font-style: normal; font-size: 6pt; color: var(--muted); margin-left: 1.2mm; }
+  .chips { display: flex; flex-wrap: wrap; gap: 1.2mm; }
+  .filter-chip {
+    font-size: 6.2pt; padding: .9mm 1.8mm; border-radius: 2mm; border: .4pt solid #CFE6EC;
+    background: #F2FAFC; color: #145A68; font-family: Consolas, monospace;
+  }
+  .flowline { display: flex; align-items: center; gap: 1.6mm; flex-wrap: wrap; }
+  .flowline span { font-size: 6.4pt; }
+  .flowline i { font-style: normal; color: var(--teal); font-size: 7pt; }
+
+  /* ---------- page 6 derivatives ---------- */
+  .chainband { display: flex; gap: 0; border: .5pt solid var(--line); border-radius: 2mm; background: #F6FAFD; padding: 2.8mm 3mm; margin-top: 3.4mm; }
+  .chstep { flex: 1; display: flex; gap: 2mm; padding-right: 3.4mm; border-right: .4pt solid var(--line); }
+  .chstep:last-child { border-right: 0; padding-right: 0; }
+  .chstep .cn { flex: none; width: 4.2mm; height: 4.2mm; border-radius: 50%; background: var(--teal); color: #fff; font-family: Consolas, monospace; font-size: 5.8pt; display: flex; align-items: center; justify-content: center; }
+  .chstep b { display: block; font-size: 6.9pt; }
+  .chstep p { font-size: 6pt; line-height: 1.35; color: var(--muted); margin-top: .3mm; }
+  .opt-card { border: .5pt solid var(--line); border-radius: 2.2mm; overflow: hidden; }
+  .opt-head { display: flex; justify-content: space-between; align-items: baseline; padding: 2.6mm 3mm; background: #F7FAFD; border-bottom: .5pt solid var(--line); }
+  .opt-head .t { font-size: 9.6pt; font-weight: 700; }
+  .opt-table { width: 100%; border-collapse: collapse; }
+  .opt-table th { font-size: 5.7pt; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 1mm 1.4mm; background: #FBFDFE; border-bottom: .4pt solid var(--line); }
+  .opt-table th.c { color: #0B7A55; }
+  .opt-table th.p { color: #B02E3B; }
+  .opt-table th.mid { background: #EEF3F9; color: var(--ink); text-align: center; }
+  .opt-table td { font-family: Consolas, monospace; font-size: 6.5pt; text-align: right; padding: 1.4mm 1.4mm; border-bottom: .35pt solid #F0F4F9; }
+  .opt-table td.mid { font-family: "Segoe UI", sans-serif; font-weight: 700; font-size: 6.8pt; text-align: center; background: #F4F8FC; color: var(--ink); }
+  .opt-table tr.atm td { background: #FFF8E8; }
+  .opt-table tr.atm td.mid { background: #F6E7C4; }
+  .heat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1mm; }
+  .heat { border-radius: 1mm; padding: 2.9mm 1.4mm; color: #fff; }
+  .heat b { display: block; font-size: 6.5pt; font-weight: 700; letter-spacing: .02em; }
+  .heat span { font-family: Consolas, monospace; font-size: 6.4pt; opacity: .95; }
+  .newsitem { padding: 1.5mm 0; border-bottom: .4pt solid var(--line2); }
+  .newsitem:last-child { border-bottom: 0; }
+  .newsitem b { display: block; font-size: 6.9pt; line-height: 1.35; font-weight: 600; }
+  .newsitem span { font-size: 5.6pt; color: var(--muted); font-family: Consolas, monospace; }
+  .flow-sum { display: flex; gap: 1.4mm; margin-top: 2mm; border-top: .4pt solid var(--line2); padding-top: 1.6mm; }
+  .flow-sum div { flex: 1; }
+  .flow-sum span { display: block; font-size: 5.4pt; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .flow-sum b { font-family: Consolas, monospace; font-size: 8pt; }
+
+  /* ---------- page 7 use cases ---------- */
+  .uc {
+    display: grid; grid-template-columns: 33mm 1fr 51mm; gap: 4mm;
+    border: .5pt solid var(--line); border-radius: 2.4mm; padding: 3.6mm 4mm;
+    background: linear-gradient(180deg,#fff,#FCFDFF);
+  }
+  .uc-n { font-family: Consolas, monospace; font-size: 6.8pt; letter-spacing: .16em; color: var(--teal); }
+  .uc h3 { font-size: 11.5pt; margin: 1mm 0 1.4mm; letter-spacing: -.015em; }
+  .uc-l .course { font-size: 6.4pt; color: var(--muted); line-height: 1.4; }
+  .uc-scene { font-size: 7.4pt; line-height: 1.5; }
+  .uc-m { display: flex; flex-direction: column; }
+  .uc-note { margin-top: 2mm; font-size: 6.2pt; line-height: 1.42; color: var(--muted); }
+  .uc-note b { color: var(--ink); }
+  .uc .pullrow { margin-top: auto; padding-top: 2.2mm; }
+  .uc-scene b { color: var(--ink); }
+  .uc-steps { display: flex; gap: 1.2mm; margin: 2mm 0 1.8mm; flex-wrap: wrap; }
+  .uc-step { display: flex; align-items: center; gap: 1.2mm; border: .4pt solid var(--line); border-radius: 1mm; padding: .8mm 1.6mm; font-size: 6.1pt; color: #33455C; background: #fff; }
+  .uc-step i { font-style: normal; font-family: Consolas, monospace; color: var(--teal); font-weight: 700; }
+  .uc-learn { font-size: 6.2pt; color: var(--muted); }
+  .uc-learn b { color: var(--ink); }
+  .uc-r { border-left: .5pt solid var(--line); padding-left: 3.4mm; display: flex; flex-direction: column; }
+  .uc-r .g { height: 30mm; display: flex; align-items: center; justify-content: center; }
+  .uc-r .g svg { max-height: 100%; max-width: 100%; }
+  .paystats { display: flex; gap: 1mm; margin-top: 1.4mm; }
+  .paystats div { flex: 1; border-top: .4pt solid var(--line); padding-top: 1mm; }
+  .paystats span { display: block; font-size: 5.2pt; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .paystats b { font-family: Consolas, monospace; font-size: 7.2pt; }
+  .uc-del { font-size: 6pt; color: var(--muted); border-top: .4pt solid var(--line2); padding-top: 1.2mm; margin-top: auto; }
+  .uc-del b { display: block; font-size: 6.6pt; color: var(--ink); margin-bottom: .3mm; }
+  .pullrow { display: flex; align-items: center; gap: 1.2mm; flex-wrap: wrap; margin-top: 2.2mm; }
+  .pullrow .lbl { font-size: 5.6pt; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-right: .6mm; }
+  .pullrow span:not(.lbl) { font-size: 5.9pt; font-family: Consolas, monospace; color: #145A68; background: #F2FAFC; border: .4pt solid #D8ECF1; border-radius: .8mm; padding: .4mm 1.3mm; }
+  .pullquote { margin-top: 4mm; border-left: 2.4pt solid var(--teal); padding: 1mm 0 1mm 4mm; font-size: 12pt; line-height: 1.3; color: #16243A; letter-spacing: -.01em; }
+  .pullquote span { display: block; font-size: 6.4pt; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 1.4mm; }
+  .peerbar { width: 100%; display: flex; flex-direction: column; gap: 1.4mm; }
+  .pb-row { display: flex; align-items: center; gap: 1.6mm; }
+  .pb-row span { font-size: 5.8pt; width: 9mm; color: var(--muted); font-family: Consolas, monospace; }
+  .pb-row .track { flex: 1; height: 2.2mm; background: #EEF3F9; border-radius: 1mm; }
+  .pb-row .track i { display: block; height: 100%; border-radius: 1mm; background: var(--teal); }
+  .pb-row b { font-family: Consolas, monospace; font-size: 5.8pt; width: 7mm; text-align: right; }
+  .pb-cap { font-size: 5.4pt; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: 1mm; }
+
+  /* ---------- page 8 quick cases ---------- */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+  .qcase { border: .5pt solid var(--line); border-radius: 2.4mm; padding: 3.2mm 3.6mm; display: flex; flex-direction: column; background: #fff; }
+  .qcase .qh { display: flex; justify-content: space-between; align-items: flex-start; gap: 2mm; margin-bottom: 1mm; }
+  .qcase h3 { font-size: 9.9pt; }
+  .qcase p { font-size: 7.15pt; line-height: 1.45; }
+  .qcase ol { margin: 1.4mm 0 0 3.4mm; }
+  .qcase ol li { font-size: 6.85pt; line-height: 1.4; color: #33455C; margin-bottom: .6mm; }
+  .qcase .chips { margin-top: auto; padding-top: 1.8mm; }
+  .qcase .chips .tag { font-size: 6.1pt; }
+  .qcase .qg { margin: 1.4mm 0; height: 25mm; }
+  .qcase .qg svg { width: 100%; height: 100%; }
+  .mc-meta { font-family: Consolas, monospace; font-size: 5.7pt; letter-spacing: .05em; text-transform: uppercase; color: #7C8FA6; margin-bottom: 1.5mm; }
+  .watch { font-size: 6.35pt; line-height: 1.4; color: var(--muted); margin-top: 1.6mm; border-left: 1.4pt solid #E3EBF4; padding-left: 2.2mm; }
+  .watch b { color: var(--ink); }
+  .srcmix { margin-top: 2.2mm; }
+  .sm-h { display: flex; justify-content: space-between; font-size: 5.6pt; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+  .sm-bar { display: flex; height: 2.4mm; border-radius: .6mm; overflow: hidden; margin: 1.2mm 0 .9mm; }
+  .sm-bar i { display: block; }
+  .sm-k { display: flex; gap: 3mm; font-size: 5.8pt; color: var(--muted); font-family: Consolas, monospace; }
+  .sm-k span { display: flex; align-items: center; gap: 1mm; }
+  .sm-k i { width: 1.5mm; height: 1.5mm; border-radius: 50%; display: block; }
+  .kpis { display: flex; gap: 1.4mm; margin-top: 2.2mm; }
+  .kpi { flex: 1; border: .4pt solid var(--line); border-radius: 1mm; padding: 1.4mm 1.4mm 1mm; background: #FBFDFE; }
+  .kpi b { display: block; font-family: Consolas, monospace; font-size: 8.4pt; line-height: 1.1; }
+  .kpi span { font-size: 5.2pt; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .absorb { margin: 1.6mm 0 .6mm; }
+  .ab-h { display: flex; justify-content: space-between; font-size: 5.5pt; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  .ab-bar { display: flex; height: 2.4mm; border-radius: .6mm; overflow: hidden; margin: 1mm 0 .8mm; }
+  .ab-bar i { display: block; }
+  .ab-k { display: flex; justify-content: space-between; font-size: 5.7pt; color: var(--muted); font-family: Consolas, monospace; }
+  .ministat { flex: 1; border: .4pt solid var(--line); border-radius: 1mm; padding: 1.2mm 1mm; text-align: center; background: #FBFDFE; }
+  .ministat b { display: block; font-family: Consolas, monospace; font-size: 8pt; line-height: 1.1; }
+  .ministat span { font-size: 5.4pt; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .quad { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1mm; }
+  .qbox { border: .4pt solid var(--line); border-radius: 1mm; padding: 1.6mm 1.7mm; min-height: 19mm; background: #FBFDFE; }
+  .qbox em { font-style: normal; display: block; font-size: 5.2pt; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: .8mm; }
+  .qbox .chips { gap: .7mm; margin-top: 0; padding-top: 0; }
+  .qbox .tag { font-size: 5.4pt; padding: .25mm .9mm; }
+  .axis-note { display: flex; justify-content: space-between; font-size: 5.2pt; color: var(--muted); margin-top: 1mm; letter-spacing: .04em; }
+
+  /* ---------- page 9 curriculum ---------- */
+  .timeline { display: flex; gap: 1.4mm; }
+  .phase { flex: 1; border-top: 2pt solid var(--teal); padding-top: 1.8mm; }
+  .phase:nth-child(2) { border-color: var(--cyan); }
+  .phase:nth-child(3) { border-color: var(--up); }
+  .phase:nth-child(4) { border-color: #7C8FA6; }
+  .phase:nth-child(5) { border-color: var(--amber); }
+  .phase:nth-child(6) { border-color: var(--ink); }
+  .phase b { display: block; font-family: Consolas, monospace; font-size: 6.4pt; color: var(--muted); }
+  .phase span { font-size: 7pt; font-weight: 600; }
+  .phase p { font-size: 5.9pt; color: var(--muted); margin-top: .4mm; }
+  .wk-table th, .wk-table td { font-size: 6.6pt; }
+  .wk-table td { padding: 3mm 1.8mm; }
+  .session { display: flex; gap: 0; border: .5pt solid var(--line); border-radius: 2mm; padding: 3.6mm 3mm; margin-top: 4.2mm; background: #F6FAFD; }
+  .sstep { flex: 1; padding-right: 3mm; border-right: .4pt solid var(--line); }
+  .sstep:last-child { border-right: 0; padding-right: 0; }
+  .sstep b { display: block; font-family: Consolas, monospace; font-size: 6pt; color: var(--teal); }
+  .sstep span { display: block; font-size: 7pt; font-weight: 700; margin-top: .3mm; }
+  .sstep p { font-size: 5.8pt; line-height: 1.35; color: var(--muted); margin-top: .3mm; }
+  .legend { display: flex; flex-direction: column; gap: 1.4mm; margin-top: 2mm; }
+  .legend .lrow { display: flex; align-items: center; gap: 1.4mm; font-size: 6pt; color: var(--muted); white-space: nowrap; }
+  .legend .sw { width: 2.2mm; height: 2.2mm; border-radius: .4mm; flex: none; }
+  .legend .lv { font-family: Consolas, monospace; font-weight: 700; color: var(--ink); font-size: 6.4pt; margin-right: .8mm; }
+  .miles { display: flex; gap: 2.4mm; margin-top: 3.6mm; }
+  .mile { flex: 1; border-left: 1.8pt solid var(--line); padding-left: 2.6mm; }
+  .mile:nth-child(1) { border-color: var(--teal); }
+  .mile:nth-child(2) { border-color: var(--cyan); }
+  .mile:nth-child(3) { border-color: var(--up); }
+  .mile:nth-child(4) { border-color: var(--amber); }
+  .mile b { display: block; font-family: Consolas, monospace; font-size: 6.2pt; color: var(--muted); }
+  .mile span { display: block; font-size: 7pt; font-weight: 600; margin-top: .2mm; }
+  .mile p { font-size: 5.8pt; line-height: 1.35; color: var(--muted); margin-top: .3mm; }
+  .gl-table td { padding: 1.35mm 2mm; font-size: 6.9pt; }
+  .gl-table td:first-child { text-align: left; width: 22mm; font-size: 6pt; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+  .wkwrap { margin-top: auto; padding-top: 2mm; border-top: .4pt solid var(--line2); }
+  .wkstrip { display: flex; gap: .8mm; margin-top: 1mm; }
+  .wkstrip i { flex: 1; height: 2mm; border-radius: .3mm; background: #E8EEF6; }
+  .wkstrip i.on { background: var(--teal); }
+  .wkstr-n { display: flex; justify-content: space-between; font-family: Consolas, monospace; font-size: 5.3pt; color: var(--muted); margin-top: .8mm; }
+  .cap-ev { margin-top: auto; padding-top: 2.2mm; border-top: .4pt solid rgba(255,255,255,.14); font-size: 6pt; color: #9FB4C9; line-height: 1.45; }
+  .cap-ev b { color: #DCE8F4; }
+
+  /* ---------- page 10 operate ---------- */
+  .ready { display: flex; gap: 3mm; margin-top: 3.4mm; }
+  .ready .rc { flex: 1; border: .5pt solid var(--line); border-radius: 2mm; padding: 2.6mm 3mm; background: #FBFDFE; }
+  .ready .rc b { display: block; font-size: 7.4pt; margin-bottom: .6mm; }
+  .ready .rc p { font-size: 6.4pt; line-height: 1.4; color: var(--muted); }
+  .drill { margin-top: 4mm; border: .5pt solid var(--line); border-radius: 2mm; padding: 3mm 3.6mm; background: #F6FAFD; display: flex; gap: 4mm; align-items: flex-start; }
+  .drill .dt { flex: none; width: 42mm; }
+  .drill .dt b { display: block; font-size: 8.4pt; }
+  .drill .dt span { font-size: 6.3pt; color: var(--muted); }
+  .drill ol { flex: 1; margin: 0 0 0 4mm; columns: 2; column-gap: 6mm; }
+  .drill li { font-size: 6.6pt; line-height: 1.45; color: #33455C; margin-bottom: 1mm; break-inside: avoid; }
+  .drill li::marker { color: var(--teal); font-weight: 700; }
+  .check { margin: 1.2mm 0 0 3.6mm; }
+  .check li { font-size: 6.3pt; line-height: 1.42; color: #33455C; margin-bottom: .9mm; }
+  .check li::marker { color: var(--teal); font-weight: 700; }
+  .mislead { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.6mm; margin-top: 3.4mm; }
+  .mislead .m { border-top: 1.6pt solid var(--down); padding-top: 2mm; }
+  .mislead .m > b { display: block; font-size: 7.5pt; margin-bottom: .5mm; }
+  .mislead .m p b { font-weight: 700; color: var(--ink); }
+  .mislead .m p { font-size: 6.4pt; line-height: 1.42; color: var(--muted); }
+  .api-table td { padding: 1.9mm 2mm; font-size: 6.9pt; }
+  .api-table th { padding: 1.4mm 2mm; }
+  .mapband { display: flex; align-items: center; gap: 4mm; margin-top: 3.4mm; border: .5pt solid var(--line); border-radius: 2mm; padding: 2.8mm 3.4mm; background: #FBFDFE; }
+  .mapband .ml { flex: none; width: 42mm; }
+  .mapband .ml b { display: block; font-size: 7.6pt; }
+  .mapband .ml span { font-size: 6pt; color: var(--muted); }
+  .mapband .mr { flex: 1; display: flex; gap: 1.4mm; flex-wrap: wrap; }
+  .mapband .mr span { font-size: 6.1pt; border: .4pt solid var(--line); border-radius: 1mm; padding: .7mm 1.8mm; background: #fff; color: #33455C; }
+  .mapband .mr b { color: var(--teal); font-family: Consolas, monospace; font-weight: 600; margin-right: 1mm; }
+  .code { background: #0B1727; border-radius: 2mm; padding: 3mm 3.4mm; font-family: Consolas, monospace; font-size: 6.5pt; line-height: 1.8; color: #C9D8E8; }
+  .code .c { color: #5C748C; }
+  .code .k { color: #7BD3E8; }
+  .code .s { color: #8BD9A8; }
+  .kbds { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.4mm; }
+  .kbd-row { display: flex; align-items: center; gap: 1.4mm; border: .4pt solid var(--line); border-radius: 1mm; padding: 1.1mm 1.4mm; }
+  .kbd-row kbd { font-family: Consolas, monospace; font-size: 6pt; background: var(--wash); border: .4pt solid var(--line); border-bottom-width: .9pt; border-radius: .6mm; padding: .25mm 1mm; color: var(--ink); }
+  .kbd-row span { font-size: 5.8pt; color: var(--muted); }
+  .limits li { font-size: 6.7pt; line-height: 1.45; margin: 0 0 1mm 3mm; color: #33455C; }
+  .limits li::marker { color: var(--down); }
+  .backband { background: #07101F; border-radius: 2.4mm; color: #fff; padding: 6mm 7mm; display: flex; align-items: center; gap: 6mm; }
+  .backband img { width: 14mm; height: 14mm; background: #fff; border-radius: 50%; padding: .8mm; }
+  .backband h3 { color: #fff; font-size: 13pt; letter-spacing: -.02em; }
+  .backband p { color: #9FB4C9; font-size: 6.8pt; margin-top: 1mm; }
+  .backband .right { margin-left: auto; text-align: right; font-family: Consolas, monospace; font-size: 6.4pt; color: #7E94AD; line-height: 1.8; }
+
+  /* ---------- footer ---------- */
+  .pf { margin-top: auto; padding-top: 2.5mm; border-top: .4pt solid var(--line); display: flex; justify-content: space-between; font-size: 5.6pt; color: #93A3B7; letter-spacing: .05em; flex: none; }
+</style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true"><defs>
+  <symbol id="i-tape" viewBox="0 0 24 24"><path d="M2 7h20M2 12h15M2 17h18"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+  <symbol id="i-breadth" viewBox="0 0 24 24"><path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-candle" viewBox="0 0 24 24"><path d="M7 4v3M7 17v3M7 7h4v10H7zM17 5v3M17 15v4M17 8h4v7h-4z"/></symbol>
+  <symbol id="i-move" viewBox="0 0 24 24"><path d="M4 17l6-6 4 4 6-8M14 7h6v6"/></symbol>
+  <symbol id="i-flow" viewBox="0 0 24 24"><path d="M4 19V9M10 19v-6M16 19V5M22 19H2"/></symbol>
+  <symbol id="i-heat" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="5" rx="1"/><rect x="3" y="13" width="8" height="5" rx="1"/><rect x="13" y="10" width="8" height="11" rx="1"/></symbol>
+  <symbol id="i-chain" viewBox="0 0 24 24"><path d="M9 7H7a4 4 0 000 8h2M15 7h2a4 4 0 010 8h-2M9 12h6"/></symbol>
+  <symbol id="i-news" viewBox="0 0 24 24"><path d="M5 4h11v16H6a1 1 0 01-1-1zM16 8h3v11a1 1 0 01-1 1M8 8h5M8 12h5M8 16h3"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h10v18H7zM10 7h4M10 11h4M10 15h2"/></symbol>
+  <symbol id="i-lens" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M8 11h6M11 8v6"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17l9 5 9-5"/></symbol>
+</defs></svg>
+
+<!-- ==================================================================== -->
+<!-- COVER                                                                -->
+<!-- ==================================================================== -->
+<section class="page cover">
+  <div class="cover-inner">
+    <div class="c-top">
+      <div class="brand">
+        <img src="../public/panimalar-crest.png" alt="Panimalar Engineering College crest">
+        <div>
+          <strong>PANIMALAR ENGINEERING COLLEGE</strong>
+          <span>Department of Management Studies &middot; Chennai</span>
+        </div>
+      </div>
+      <div class="c-edition">PROSPECTUS<br><b>2026&ndash;27</b></div>
+    </div>
+
+    <div class="c-hero">
+      <div class="c-kicker">MBA &middot; FINANCE &middot; ANALYTICS &middot; FINTECH</div>
+      <h1>The Fintech Lab<br><span>Terminal</span></h1>
+      <p>Live NSE market intelligence, engineered for the classroom. <b>Twelve research modules, three honest data states</b>, and a screen that never goes blank &mdash; so a case discussion can start with a chart, not a slide.</p>
+      <div class="c-rule"></div>
+    </div>
+
+    <div class="term-wrap">
+      <div class="term">
+        <div class="term-top">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="term-url">localhost:3000 &middot; panimalar-mba-fintech-lab</span>
+          <span class="term-live"><em></em>LIVE &middot; 15s</span>
+        </div>
+        <div class="tape">
+          <span><b>RELIANCE</b> 1,498.20 <i class="up">+1.24%</i></span>
+          <span><b>TCS</b> 3,182.45 <i class="down">&minus;0.38%</i></span>
+          <span><b>HDFCBANK</b> 1,742.10 <i class="up">+0.86%</i></span>
+          <span><b>INFY</b> 1,486.30 <i class="down">&minus;0.52%</i></span>
+          <span><b>SBIN</b> 842.65 <i class="up">+1.41%</i></span>
+          <span><b>ITC</b> 438.90 <i class="up">+0.21%</i></span>
+        </div>
+        <div class="term-body">
+          <div class="term-cards">
+            <div class="tcard">
+              <div class="lbl">NIFTY 50</div>
+              <div class="val">26,482.35<span class="chg up">+0.62%</span></div>
+              <div class="s">@@SPARK_NIFTY@@</div>
+            </div>
+            <div class="tcard">
+              <div class="lbl">BANK NIFTY</div>
+              <div class="val">59,120.40<span class="chg up">+0.84%</span></div>
+              <div class="s">@@SPARK_BANK@@</div>
+            </div>
+            <div class="tcard">
+              <div class="lbl">INDIA VIX</div>
+              <div class="val">12.84<span class="chg down">&minus;3.20%</span></div>
+              <div class="s">@@SPARK_VIX@@</div>
+            </div>
+          </div>
+          <div class="term-grid">
+            <div class="tchart">
+              <div class="tchart-h"><b>RELIANCE &middot; 1D</b><span>1,498.20 &nbsp;+1.24%</span></div>
+              <div class="c">@@CANDLES_DARK@@</div>
+            </div>
+            <div class="tside">
+              <div class="tside-h">SECTOR MAP</div>
+              <div class="miniheat">
+                <i style="background:rgba(14,159,110,.30)">BANK</i>
+                <i style="background:rgba(214,69,80,.34)">IT</i>
+                <i style="background:rgba(14,159,110,.46)">AUTO</i>
+                <i style="background:rgba(14,159,110,.18)">FMCG</i>
+                <i style="background:rgba(214,69,80,.26)">PHARMA</i>
+                <i style="background:rgba(14,159,110,.60)">METAL</i>
+                <i style="background:rgba(14,159,110,.70)">REALTY</i>
+                <i style="background:rgba(14,159,110,.22)">INFRA</i>
+              </div>
+              <div class="tside-h" style="margin-top:1mm">OPTION CHAIN &middot; NIFTY</div>
+              <div class="trows">
+                <div class="trow"><span>26400 CE</span><b>OI 42.6L</b><span class="up">+8.2%</span></div>
+                <div class="trow"><span>26500 PE</span><b>OI 51.3L</b><span class="up">+4.1%</span></div>
+                <div class="trow"><span>PCR</span><b>1.18</b><span class="mut">put-heavy</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="term-foot">
+          <span>NSE CASH &middot; 27 OCT 2026 &middot; 10:32 IST</span>
+          <span>SOURCE NSE &middot; YAHOO &middot; MCP &middot; RSS</span>
+          <span class="demo-chip">DEMO FALLBACK READY</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="c-steps">
+      <div class="c-step"><b>01</b><span>Read the market</span><p>Indices, breadth, movers, sector map &mdash; the state of the session.</p></div>
+      <div class="c-step"><b>02</b><span>Build the analysis</span><p>Candles, ratios, option chain, institutional flows.</p></div>
+      <div class="c-step"><b>03</b><span>Defend the decision</span><p>A note, a hedge, a portfolio review &mdash; graded on evidence.</p></div>
+    </div>
+
+    <div class="c-stats">
+      <div class="c-stat"><b>12</b><span>research modules</span></div>
+      <div class="c-stat" style="padding-left:4mm"><b>12</b><span>API endpoints</span></div>
+      <div class="c-stat" style="padding-left:4mm"><b>3</b><span>honest data states</span></div>
+      <div class="c-stat" style="padding-left:4mm"><b>0</b><span>API keys</span></div>
+      <div class="c-stat" style="padding-left:4mm"><b>15s</b><span>default refresh</span></div>
+    </div>
+
+    <div class="c-foot">
+      <div class="c-badges">
+        <span class="badge"><i></i>LIVE</span>
+        <span class="badge"><i></i>DELAYED</span>
+        <span class="badge"><i></i>DEMO</span>
+      </div>
+      <div class="c-contents">
+        <b>INSIDE</b> &nbsp; FEATURES &middot; REAL-WORLD USE CASES<br>
+        12-WEEK CURRICULUM &middot; LAB SETUP &amp; API
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 01 EXECUTIVE SUMMARY                                                 -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>01 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">01</div>
+    <div>
+      <div class="kicker">The proposition</div>
+      <h2>One screen. Twelve ways<br>to learn finance.</h2>
+    </div>
+  </div>
+
+  <div class="exec-top">
+    <div class="l">
+      <p class="lead">Most MBA finance courses end with a valuation spreadsheet built on a case that is three years old by the time it is graded. This terminal puts the <b>current market session</b> on the projector &mdash; the index, the option chain, the institutional flows &mdash; and labels every number with where it came from and how old it is.</p>
+      <p class="lead" style="margin-top:2.6mm">It is built for a 40-student lab and a dim projector: dense, dark, readable from the back row, no login and no API keys. Students open a browser and immediately start asking the questions an analyst asks.</p>
+    </div>
+    <div class="r">
+      <h4 style="margin-bottom:2mm">Designed for</h4>
+      <div class="personas" style="flex-direction:column;gap:2.4mm">
+        <div class="persona"><b>Investment analysis</b><span>Valuation, screening, research notes</span></div>
+        <div class="persona" style="border-color:var(--cyan)"><b>Derivatives &amp; risk</b><span>Option chain, volatility, hedging</span></div>
+        <div class="persona" style="border-color:var(--up)"><b>Business analytics</b><span>Data quality, dashboards, storytelling</span></div>
+        <div class="persona" style="border-color:var(--amber)"><b>FinTech product</b><span>APIs, latency, graceful failure</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:5mm">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2.2mm">
+      <h4>The twelve modules</h4>
+      <span class="tiny mut">Every panel is a teaching object, not decoration.</span>
+    </div>
+    <div class="feature-grid">
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-tape"/></svg><b>Ticker tape</b></div><p>Watchlist and movers scrolling with LTP and % change.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-grid"/></svg><b>Index cards</b></div><p>NIFTY 50, Bank NIFTY, IT, Midcap, Next 50 and India VIX.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-breadth"/></svg><b>Market breadth</b></div><p>Advance / unchanged / decline rail for the NIFTY 50.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-list"/></svg><b>Watchlist</b></div><p>Editable, sortable, saved per browser for each student.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-candle"/></svg><b>Price chart</b></div><p>Intraday area and 1W&ndash;1Y candlesticks with volume.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-move"/></svg><b>Movers</b></div><p>Top gainers, losers and volume toppers in the NIFTY 50.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-flow"/></svg><b>FII / DII flows</b></div><p>Institutional cash-market buy, sell and net in &#8377; crore.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-heat"/></svg><b>Sector heat-map</b></div><p>Twelve sectoral indices, colour-scaled by % change.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-chain"/></svg><b>Option chain</b></div><p>ATM &plusmn; 5 strikes: OI, OI change, LTP, IV and PCR.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-news"/></svg><b>Market news</b></div><p>Latest Economic Times headlines, timestamped.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-doc"/></svg><b>Stock detail</b></div><p>52-week range, P/E, ROE, yield &mdash; with explainers.</p></div>
+      <div class="feat"><div class="fh"><svg class="ico"><use href="#i-lens"/></svg><b>MarketLens</b></div><p>One-click bridge to NSE&rsquo;s official screener and valuation modules.</p></div>
+    </div>
+  </div>
+
+  <div class="stats" style="margin-top:4mm">
+    <div class="stat"><b>12</b><span>research modules</span></div>
+    <div class="stat"><b>12</b><span>API endpoints</span></div>
+    <div class="stat"><b>3</b><span>data states</span></div>
+    <div class="stat"><b>0</b><span>API keys</span></div>
+    <div class="stat"><b>15s</b><span>default refresh</span></div>
+    <div class="stat"><b>40</b><span>students per cache</span></div>
+  </div>
+
+  <div style="margin-top:4mm">
+    <div class="readmap">
+      <div><b>02</b><span>Why it works &mdash; architecture and data truth</span></div>
+      <div><b>03&ndash;05</b><span>Feature tour &mdash; pulse, research, derivatives</span></div>
+      <div><b>06&ndash;07</b><span>Seven real-world use cases</span></div>
+      <div><b>08&ndash;09</b><span>12-week curriculum, setup, API, ethics</span></div>
+    </div>
+  </div>
+
+  <table class="compare">
+    <thead><tr><th></th><th>A free finance site</th><th>A video case</th><th class="hl">This terminal</th></tr></thead>
+    <tbody>
+      <tr><td>Live market</td><td>Delayed, ad-supported, no context</td><td>No &mdash; recorded months ago</td><td class="hl">Current session, cached for 15 seconds</td></tr>
+      <tr><td>Provenance</td><td>Rarely stated</td><td>Fixed narrative</td><td class="hl">Status, source and as-of on every card</td></tr>
+      <tr><td>Derivatives</td><td>Buried, or behind a paywall</td><td>Not available</td><td class="hl">Option chain with OI, IV and PCR</td></tr>
+      <tr><td>Extend it</td><td>Closed product</td><td>Not possible</td><td class="hl">12 documented JSON endpoints</td></tr>
+      <tr><td>A bad data day</td><td>Error page</td><td>Not applicable</td><td class="hl">Labelled DEMO feed, class continues</td></tr>
+    </tbody>
+  </table>
+
+  <div class="pf"><span>Educational use only &middot; not investment advice</span><span>Department of Management Studies</span></div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 02 ARCHITECTURE                                                      -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>02 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">02</div>
+    <div>
+      <div class="kicker">Under the hood</div>
+      <h2>Every number is labelled.<br>That is the lesson.</h2>
+    </div>
+  </div>
+
+  <div class="row" style="gap:6mm">
+    <div class="col" style="flex:1.35">
+      <p class="lead">A dashboard is only as credible as its provenance. Each response carries a <b>status</b>, a <b>source</b>, an <b>as-of timestamp</b> and an optional warning. When NSE is unreachable, the request falls through to the MCP server, then Yahoo Finance, then a deterministic simulator &mdash; so the class never stares at a spinner, and never mistakes a simulation for the exchange.</p>
+      <p class="mini" style="margin-top:2.4mm;color:var(--muted)">The same discipline applies to an analyst&rsquo;s model: a number without a source and a date is an opinion.</p>
+    </div>
+    <div class="col" style="flex:.85">
+      <div class="json">
+<span class="c">// every market response</span><br>
+{<br>
+&nbsp;&nbsp;<span class="k">"data"</span>: [ &hellip; ],<br>
+&nbsp;&nbsp;<span class="k">"status"</span>: <span class="s">"live"</span>,<br>
+&nbsp;&nbsp;<span class="k">"source"</span>: <span class="s">"nse:indices"</span>,<br>
+&nbsp;&nbsp;<span class="k">"asOf"</span>: <span class="s">"2026-10-27T10:32:11+05:30"</span>,<br>
+&nbsp;&nbsp;<span class="k">"warning"</span>: <span class="n">null</span><br>
+}
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:4.5mm;border:.5pt solid var(--line);border-radius:2.4mm;padding:3mm 3mm 2mm;background:linear-gradient(180deg,#FBFDFF,#F4F8FC)">
+    <svg viewBox="0 0 700 250" style="width:100%;height:auto;display:block" aria-hidden="true">
+      <defs>
+        <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8AA0B8"/>
+        </marker>
+      </defs>
+      <!-- browser -->
+      <rect x="4" y="86" width="128" height="72" rx="7" fill="#fff" stroke="#C9D8E8"/>
+      <rect x="4" y="86" width="128" height="16" rx="7" fill="#0B1727"/>
+      <circle cx="12" cy="94" r="2" fill="#D64550"/><circle cx="19" cy="94" r="2" fill="#C79A4C"/><circle cx="26" cy="94" r="2" fill="#4FA37E"/>
+      <text x="16" y="118" font-family="Segoe UI,sans-serif" font-size="8.6" font-weight="700" fill="#0A1526">Browser</text>
+      <text x="16" y="131" font-family="Segoe UI,sans-serif" font-size="6.8" fill="#65758C">React 19 client panels</text>
+      <text x="16" y="142" font-family="Consolas,monospace" font-size="6.8" fill="#0B7285">poll 10s / 15s / 30s / 1m</text>
+
+      <!-- arrow -->
+      <line x1="136" y1="122" x2="186" y2="122" stroke="#8AA0B8" stroke-width="1" marker-end="url(#ar)"/>
+      <text x="161" y="114" text-anchor="middle" font-family="Consolas,monospace" font-size="6" fill="#65758C">/api/market/*</text>
+
+      <!-- route handlers -->
+      <rect x="192" y="64" width="180" height="118" rx="8" fill="#0A1526"/>
+      <text x="206" y="86" font-family="Segoe UI,sans-serif" font-size="8.6" font-weight="700" fill="#fff">Next.js route handlers</text>
+      <text x="206" y="100" font-family="Segoe UI,sans-serif" font-size="6.6" fill="#9FB4C9">Capability names: indices, quotes,</text>
+      <text x="206" y="110" font-family="Segoe UI,sans-serif" font-size="6.6" fill="#9FB4C9">movers, options, history&hellip;</text>
+      <rect x="204" y="120" width="156" height="22" rx="4" fill="#123049"/>
+      <text x="212" y="134.5" font-family="Consolas,monospace" font-size="6.6" fill="#7BD3E8">in-memory TTL cache</text>
+      <rect x="204" y="146" width="156" height="22" rx="4" fill="#123049"/>
+      <text x="212" y="160.5" font-family="Consolas,monospace" font-size="6.6" fill="#7BD3E8">request coalescing</text>
+
+      <!-- fan out -->
+      <line x1="374" y1="122" x2="428" y2="34" stroke="#8AA0B8" stroke-width=".8" marker-end="url(#ar)"/>
+      <line x1="374" y1="122" x2="428" y2="80" stroke="#8AA0B8" stroke-width=".8" marker-end="url(#ar)"/>
+      <line x1="374" y1="122" x2="428" y2="126" stroke="#8AA0B8" stroke-width=".8" marker-end="url(#ar)"/>
+      <line x1="374" y1="122" x2="428" y2="172" stroke="#8AA0B8" stroke-width=".8" marker-end="url(#ar)"/>
+      <line x1="374" y1="122" x2="428" y2="218" stroke="#8AA0B8" stroke-width=".8" marker-end="url(#ar)"/>
+
+      <!-- providers -->
+      <g font-family="Segoe UI,sans-serif">
+        <rect x="432" y="18" width="190" height="32" rx="5" fill="#E8F7F1" stroke="#C4E8D8"/>
+        <text x="442" y="32" font-size="7.6" font-weight="700" fill="#0A1526">NSE India</text>
+        <text x="442" y="42.5" font-size="6.2" fill="#5B7A6C">public JSON endpoints &middot; live</text>
+        <text x="612" y="38" text-anchor="end" font-family="Consolas,monospace" font-size="6.4" fill="#0B7A55">1</text>
+
+        <rect x="432" y="64" width="190" height="32" rx="5" fill="#EAF4F7" stroke="#CFE6EC"/>
+        <text x="442" y="78" font-size="7.6" font-weight="700" fill="#0A1526">india-stock-mcp</text>
+        <text x="442" y="88.5" font-size="6.2" fill="#4A6B78">stdio JSON-RPC &middot; quotes, OHLC</text>
+        <text x="612" y="84" text-anchor="end" font-family="Consolas,monospace" font-size="6.4" fill="#0B7285">2</text>
+
+        <rect x="432" y="110" width="190" height="32" rx="5" fill="#FDF4E7" stroke="#F0DBB7"/>
+        <text x="442" y="124" font-size="7.6" font-weight="700" fill="#0A1526">Yahoo Finance</text>
+        <text x="442" y="134.5" font-size="6.2" fill="#8A6A3A">quotes &amp; candles &middot; ~15 min delayed</text>
+        <text x="612" y="130" text-anchor="end" font-family="Consolas,monospace" font-size="6.4" fill="#9A5B06">3</text>
+
+        <rect x="432" y="156" width="190" height="32" rx="5" fill="#F1F4F8" stroke="#DCE6F1"/>
+        <text x="442" y="170" font-size="7.6" font-weight="700" fill="#0A1526">Economic Times RSS</text>
+        <text x="442" y="180.5" font-size="6.2" fill="#65758C">headlines &middot; publisher timestamps</text>
+        <text x="612" y="176" text-anchor="end" font-family="Consolas,monospace" font-size="6.4" fill="#65758C">4</text>
+
+        <rect x="432" y="202" width="190" height="32" rx="5" fill="#FCEDEF" stroke="#F4CFD4"/>
+        <text x="442" y="216" font-size="7.6" font-weight="700" fill="#0A1526">Deterministic simulator</text>
+        <text x="442" y="226.5" font-size="6.2" fill="#9B5B63">seeded mock &middot; never fails</text>
+        <text x="612" y="222" text-anchor="end" font-family="Consolas,monospace" font-size="6.4" fill="#B02E3B">5</text>
+      </g>
+
+      <text x="432" y="246" font-family="Segoe UI,sans-serif" font-size="6.2" fill="#65758C">First provider that answers wins &mdash; the last one is always the demo feed.</text>
+      <text x="196" y="200" font-family="Consolas,monospace" font-size="6" fill="#65758C">TTL 15s&ndash;5m</text>
+      <text x="196" y="209" font-family="Consolas,monospace" font-size="6" fill="#65758C">40 clients &asymp; 1 upstream call</text>
+    </svg>
+  </div>
+
+  <div class="row" style="margin-top:4mm;gap:2.4mm">
+    <div class="principle"><b>Never blank</b><p>Every capability ends in the simulator. A dropped feed changes the label, not the lesson plan.</p></div>
+    <div class="principle" style="border-color:var(--teal)"><b>Label the truth</b><p>LIVE, DELAYED or DEMO on every panel &mdash; plus the actual source and timestamp.</p></div>
+    <div class="principle" style="border-color:var(--up)"><b>Cache once, serve forty</b><p>TTLs from 15 seconds to 5 minutes; hidden tabs drop to one request per minute.</p></div>
+  </div>
+
+  <div style="margin-top:3.4mm;display:flex;gap:3mm;align-items:center">
+    <div class="badge-legend" style="flex:1">
+      <div class="bl-row"><span class="badge b-live"><i></i>LIVE</span><p>Straight from the exchange endpoint. Freshest state.</p></div>
+      <div class="bl-row"><span class="badge b-delay"><i></i>DELAYED</span><p>Yahoo or MCP fallback, typically 15 minutes behind.</p></div>
+      <div class="bl-row"><span class="badge b-demo"><i></i>DEMO</span><p>Seeded simulation; the banner explains why it appeared.</p></div>
+    </div>
+    <div style="flex:1.1;border-left:.5pt solid var(--line);padding-left:4mm">
+      <h4 style="margin-bottom:1.2mm">Why an MBA should care</h4>
+      <p class="mini">Analysts spend more time validating data than modelling. Asking &ldquo;where did this number come from, and how old is it?&rdquo; is a professional habit &mdash; and this terminal makes that habit visible on every card.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:3.4mm">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.6mm">
+      <h4>Fallback order, by capability</h4><span class="tiny mut">The first provider that answers wins</span>
+    </div>
+    <table class="tbl cap-table">
+      <thead><tr><th class="l">Capability</th><th class="l">First choice</th><th class="l">Then</th><th style="width:20mm">TTL</th></tr></thead>
+      <tbody>
+        <tr><td class="l"><b>Indices &amp; quotes</b></td><td class="l">NSE public JSON</td><td class="l">MCP &rarr; Yahoo &rarr; demo</td><td>15 s</td></tr>
+        <tr><td class="l"><b>Candles &amp; history</b></td><td class="l">Yahoo Finance</td><td class="l">MCP &rarr; demo</td><td>60 s</td></tr>
+        <tr><td class="l"><b>Option chain</b></td><td class="l">NSE option chain</td><td class="l">MCP &rarr; demo</td><td>45&ndash;60 s</td></tr>
+        <tr><td class="l"><b>Institutional flows</b></td><td class="l">NSE cash market</td><td class="l">Demo only (latest session)</td><td>5 min</td></tr>
+        <tr><td class="l"><b>Headlines</b></td><td class="l">Economic Times RSS</td><td class="l">Demo only</td><td>5 min</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="citerule">
+    <b>Citable in a graded memo:</b> LIVE with its timestamp &middot; DELAYED stated as indicative &middot; DEMO for method only, never as market evidence.
+  </div>
+
+  <div class="lifecycle">
+    <b>Browser poll</b><i>&rarr;</i><b>Route handler</b><i>&rarr;</i><b>TTL cache</b><i>&rarr;</i><b>Provider chain</b><i>&rarr;</i><b>Data envelope</b>
+    <span style="margin-left:auto">Same path for all twelve modules.</span>
+  </div>
+
+  <div class="drill">
+    <div class="dt"><b>Lab drill: break the feed</b><span>10 minutes &middot; first session</span></div>
+    <ol>
+      <li>Disconnect the lab network and reload the dashboard.</li>
+      <li>Read the banner: which panels switched to DEMO?</li>
+      <li>Open <span class="mono">/api/health</span> and name the failing provider.</li>
+      <li>Reconnect, refresh, and note which panel recovered first.</li>
+    </ol>
+  </div>
+
+  <div class="pf"><span>Architecture &middot; Next.js 16 &middot; React 19 &middot; Node 22+</span><span>No API keys required</span></div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 03 MARKET PULSE                                                      -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>03 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">03</div>
+    <div>
+      <div class="kicker">Feature tour &middot; i</div>
+      <h2>The market at a glance &mdash;<br>and what each glance hides.</h2>
+    </div>
+  </div>
+
+  <div class="row" style="gap:4.5mm">
+    <div class="col" style="flex:1.55">
+      <div class="ticker-demo">
+        <span><b>RELIANCE</b> 1,498.20 <span class="up">+1.24%</span></span>
+        <span><b>TCS</b> 3,182.45 <span class="down">&minus;0.38%</span></span>
+        <span><b>HDFCBANK</b> 1,742.10 <span class="up">+0.86%</span></span>
+        <span class="tk-time">as of 10:32</span>
+      </div>
+
+      <div class="idx-grid" style="margin-top:2mm">
+        <div class="idx">
+          <div class="ih"><b>NIFTY 50</b><span>Benchmark</span></div>
+          <div class="iv">26,482.35 <span class="ic up">+0.62%</span></div>
+          <div class="ispark">@@SPARK_NIFTY@@</div>
+          <div class="irange"><span>L 26,318</span><span>H 26,540</span></div>
+        </div>
+        <div class="idx">
+          <div class="ih"><b>BANK NIFTY</b><span>Banking</span></div>
+          <div class="iv">59,120.40 <span class="ic up">+0.84%</span></div>
+          <div class="ispark">@@SPARK_BANK@@</div>
+          <div class="irange"><span>L 58,640</span><span>H 59,285</span></div>
+        </div>
+        <div class="idx">
+          <div class="ih"><b>NIFTY IT</b><span>Technology</span></div>
+          <div class="iv">39,850.15 <span class="ic down">&minus;0.41%</span></div>
+          <div class="ispark">@@SPARK_IT@@</div>
+          <div class="irange"><span>L 39,702</span><span>H 40,118</span></div>
+        </div>
+        <div class="idx">
+          <div class="ih"><b>MIDCAP 100</b><span>Mid caps</span></div>
+          <div class="iv">62,340.80 <span class="ic up">+1.12%</span></div>
+          <div class="ispark">@@SPARK_MID@@</div>
+          <div class="irange"><span>L 61,702</span><span>H 62,410</span></div>
+        </div>
+        <div class="idx">
+          <div class="ih"><b>NEXT 50</b><span>Large caps</span></div>
+          <div class="iv">74,210.05 <span class="ic up">+0.35%</span></div>
+          <div class="ispark">@@SPARK_NEXT@@</div>
+          <div class="irange"><span>L 73,942</span><span>H 74,368</span></div>
+        </div>
+        <div class="idx">
+          <div class="ih"><b>INDIA VIX</b><span>Volatility</span></div>
+          <div class="iv">12.84 <span class="ic down">&minus;3.20%</span></div>
+          <div class="ispark">@@SPARK_VIX@@</div>
+          <div class="irange"><span>L 12.61</span><span>H 13.42</span></div>
+        </div>
+      </div>
+
+      <div class="breadth" style="margin-top:2mm">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <h4>Market breadth &middot; NIFTY 50</h4>
+          <span class="tiny mono mut">34 &nbsp;/&nbsp; 3 &nbsp;/&nbsp; 13</span>
+        </div>
+        <div class="bbar">
+          <i style="width:68%;background:#0E9F6E"></i>
+          <i style="width:6%;background:#B9C5D4"></i>
+          <i style="width:26%;background:#D64550"></i>
+        </div>
+        <div class="blast"><span class="up">34 advancing</span><span>3 unchanged</span><span class="down">13 declining</span></div>
+      </div>
+
+      <div class="movers-mini" style="margin-top:2mm">
+        <div class="mm-row" style="background:#F7FAFD"><span><b>GAINERS &middot; LOSERS &middot; VOLUME</b></span><span class="tiny mut">% change</span></div>
+        <div class="mm-row"><span>REALTY &middot; DLF</span><b class="up">+3.42%</b></div>
+        <div class="mm-row"><span>METAL &middot; TATASTEEL</span><b class="up">+2.86%</b></div>
+        <div class="mm-row"><span>PSU BANK &middot; SBIN</span><b class="up">+1.41%</b></div>
+        <div class="mm-row" style="background:#FBFDFE"><span class="tiny mut" style="letter-spacing:.1em">LOSERS</span><span></span></div>
+        <div class="mm-row"><span>IT &middot; TCS</span><b class="down">&minus;0.38%</b></div>
+        <div class="mm-row"><span>PHARMA &middot; SUNPHARMA</span><b class="down">&minus;0.62%</b></div>
+        <div class="mm-row" style="background:#FBFDFE"><span class="tiny mut" style="letter-spacing:.1em">VOLUME TOPPER</span><span></span></div>
+        <div class="mm-row"><span>YESBANK</span><b>2.4&times; avg</b></div>
+      </div>
+    </div>
+
+    <div class="col" style="flex:.9">
+      <h4 style="margin-bottom:2.2mm">What to look at, and why</h4>
+      <div class="annos">
+        <div class="anno"><span class="n">1</span><div><b>The tape is relative</b><p>Students compare % change, not price. A &#8377;12,000 stock and a &#8377;400 stock are only comparable as percentages.</p></div></div>
+        <div class="anno"><span class="n">2</span><div><b>Six windows, one market</b><p>Large cap vs mid cap vs IT vs volatility. Rotation begins as a relative number on a card.</p></div></div>
+        <div class="anno"><span class="n">3</span><div><b>Sparklines show character</b><p>Direction, slope and volatility in one glance. VIX falling while the index rises is the classic risk-on signature.</p></div></div>
+        <div class="anno"><span class="n">4</span><div><b>Breadth beats the headline</b><p>An index can rise while most constituents fall. The advance/decline rail exposes a narrow rally.</p></div></div>
+        <div class="anno"><span class="n">5</span><div><b>Movers separate news from noise</b><p>Gainers and losers show reaction; volume toppers show conviction. Ask which move has volume behind it.</p></div></div>
+        <div class="anno"><span class="n">6</span><div><b>Session status is context</b><p>Pre-open, live and post-close change how a quote should be read. Every panel carries its own clock.</p></div></div>
+      </div>
+
+      <div class="card" style="margin-top:4mm;padding:3mm 3.4mm">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h4>Session status</h4><span class="badge b-live"><i></i>OPEN</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:2mm;margin-top:1.2mm">
+          <span class="mono" style="font-size:19pt;line-height:1">10:32</span><span class="tiny mut">IST &middot; Tuesday</span>
+        </div>
+        <p class="tiny mut" style="margin-top:1.2mm">Continuous trading since 09:15. Closes 15:30. Quotes are cached for 15 seconds.</p>
+        <div class="chips" style="margin-top:2.2mm">
+          <span class="tag grey">pre-open 09:00</span><span class="tag grey">auction 09:08</span><span class="tag grey">close 15:30</span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:4mm;padding:3mm 3.4mm">
+        <h4>Anatomy of a card</h4>
+        <div class="anat">
+          <div><i>1</i><b>Badge</b><span>LIVE, DELAYED or DEMO &mdash; read it before the number.</span></div>
+          <div><i>2</i><b>Value</b><span>Last cached tick, with its change against the previous close.</span></div>
+          <div><i>3</i><b>Sparkline</b><span>Session path on the day's own scale, so shape survives.</span></div>
+          <div><i>4</i><b>L &amp; H</b><span>Session low and high &mdash; not the 52-week range.</span></div>
+        </div>
+      </div>
+
+      <div class="card wash" style="margin-top:3.6mm;padding:3mm 3.4mm">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <h4>Sixty-second check</h4><span class="tag grey">every card</span>
+        </div>
+        <ol class="check">
+          <li>Is the move broad, or three stocks in a trench coat?</li>
+          <li>Which sector is doing the work?</li>
+          <li>What would have to be true for it to reverse?</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="card wash" style="margin-top:4mm;padding:3mm 4mm">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1mm">
+      <h4>A trading day in IST &mdash; the clock students must internalise</h4>
+      <span class="tiny mut">Monday to Friday</span>
+    </div>
+    <div class="dayline">
+      <div class="dstep"><b>09:00</b><span>Pre-open session</span></div>
+      <div class="dstep"><b>09:08</b><span>Call auction</span></div>
+      <div class="dstep"><b>09:15</b><span>Continuous trading</span></div>
+      <div class="dstep"><b>12:00</b><span>Mid-session</span></div>
+      <div class="dstep"><b>15:30</b><span>Close</span></div>
+      <div class="dstep"><b>15:40</b><span>Post-close</span></div>
+    </div>
+  </div>
+
+  <div class="mislead">
+    <div class="m"><b>A rising index, a falling majority</b><p>Breadth divergence: a handful of heavyweights can lift the index while most stocks decline. <b>Ask:</b> how many stocks are advancing?</p></div>
+    <div class="m" style="border-color:var(--amber)"><b>One sector in disguise</b><p>Concentration: a &ldquo;broad&rdquo; index can be a single sector story. <b>Ask:</b> which sector drove the move?</p></div>
+    <div class="m" style="border-color:var(--teal)"><b>A one-day move is not a trend</b><p>Timeframe: the same +2% is noise on a 1Y chart and a breakout on a 1D chart. <b>Ask:</b> over what horizon?</p></div>
+  </div>
+
+  <div class="pf"><span>Panel coverage &middot; NIFTY 50 universe + 60 liquid symbols</span><span>Refresh 10s &ndash; 1m</span></div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 04 RESEARCH DESK                                                     -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>04 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">04</div>
+    <div>
+      <div class="kicker">Feature tour &middot; ii</div>
+      <h2>From a ticker to<br>an investment note.</h2>
+    </div>
+  </div>
+
+  <div style="border:.5pt solid var(--line);border-radius:2.4mm;overflow:hidden">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:2.4mm 3mm;background:#F7FAFD;border-bottom:.5pt solid var(--line)">
+      <div style="display:flex;align-items:center;gap:2.4mm">
+        <b style="font-size:8.4pt">Watchlist</b>
+        <span class="tag grey">12 symbols</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:2mm">
+        <span class="badge b-delay"><i></i>DELAYED</span>
+        <span class="tiny mut">MCP &rarr; Yahoo &middot; 15s</span>
+      </div>
+    </div>
+    <table class="tbl">
+      <thead><tr>
+        <th class="l">Company</th><th>LTP</th><th>Change</th><th>Change %</th><th>Day range</th><th>Volume</th><th>P/E</th>
+      </tr></thead>
+      <tbody>
+        <tr class="sel"><td class="l"><b>RELIANCE</b> <span class="mut tiny">Reliance Industries</span></td><td>1,498.20</td><td class="up">+18.35</td><td class="up">+1.24%</td><td><span class="rangebar"><i style="left:64%"></i></span> <span class="tiny mut mono">1,472&ndash;1,502</span></td><td>62.4L</td><td>24.8</td></tr>
+        <tr><td class="l"><b>TCS</b> <span class="mut tiny">Tata Consultancy</span></td><td>3,182.45</td><td class="down">&minus;12.10</td><td class="down">&minus;0.38%</td><td><span class="rangebar"><i style="left:34%"></i></span> <span class="tiny mut mono">3,168&ndash;3,210</span></td><td>12.1L</td><td>26.9</td></tr>
+        <tr><td class="l"><b>HDFCBANK</b> <span class="mut tiny">HDFC Bank</span></td><td>1,742.10</td><td class="up">+14.90</td><td class="up">+0.86%</td><td><span class="rangebar"><i style="left:78%"></i></span> <span class="tiny mut mono">1,721&ndash;1,748</span></td><td>38.7L</td><td>19.4</td></tr>
+        <tr><td class="l"><b>INFY</b> <span class="mut tiny">Infosys</span></td><td>1,486.30</td><td class="down">&minus;7.80</td><td class="down">&minus;0.52%</td><td><span class="rangebar"><i style="left:33%"></i></span> <span class="tiny mut mono">1,479&ndash;1,501</span></td><td>21.3L</td><td>22.1</td></tr>
+        <tr><td class="l"><b>ICICIBANK</b> <span class="mut tiny">ICICI Bank</span></td><td>1,284.55</td><td class="up">+9.20</td><td class="up">+0.72%</td><td><span class="rangebar"><i style="left:72%"></i></span> <span class="tiny mut mono">1,271&ndash;1,289</span></td><td>31.8L</td><td>18.2</td></tr>
+        <tr><td class="l"><b>SBIN</b> <span class="mut tiny">State Bank of India</span></td><td>842.65</td><td class="up">+11.75</td><td class="up">+1.41%</td><td><span class="rangebar"><i style="left:86%"></i></span> <span class="tiny mut mono">828&ndash;845</span></td><td>54.2L</td><td>11.6</td></tr>
+        <tr><td class="l"><b>BHARTIARTL</b> <span class="mut tiny">Bharti Airtel</span></td><td>1,638.40</td><td class="down">&minus;4.10</td><td class="down">&minus;0.25%</td><td><span class="rangebar"><i style="left:36%"></i></span> <span class="tiny mut mono">1,630&ndash;1,652</span></td><td>9.8L</td><td>32.4</td></tr>
+        <tr><td class="l"><b>MARUTI</b> <span class="mut tiny">Maruti Suzuki</span></td><td>12,864.00</td><td class="up">+137.50</td><td class="up">+1.08%</td><td><span class="rangebar"><i style="left:79%"></i></span> <span class="tiny mut mono">12,702&ndash;12,910</span></td><td>4.2L</td><td>27.5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row" style="margin-top:4mm;gap:5mm">
+    <div class="chart-panel" style="flex:1.5">
+      <div class="chart-head">
+        <span class="sym">RELIANCE</span>
+        <span class="px">1,498.20</span>
+        <span class="ch up">+1.24%</span>
+        <span class="ranges">
+          <span>1D</span><span class="on">1W</span><span>1M</span><span>6M</span><span>1Y</span>
+        </span>
+      </div>
+      <div class="chart-body">@@CANDLES@@</div>
+      <div class="chart-foot"><span>OHLC candlesticks &middot; volume &middot; 5-period moving average</span><span><span class="badge b-delay"><i></i>DELAYED</span> &nbsp; Source: MCP / Yahoo</span></div>
+    </div>
+    <div style="flex:.72">
+      <h4 style="margin-bottom:2.2mm">Reading the chart</h4>
+      <div class="reading">
+        <div class="r"><b>Structure before prediction</b><p>Higher lows from mid-session, then a break above the prior swing high. Students describe what happened before forecasting.</p></div>
+        <div class="r"><b>Volume confirms the move</b><p>The breakout bar carries roughly 2.5&times; average volume. A price move without volume is a hypothesis, not evidence.</p></div>
+        <div class="r"><b>The y-axis is a choice</b><p>Switch from 1D area to 1Y candles and the same stock tells a different story. Timeframe is an analytical decision.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:4mm;gap:3mm">
+    <div class="card col" style="padding:3.2mm 3.6mm">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h4>Ratio explainers</h4><span class="tag">hover any metric</span>
+      </div>
+      <div style="margin-top:1.6mm">
+        <div class="ratio"><span>Trailing P/E <em>sector 20.1&times;</em></span><b>24.8&times;</b></div>
+        <div class="ratio"><span>Forward P/E</span><b>22.1&times;</b></div>
+        <div class="ratio"><span>Return on equity</span><b>18.4%</b></div>
+        <div class="ratio"><span>Dividend yield</span><b>0.6%</b></div>
+        <div class="ratio"><span>52-week range</span><b>1,214&ndash;1,512</b></div>
+      </div>
+      <p class="tiny mut" style="margin-top:1.8mm">Each ratio carries a one-line definition and a benchmark, so the number becomes an argument students can defend.</p>
+    </div>
+
+    <div class="card col" style="padding:3.2mm 3.6mm">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h4>MarketLens drawer</h4><span class="tag amber">NSE portal</span>
+      </div>
+      <p class="tiny" style="margin-top:1.4mm">One keystroke opens the official NSE screener for deeper fundamental work.</p>
+      <div class="chips" style="margin-top:2mm">
+        <span class="filter-chip">P/E &lt; 20</span>
+        <span class="filter-chip">ROE &gt; 15%</span>
+        <span class="filter-chip">D/E &lt; 1</span>
+        <span class="filter-chip">Promoter pledge = 0</span>
+        <span class="filter-chip">Market cap &gt; &#8377;50k cr</span>
+      </div>
+      <div style="margin-top:auto;padding-top:2mm;border-top:.4pt solid var(--line2);display:flex;justify-content:space-between;align-items:center">
+        <span class="tiny mut">Screen 2,000+ listed equities</span>
+        <span class="tiny mono" style="color:var(--teal)">Open &nearr;</span>
+      </div>
+    </div>
+
+    <div class="card col" style="padding:3.2mm 3.6mm">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h4>From screen to note</h4><span class="tag green">workflow</span>
+      </div>
+      <div class="flowline" style="margin-top:2.4mm">
+        <span><b>Search</b></span><i>&rarr;</i>
+        <span><b>Watch</b></span><i>&rarr;</i>
+        <span><b>Compare</b></span><i>&rarr;</i>
+        <span><b>Explain</b></span><i>&rarr;</i>
+        <span><b>Write</b></span>
+      </div>
+      <p class="tiny mut" style="margin-top:2mm">Press <b class="mono">/</b> to search 70+ symbols, <b class="mono">W</b> to add or remove, <b class="mono">Enter</b> for the detail card. The watchlist persists per browser, so each student keeps a personal universe.</p>
+      <div class="chips" style="margin-top:2mm">
+        <span class="tag grey">localStorage</span><span class="tag grey">sortable</span><span class="tag grey">keyboard-first</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pf"><span>Research workbench &middot; quotes, candles, fundamentals, screening</span><span>Press ? for shortcuts</span></div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 05 DERIVATIVES & FLOWS                                               -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>05 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">05</div>
+    <div>
+      <div class="kicker">Feature tour &middot; iii</div>
+      <h2>Where price meets<br>positioning.</h2>
+    </div>
+  </div>
+
+  <div class="row" style="gap:4mm">
+    <div class="opt-card" style="flex:1.55">
+      <div class="opt-head">
+        <div><span class="t">NIFTY option chain</span> <span class="tag grey" style="margin-left:2mm">weekly</span></div>
+        <div style="text-align:right"><span class="mono" style="font-size:9pt">26,482.35</span> <span class="tiny up mono">+0.62%</span><br><span class="tiny mut">spot &middot; ATM &plusmn; 5 strikes</span></div>
+      </div>
+      <table class="opt-table">
+        <thead><tr>
+          <th class="c">OI (L)</th><th class="c">Chg</th><th class="c">LTP</th><th class="c">IV</th>
+          <th class="mid">STRIKE</th>
+          <th class="p">IV</th><th class="p">LTP</th><th class="p">Chg</th><th class="p">OI (L)</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>38.4</td><td class="up">+6.2</td><td>312.5</td><td>11.8</td><td class="mid">26,200</td><td>12.9</td><td>38.2</td><td class="down">&minus;18.4</td><td>72.4</td></tr>
+          <tr><td>40.1</td><td class="up">+4.8</td><td>268.0</td><td>11.6</td><td class="mid">26,250</td><td>13.1</td><td>62.4</td><td class="down">&minus;14.2</td><td>66.1</td></tr>
+          <tr><td>44.2</td><td class="up">+9.1</td><td>221.5</td><td>11.4</td><td class="mid">26,300</td><td>12.8</td><td>96.8</td><td class="down">&minus;11.6</td><td>58.3</td></tr>
+          <tr><td>47.8</td><td class="up">+7.4</td><td>176.0</td><td>11.2</td><td class="mid">26,350</td><td>12.6</td><td>142.5</td><td class="down">&minus;8.9</td><td>53.0</td></tr>
+          <tr><td>52.3</td><td class="up">+11.2</td><td>134.5</td><td>11.0</td><td class="mid">26,400</td><td>12.4</td><td>198.2</td><td class="down">&minus;6.2</td><td>49.2</td></tr>
+          <tr><td>58.9</td><td class="up">+14.6</td><td>98.0</td><td>10.9</td><td class="mid">26,450</td><td>12.3</td><td>262.4</td><td class="down">&minus;4.1</td><td>46.0</td></tr>
+          <tr class="atm"><td>49.8</td><td class="up">+4.1</td><td>68.5</td><td>10.8</td><td class="mid">26,500</td><td>12.2</td><td>338.9</td><td class="down">&minus;2.8</td><td>60.4</td></tr>
+          <tr><td>43.7</td><td class="down">&minus;2.6</td><td>46.2</td><td>10.9</td><td class="mid">26,550</td><td>12.4</td><td>412.6</td><td class="down">&minus;1.9</td><td>42.2</td></tr>
+          <tr><td>36.2</td><td class="down">&minus;5.3</td><td>30.8</td><td>11.1</td><td class="mid">26,600</td><td>12.7</td><td>489.5</td><td class="down">&minus;1.2</td><td>37.8</td></tr>
+        </tbody>
+      </table>
+      <div style="display:flex;justify-content:space-between;padding:1.6mm 3mm;background:#FBFDFE;border-top:.4pt solid var(--line)">
+        <span class="tiny mut">Calls &middot; OI change in lakh contracts</span>
+        <span class="tiny mut">Puts &middot; 9 strikes</span>
+      </div>
+    </div>
+
+    <div class="card col" style="flex:.85;padding:3.4mm 3.8mm;display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <h4>Positioning gauge</h4><span class="badge b-live"><i></i>LIVE</span>
+      </div>
+      <div style="height:42mm;display:flex;align-items:center;justify-content:center;margin-top:1mm">@@PCR@@</div>
+      <div class="ratio"><span>Put OI vs call OI</span><b>485L / 411L</b></div>
+      <div class="ratio"><span>ATM implied volatility</span><b>10.8%</b></div>
+      <div class="ratio"><span>Max pain</span><b>26,500</b></div>
+      <p class="tiny mut" style="margin-top:2mm">A PCR above 1.0 means more puts than calls are outstanding. It describes positioning &mdash; not a buy or sell signal.</p>
+    </div>
+  </div>
+
+  <div class="row" style="margin-top:4mm;gap:3mm">
+    <div class="card col" style="padding:3mm 3.4mm">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.4mm">
+        <h4>FII / DII cash flows</h4><span class="tag amber">&#8377; crore</span>
+      </div>
+      <div style="height:52mm">@@FLOWS@@</div>
+      <p class="tiny mut" style="margin-top:1mm">Net: <b class="down">&minus;&#8377;216 cr</b> on the session. Institutions are not a single actor &mdash; domestic funds can absorb foreign selling.</p>
+      <div class="flow-sum">
+        <div><span>5-session FII</span><b class="down">&minus;3,797</b></div>
+        <div><span>5-session DII</span><b class="up">+4,083</b></div>
+        <div><span>Combined</span><b class="up">+286</b></div>
+      </div>
+    </div>
+
+    <div class="card col" style="padding:3mm 3.4mm">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.8mm">
+        <h4>Sector heat-map</h4><span class="tag green">12 indices</span>
+      </div>
+      <div class="heat-grid">
+        <div class="heat" style="background:rgba(14,159,110,.42)"><b>BANK</b><span>+0.84%</span></div>
+        <div class="heat" style="background:rgba(214,69,80,.40)"><b>IT</b><span>&minus;0.41%</span></div>
+        <div class="heat" style="background:rgba(14,159,110,.62)"><b>AUTO</b><span>+1.32%</span></div>
+        <div class="heat" style="background:rgba(14,159,110,.22)"><b>FMCG</b><span>+0.18%</span></div>
+        <div class="heat" style="background:rgba(214,69,80,.50)"><b>PHARMA</b><span>&minus;0.62%</span></div>
+        <div class="heat" style="background:rgba(14,159,110,.82)"><b>METAL</b><span>+1.94%</span></div>
+        <div class="heat" style="background:rgba(14,159,110,.92)"><b>REALTY</b><span>+2.31%</span></div>
+        <div class="heat" style="background:rgba(14,159,110,.34)"><b>ENERGY</b><span>+0.44%</span></div>
+        <div class="heat" style="background:rgba(14,159,110,.54)"><b>PSU BANK</b><span>+1.08%</span></div>
+        <div class="heat" style="background:rgba(14,159,110,.40)"><b>FIN SRV</b><span>+0.72%</span></div>
+        <div class="heat" style="background:rgba(214,69,80,.32)"><b>MEDIA</b><span>&minus;0.25%</span></div>
+        <div class="heat" style="background:rgba(14,159,110,.36)"><b>INFRA</b><span>+0.51%</span></div>
+      </div>
+      <p class="tiny mut" style="margin-top:2mm">Breadth within sectors matters: a green tile can hide a narrow, two-stock rally.</p>
+    </div>
+
+    <div class="card col" style="padding:3mm 3.4mm">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1mm">
+        <h4>Market news</h4><span class="tag grey">RSS</span>
+      </div>
+      <div class="newsitem"><b>Banks lead Q2 earnings as NIM recovery beats estimates</b><span>10:24 IST &middot; Markets</span></div>
+      <div class="newsitem"><b>FII selling slows; domestic funds step in for third session</b><span>09:58 IST &middot; Economy</span></div>
+      <div class="newsitem"><b>Auto index at record high on festive demand, easing input costs</b><span>09:41 IST &middot; Companies</span></div>
+      <div class="newsitem"><b>RBI holds repo rate; commentary signals an extended pause</b><span>09:22 IST &middot; Economy</span></div>
+      <div class="newsitem"><b>IT guidance trimmed as deal cycles lengthen in BFSI</b><span>09:18 IST &middot; Companies</span></div>
+      <p class="tiny mut" style="margin-top:2mm">Headlines explain the narrative; the tape and the flows test whether the narrative is priced.</p>
+    </div>
+  </div>
+
+  <div class="chainband">
+    <div class="chstep"><span class="cn">1</span><div><b>Locate spot</b><p>26,482 &rarr; nearest strike 26,500.</p></div></div>
+    <div class="chstep"><span class="cn">2</span><div><b>Find the walls</b><p>Highest put OI: 26,200 (72L); call wall: 26,450 (59L).</p></div></div>
+    <div class="chstep"><span class="cn">3</span><div><b>Read the price of risk</b><p>PCR 1.18, ATM IV 10.8%, VIX 12.8.</p></div></div>
+    <div class="chstep"><span class="cn">4</span><div><b>Test a decision</b><p>Is the put cheap enough to insure the portfolio?</p></div></div>
+  </div>
+
+  <div class="card ink" style="margin-top:4mm;padding:3mm 4mm;display:flex;gap:5mm">
+    <div style="flex:1"><h4 style="color:#5FD3E8">Three traps to teach</h4><p class="tiny" style="margin-top:.6mm">Open interest is not volume. A large OI can be old positioning that never trades today.</p></div>
+    <div style="flex:1;border-left:.4pt solid rgba(255,255,255,.14);padding-left:4mm"><p class="tiny">PCR is a ratio, not a signal. It needs price context, OI change and expiry to mean anything.</p></div>
+    <div style="flex:1;border-left:.4pt solid rgba(255,255,255,.14);padding-left:4mm"><p class="tiny">Implied volatility is the price of uncertainty. Rising IV makes every option more expensive, including the hedge.</p></div>
+  </div>
+
+  <div class="pf"><span>Derivatives &amp; flows &middot; NIFTY / BANKNIFTY chains &middot; institutional cash market</span><span>Illustrative values</span></div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 06 USE CASES I                                                       -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>06 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">06</div>
+    <div>
+      <div class="kicker">Real-world use cases &middot; i</div>
+      <h2>Three desks, three<br>deliverables.</h2>
+    </div>
+  </div>
+
+  <p class="lead" style="margin-bottom:4mm;width:150mm">Each case runs for two lab sessions and ends with a document a real desk would accept. The terminal supplies the evidence; the student supplies the judgement.</p>
+
+  <article class="uc" style="height:66mm">
+    <div class="uc-l">
+      <div class="uc-n">CASE 01</div>
+      <h3>Equity research analyst</h3>
+      <div class="course">Investment Analysis &amp; Portfolio Management<br>2 sessions &middot; pairs</div>
+      <div style="margin-top:2mm"><span class="tag">relative valuation</span></div>
+    </div>
+    <div class="uc-m">
+      <p class="uc-scene"><b>Scenario.</b> You cover Indian IT. NIFTY IT is down 0.4% while the benchmark is up 0.6%. Write a two-page initiation note on Infosys against TCS, with a clear recommendation and a stated data cutoff.</p>
+      <div class="uc-steps">
+        <span class="uc-step"><i>1</i>Screen the IT universe</span>
+        <span class="uc-step"><i>2</i>Pull quote, 52W, P/E, ROE</span>
+        <span class="uc-step"><i>3</i>Compare chart behaviour</span>
+        <span class="uc-step"><i>4</i>Write with as-of stamps</span>
+      </div>
+      <p class="uc-learn"><b>Learn:</b> multiples vs peers, earnings quality, relative strength, data hygiene, and how to write a recommendation that survives a viva.</p>
+      <p class="uc-note"><b>Watch for:</b> comparing P/E without adjusting for growth, and a note with no data cutoff.</p>
+      <div class="pullrow"><span class="lbl">Data</span><span>watchlist</span><span>stock detail</span><span>1Y chart</span><span>MarketLens</span></div>
+    </div>
+    <div class="uc-r">
+      <div class="g" style="height:30mm">
+        <div class="peerbar">
+          <div class="pb-cap">P/E vs sector &middot; trailing</div>
+          <div class="pb-row"><span>TCS</span><div class="track"><i style="width:92%"></i></div><b>26.9</b></div>
+          <div class="pb-row"><span>INFY</span><div class="track"><i style="width:76%"></i></div><b>22.1</b></div>
+          <div class="pb-row"><span>WIPRO</span><div class="track"><i style="width:65%"></i></div><b>19.1</b></div>
+          <div class="pb-row"><span>SECTOR</span><div class="track"><i style="width:81%;background:#7C8FA6"></i></div><b>23.6</b></div>
+        </div>
+      </div>
+      <p class="tiny mut" style="margin-top:1mm">TCS 14% above the sector, INFY 6% below &mdash; argue which is earned.</p>
+      <div class="uc-del"><b>Deliverable</b>2-page note + 5-minute defence &middot; P/E vs sector shown, every figure dated.</div>
+    </div>
+  </article>
+
+  <article class="uc" style="height:66mm;margin-top:3.4mm">
+    <div class="uc-l">
+      <div class="uc-n">CASE 02</div>
+      <h3>Portfolio manager</h3>
+      <div class="course">Security Analysis &amp; Portfolio Management<br>3 sessions &middot; groups of 4</div>
+      <div style="margin-top:2mm"><span class="tag green">construction</span></div>
+    </div>
+    <div class="uc-m">
+      <p class="uc-scene"><b>Scenario.</b> Build a &#8377;10 lakh core-satellite portfolio of eight stocks. Cap any sector at 25%, benchmark against the NIFTY 50, and review it every lab session for four weeks.</p>
+      <div class="uc-steps">
+        <span class="uc-step"><i>1</i>Define the mandate</span>
+        <span class="uc-step"><i>2</i>Set weights &amp; caps</span>
+        <span class="uc-step"><i>3</i>Track daily % and breadth</span>
+        <span class="uc-step"><i>4</i>Write the rebalance memo</span>
+      </div>
+      <p class="uc-learn"><b>Learn:</b> diversification, concentration limits, tracking difference, performance attribution and the discipline of not rewriting the thesis after the fact.</p>
+      <p class="uc-note"><b>Watch for:</b> sector caps breached after a winner runs, and benchmark switching mid-stream.</p>
+      <div class="pullrow"><span class="lbl">Data</span><span>index cards</span><span>breadth</span><span>movers</span><span>sector map</span></div>
+    </div>
+    <div class="uc-r">
+      <div class="g" style="height:32mm">@@PORTFOLIO@@</div>
+      <div class="uc-del"><b>Deliverable</b>Portfolio sheet + weekly review &middot; compare against NIFTY 50, explain every change.</div>
+    </div>
+  </article>
+
+  <article class="uc" style="height:66mm;margin-top:3.4mm">
+    <div class="uc-l">
+      <div class="uc-n">CASE 03</div>
+      <h3>Derivatives &amp; risk</h3>
+      <div class="course">Derivatives Management<br>2 sessions &middot; groups of 3</div>
+      <div style="margin-top:2mm"><span class="tag red">hedging</span></div>
+    </div>
+    <div class="uc-m">
+      <p class="uc-scene"><b>Scenario.</b> Protect the portfolio from Case 02 with a NIFTY protective put. India VIX is 12.8. Choose the strike and expiry, price the insurance, and decide whether the hedge is worth it.</p>
+      <div class="uc-steps">
+        <span class="uc-step"><i>1</i>Read the chain</span>
+        <span class="uc-step"><i>2</i>Pick strike &amp; expiry</span>
+        <span class="uc-step"><i>3</i>Compute premium cost</span>
+        <span class="uc-step"><i>4</i>Draw the payoff</span>
+      </div>
+      <p class="uc-learn"><b>Learn:</b> moneyness, open interest as positioning, implied vs realised volatility, the cost of insurance and basis risk between a stock portfolio and an index hedge.</p>
+      <p class="uc-note"><b>Watch for:</b> a hedge notional that does not match the portfolio, and a payoff that ignores the premium.</p>
+      <div class="pullrow"><span class="lbl">Data</span><span>option chain</span><span>India VIX</span><span>PCR</span><span>payoff</span></div>
+    </div>
+    <div class="uc-r">
+      <div class="g" style="height:32mm">@@PAYOFF@@</div>
+      <div class="paystats">
+        <div><span>Max loss</span><b>180</b></div>
+        <div><span>Breakeven</span><b>26,680</b></div>
+        <div><span>Cost</span><b>0.7%</b></div>
+      </div>
+      <div class="uc-del"><b>Deliverable</b>Payoff diagram + one-page hedge memo &middot; premium, breakeven, worst case.</div>
+    </div>
+  </article>
+
+  <div class="pullquote">The terminal is not the answer. It is the evidence.<span>Lab principle &mdash; every deliverable is a decision, not a description</span></div>
+
+  <div class="pf"><span>Use cases 01&ndash;03 &middot; research, portfolio, derivatives</span><span>Each ends in a written decision</span></div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 07 USE CASES II                                                      -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>07 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">07</div>
+    <div>
+      <div class="kicker">Real-world use cases &middot; ii</div>
+      <h2>Four shorter briefs.<br>Same standard of proof.</h2>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <article class="qcase" style="height:100mm">
+      <div class="qh"><div><div class="uc-n">CASE 04</div><h3>Macro &amp; institutional flows</h3></div><span class="tag amber">explain</span></div>
+      <div class="mc-meta">45 min &middot; pairs &middot; 150-word memo</div>
+      <p><b>The brief.</b> FIIs sold &#8377;2,148 crore and DIIs bought &#8377;1,932 crore, yet the NIFTY rose 0.62%. Explain who absorbed the supply and why the index still moved up.</p>
+      <div style="display:flex;gap:1.6mm;margin:2.2mm 0">
+        <div class="ministat"><b class="down">&minus;2,149</b><span>FII &#8377; cr</span></div>
+        <div class="ministat"><b class="up">+1,932</b><span>DII &#8377; cr</span></div>
+        <div class="ministat"><b>&minus;216</b><span>Net &#8377; cr</span></div>
+        <div class="ministat"><b>12.84</b><span>India VIX</span></div>
+      </div>
+      <div class="absorb">
+        <div class="ab-h"><span>Who absorbed the sale?</span><span>&#8377; crore</span></div>
+        <div class="ab-bar"><i style="width:53%;background:#D64550"></i><i style="width:47%;background:#0E9F6E"></i></div>
+        <div class="ab-k"><span>FII sold 2,149</span><span>DII bought 1,932</span><span class="up">others +216</span></div>
+      </div>
+      <ol>
+        <li>Read the flow panel and compute the net.</li>
+        <li>Check breadth, VIX and the sector map for confirmation.</li>
+        <li>Write 150 words: flow, absorption, narrative, one risk.</li>
+      </ol>
+      <div class="pullrow"><span class="lbl">Data</span><span>fii-dii</span><span>breadth</span><span>heat-map</span><span>news</span></div>
+      <p class="watch"><b>Watch for:</b> treating one session as a trend, and calling a net outflow bearish on its own.</p>
+      <p class="tiny mut" style="margin-top:1.2mm"><b>Deliverable:</b> 150-word memo + one named risk.</p>
+      <div class="chips"><span class="tag grey">liquidity</span><span class="tag grey">flows vs fundamentals</span><span class="tag grey">narrative discipline</span></div>
+    </article>
+
+    <article class="qcase" style="height:100mm">
+      <div class="qh"><div><div class="uc-n">CASE 05</div><h3>Sector rotation strategy</h3></div><span class="tag green">allocate</span></div>
+      <div class="mc-meta">60 min &middot; groups of 3 &middot; rotation note</div>
+      <p><b>The brief.</b> Plot the twelve sectoral indices on a relative-strength / earnings-momentum map, then propose an overweight and an underweight for the next quarter.</p>
+      <div class="qg" style="height:45mm">
+        <div class="quad">
+          <div class="qbox"><em>Defensive &middot; fading</em><div class="chips"><span class="tag red">PHARMA &minus;0.6</span><span class="tag grey">FMCG +0.2</span><span class="tag red">IT &minus;0.4</span></div></div>
+          <div class="qbox"><em>Momentum leaders</em><div class="chips"><span class="tag green">METAL +1.9</span><span class="tag green">REALTY +2.3</span><span class="tag green">AUTO +1.3</span><span class="tag green">PSU BK +1.1</span></div></div>
+          <div class="qbox"><em>Underweight</em><div class="chips"><span class="tag red">MEDIA &minus;0.3</span></div></div>
+          <div class="qbox"><em>Improving &middot; unconfirmed</em><div class="chips"><span class="tag green">BANK +0.8</span><span class="tag green">ENERGY +0.4</span><span class="tag green">INFRA +0.5</span></div></div>
+        </div>
+        <div class="axis-note"><span>&larr; weaker relative strength</span><span>earnings momentum &uarr;</span><span>stronger &rarr;</span></div>
+      </div>
+      <div class="pullrow"><span class="lbl">Data</span><span>sector map</span><span>index cards</span><span>movers</span></div>
+      <p class="watch"><b>Watch for:</b> rotating on one week of price, and ignoring valuation when chasing momentum.</p>
+      <p class="tiny mut" style="margin-top:1.2mm"><b>Deliverable:</b> one-page rotation note with two positions.</p>
+      <div class="chips"><span class="tag grey">business cycle</span><span class="tag grey">relative strength</span><span class="tag grey">position sizing</span></div>
+    </article>
+
+    <article class="qcase" style="height:100mm">
+      <div class="qh"><div><div class="uc-n">CASE 06</div><h3>FinTech product manager</h3></div><span class="tag red">design</span></div>
+      <div class="mc-meta">45 min &middot; pairs &middot; failure map</div>
+      <p><b>The brief.</b> Trace one quote from provider to screen. List three failure modes, then redesign the badge and fallback copy so a student never mistakes a simulation for the exchange.</p>
+      <div style="margin:2mm 0;display:flex;flex-direction:column;gap:1.4mm">
+        <div style="display:flex;align-items:center;gap:1.4mm"><span class="tag grey" style="width:13mm;text-align:center">NSE</span><span class="tiny mut">&rarr;</span><span class="tag grey" style="width:13mm;text-align:center">MCP</span><span class="tiny mut">&rarr;</span><span class="tag grey" style="width:13mm;text-align:center">Yahoo</span><span class="tiny mut">&rarr;</span><span class="tag red" style="width:15mm;text-align:center">DEMO</span></div>
+        <div style="display:flex;gap:1.2mm;margin-top:1mm"><span class="tag">TTL 15s</span><span class="tag">coalescing</span><span class="tag">status / source / asOf</span></div>
+      </div>
+      <div class="srcmix">
+        <div class="sm-h"><span>Where quotes actually came from</span><span class="mono">last 30 days</span></div>
+        <div class="sm-bar"><i style="width:74%;background:#0E9F6E"></i><i style="width:18%;background:#0B7285"></i><i style="width:8%;background:#D64550"></i></div>
+        <div class="sm-k"><span><i style="background:#0E9F6E"></i>NSE 74%</span><span><i style="background:#0B7285"></i>MCP 18%</span><span><i style="background:#D64550"></i>DEMO 8%</span></div>
+      </div>
+      <ol>
+        <li>Map the fallback chain and its labels.</li>
+        <li>Choose a TTL and justify the freshness trade-off.</li>
+        <li>Write the degraded-state copy for a projector.</li>
+      </ol>
+      <div class="pullrow"><span class="lbl">Data</span><span>/api/health</span><span>badges</span><span>TTL</span></div>
+      <p class="watch"><b>Watch for:</b> a DEMO badge that reads like LIVE, and a retry loop that hides the outage.</p>
+      <p class="tiny mut" style="margin-top:1.2mm"><b>Deliverable:</b> failure-mode map + revised copy.</p>
+      <div class="chips"><span class="tag grey">SLA</span><span class="tag grey">graceful failure</span><span class="tag grey">trust design</span></div>
+    </article>
+
+    <article class="qcase" style="height:100mm">
+      <div class="qh"><div><div class="uc-n">CASE 07</div><h3>Business analyst, BFSI</h3></div><span class="tag">build</span></div>
+      <div class="mc-meta">90 min &middot; individual &middot; dashboard</div>
+      <p><b>The brief.</b> Pull four endpoints into Excel or Power BI, document the schema, and publish a one-screen classroom dashboard with four KPIs and a written caveat.</p>
+      <div style="margin:2mm 0;display:flex;align-items:center;gap:1mm;flex-wrap:wrap">
+        <span class="filter-chip">/api/market/quotes</span><span class="tiny mut">&rarr;</span>
+        <span class="filter-chip">CSV / JSON</span><span class="tiny mut">&rarr;</span>
+        <span class="filter-chip">Power BI</span><span class="tiny mut">&rarr;</span>
+        <span class="filter-chip">4 KPIs</span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><b>26,482</b><span>NIFTY</span></div>
+        <div class="kpi"><b class="up">+0.62%</b><span>1D change</span></div>
+        <div class="kpi"><b>34/13</b><span>Breadth</span></div>
+        <div class="kpi"><b>&minus;216</b><span>Net flows</span></div>
+      </div>
+      <ol>
+        <li>Write the data dictionary: field, type, source, refresh.</li>
+        <li>Handle nulls, stale rows and unknown symbols.</li>
+        <li>Present the chart that changes the decision, not the prettiest one.</li>
+      </ol>
+      <div class="pullrow"><span class="lbl">Data</span><span>quotes</span><span>history</span><span>options</span><span>fii-dii</span></div>
+      <p class="watch"><b>Watch for:</b> a dashboard that refreshes without a timestamp, and nulls silently plotted as zero.</p>
+      <p class="tiny mut" style="margin-top:1.2mm"><b>Deliverable:</b> working dashboard + data dictionary.</p>
+      <div class="chips"><span class="tag grey">ETL</span><span class="tag grey">data quality</span><span class="tag grey">visual storytelling</span></div>
+    </article>
+  </div>
+
+  <div class="card wash" style="margin-top:3.4mm;padding:2.8mm 4mm;display:flex;align-items:center;gap:4mm">
+    <div style="flex:none"><h4>Where this leads</h4><p class="tiny mut" style="margin-top:.5mm">Placement-facing skills</p></div>
+    <div style="flex:1;display:flex;gap:1.6mm;flex-wrap:wrap">
+      <span class="tag">equity research associate</span>
+      <span class="tag">portfolio / wealth analyst</span>
+      <span class="tag">risk &amp; derivatives analyst</span>
+      <span class="tag">fintech product analyst</span>
+      <span class="tag">business analyst (BFSI)</span>
+    </div>
+  </div>
+
+  <div class="pf"><span>Use cases 04&ndash;07 &middot; macro, rotation, product, analytics</span><span>15-minute briefs, 150-word memos</span></div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 08 CURRICULUM                                                        -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>08 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">08</div>
+    <div>
+      <div class="kicker">The 12-week lab</div>
+      <h2>Twelve weeks.<br>One terminal. Seven artefacts.</h2>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="phase"><b>W1&ndash;2</b><span>Orientation</span><p>Market structure, data provenance, badges</p></div>
+    <div class="phase"><b>W3&ndash;4</b><span>Research</span><p>Multiples, peers, the initiation note</p></div>
+    <div class="phase"><b>W5&ndash;6</b><span>Price behaviour</span><p>Candles, volume, timeframe choice</p></div>
+    <div class="phase"><b>W7&ndash;8</b><span>Portfolio</span><p>Weights, caps, benchmarking</p></div>
+    <div class="phase"><b>W9&ndash;10</b><span>Derivatives</span><p>Option chain, volatility, hedging</p></div>
+    <div class="phase"><b>W11&ndash;12</b><span>Product &amp; capstone</span><p>Fallbacks, API, final defence</p></div>
+  </div>
+
+  <table class="tbl wk-table" style="margin-top:4mm">
+    <thead><tr>
+      <th class="l" style="width:12mm">Week</th><th class="l" style="width:48mm">Module</th><th class="l">Terminal modules used</th><th class="l" style="width:47mm">Deliverable</th><th style="width:18mm">Bloom</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="l mono">1&ndash;2</td><td class="l"><b>Market microstructure &amp; data provenance</b></td><td class="l">Ticker, index cards, session status, badges, <span class="mono">/api/health</span></td><td class="l">Lab journal: decode one live session</td><td>Understand</td></tr>
+      <tr><td class="l mono">3&ndash;4</td><td class="l"><b>Equity research &amp; relative valuation</b></td><td class="l">Watchlist, stock detail, ratio explainers, MarketLens</td><td class="l">Two-page initiation note</td><td>Apply</td></tr>
+      <tr><td class="l mono">5&ndash;6</td><td class="l"><b>Price behaviour &amp; technical evidence</b></td><td class="l">Candles, volume, 1D&ndash;1Y ranges, movers</td><td class="l">Chart-based hypothesis memo</td><td>Apply</td></tr>
+      <tr><td class="l mono">7&ndash;8</td><td class="l"><b>Portfolio construction &amp; benchmarking</b></td><td class="l">Index cards, breadth, movers, sector map</td><td class="l">&#8377;10 lakh, eight-stock portfolio</td><td>Analyse</td></tr>
+      <tr><td class="l mono">9&ndash;10</td><td class="l"><b>Derivatives, volatility &amp; hedging</b></td><td class="l">Option chain, PCR, India VIX, payoff</td><td class="l">Protective-put hedge memo</td><td>Analyse</td></tr>
+      <tr><td class="l mono">11</td><td class="l"><b>Macro flows &amp; sector rotation</b></td><td class="l">FII/DII, heat-map, news feed</td><td class="l">&ldquo;Explain yesterday&rdquo; brief</td><td>Evaluate</td></tr>
+      <tr><td class="l mono">12</td><td class="l"><b>FinTech product &amp; capstone</b></td><td class="l">All modules plus the API surface</td><td class="l">10-minute pitch + viva</td><td>Create</td></tr>
+    </tbody>
+  </table>
+
+  <div class="session">
+    <div class="sstep"><b>0&ndash;10 MIN</b><span>The question</span><p>One market event, stated as a decision to make.</p></div>
+    <div class="sstep"><b>10&ndash;25</b><span>Demo</span><p>One panel, one workflow, narrated on the projector.</p></div>
+    <div class="sstep"><b>25&ndash;65</b><span>Build</span><p>Students produce the artefact in pairs or groups.</p></div>
+    <div class="sstep"><b>65&ndash;80</b><span>Critique</span><p>Swap, challenge the evidence, mark one gap.</p></div>
+    <div class="sstep"><b>80&ndash;90</b><span>Journal</span><p>Two lines: what changed in your thinking, and why.</p></div>
+  </div>
+
+  <div class="miles">
+    <div class="mile"><b>W2</b><span>Journal baseline</span><p>One live session decoded, every number sourced.</p></div>
+    <div class="mile"><b>W6</b><span>Mid-term review</span><p>Initiation note and chart memo, peer-marked.</p></div>
+    <div class="mile"><b>W10</b><span>Hedge review</span><p>Payoff, premium and basis risk defended in class.</p></div>
+    <div class="mile"><b>W12</b><span>Capstone viva</span><p>One page, four modules, one decision held up to challenge.</p></div>
+  </div>
+
+  <div class="row" style="margin-top:4.2mm;gap:3mm;align-items:stretch">
+    <div class="card" style="flex:.95;padding:3mm 3.4mm;display:flex;flex-direction:column">
+      <h4>Assessment weight</h4>
+      <div style="display:flex;align-items:center;gap:2.4mm;margin-top:1.6mm">
+        <div style="width:26mm;height:26mm;flex:none">@@ASSESS@@</div>
+        <div class="legend" style="margin-top:0">
+          <div class="lrow"><span class="sw" style="background:#0B7285"></span><span class="lv">20%</span>Lab journal</div>
+          <div class="lrow"><span class="sw" style="background:#0891B2"></span><span class="lv">30%</span>Assignments</div>
+          <div class="lrow"><span class="sw" style="background:#0E9F6E"></span><span class="lv">30%</span>Capstone</div>
+          <div class="lrow"><span class="sw" style="background:#B45309"></span><span class="lv">20%</span>Viva</div>
+        </div>
+      </div>
+      <p class="tiny mut" style="margin-top:1.6mm">Continuous internal assessment; the journal is marked weekly, not at the end.</p>
+      <div class="wkwrap">
+        <div class="wkstr-n"><span>Journal checked</span><span>every 2 weeks</span></div>
+        <div class="wkstrip">
+          <i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i><i></i><i class="on"></i>
+        </div>
+        <div class="wkstr-n"><span>W1</span><span>W12</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="flex:.95;padding:3mm 3.4mm;align-self:stretch">
+      <h4>What &ldquo;good&rdquo; looks like</h4>
+      <table class="tbl gl-table" style="margin-top:1mm">
+        <tbody>
+          <tr><td class="l">Evidence</td><td class="l">Every claim traces to a panel, a source and a timestamp.</td></tr>
+          <tr><td class="l">Reasoning</td><td class="l">Alternatives considered; the counter-case stated, not hidden.</td></tr>
+          <tr><td class="l">Decision</td><td class="l">A position with a horizon, a risk and an exit.</td></tr>
+          <tr><td class="l">Communication</td><td class="l">One page, one chart, one recommendation a manager can act on.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card ink" style="flex:.8;padding:3.2mm 3.6mm;display:flex;flex-direction:column">
+      <h4 style="color:#5FD3E8">Capstone brief</h4>
+      <p class="mini" style="margin-top:1.2mm;color:#C9D8E8">Choose one NSE stock. Build a one-page investment case using at least four terminal modules. Declare the status, source and as-of for every data point. Then defend one hedge against it.</p>
+      <div style="margin-top:2mm;display:flex;gap:1mm;flex-wrap:wrap">
+        <span class="tag" style="background:rgba(95,211,232,.12);border-color:rgba(95,211,232,.3);color:#9FE6F2">4 modules</span>
+        <span class="tag" style="background:rgba(95,211,232,.12);border-color:rgba(95,211,232,.3);color:#9FE6F2">1 page</span>
+        <span class="tag" style="background:rgba(95,211,232,.12);border-color:rgba(95,211,232,.3);color:#9FE6F2">10 min</span>
+      </div>
+      <div class="cap-ev">
+        <b>Evidence trail</b> &middot; one screenshot per module, each carrying the badge and the as-of time.<br>
+        <b>Submit</b> &middot; PDF note + link to your dashboard. <b>Viva</b> &middot; 5-minute defence.
+      </div>
+    </div>
+  </div>
+
+  <div class="ready" style="margin-top:5mm">
+    <div class="rc"><b>Before week 1</b><p>Form groups of four, pick a sector and read the project README.</p></div>
+    <div class="rc"><b>Hardware</b><p>One laptop per pair; one projector for the demo and critique.</p></div>
+    <div class="rc"><b>Software</b><p>Students need a browser only. Node.js 22+ runs on the lab host.</p></div>
+    <div class="rc"><b>Cost</b><p>No licences, no API keys, no market-data subscription.</p></div>
+  </div>
+
+  <div class="pf"><span>Curriculum &middot; 12 weeks &middot; 7 artefacts &middot; Bloom-aligned</span><span>Adaptable to 8- or 16-week terms</span></div>
+</section>
+
+<!-- ==================================================================== -->
+<!-- 09 OPERATE + BACK COVER                                              -->
+<!-- ==================================================================== -->
+<section class="page">
+  <div class="ph"><span>Panimalar MBA Fintech Lab Terminal <span class="dot">&middot;</span> Prospectus 2026&ndash;27</span><span>09 / 09</span></div>
+
+  <div class="sechead">
+    <div class="sno">09</div>
+    <div>
+      <div class="kicker">Operate it</div>
+      <h2>Two commands.<br>Then start asking questions.</h2>
+    </div>
+  </div>
+
+  <div class="row" style="gap:4mm">
+    <div class="col" style="flex:1.05">
+      <div class="code">
+<span class="c"># Node.js 22+ &middot; no API keys</span><br>
+npm install &nbsp;<span class="c"># installs india-stock-mcp too</span><br>
+npm run dev &nbsp;<span class="c"># http://localhost:3000</span><br><br>
+<span class="c"># lab server, reachable from lab PCs</span><br>
+npm run build &amp;&amp; npm start <span class="c"># 0.0.0.0:3000</span>
+      </div>
+      <div class="card wash" style="margin-top:2.4mm;padding:2.4mm 3mm;display:flex;justify-content:space-between;align-items:center">
+        <div><b class="mono" style="font-size:7.4pt">GET /api/health</b><p class="tiny mut" style="margin-top:.4mm">Per-provider status, timings and the MCP tool list.</p></div>
+        <span class="badge b-live"><i></i>CHECK</span>
+      </div>
+    </div>
+
+    <div class="col" style="flex:1.2">
+      <h4 style="margin-bottom:2mm">Keyboard-first, because a projector has no mouse</h4>
+      <div class="kbds">
+        <div class="kbd-row"><kbd>/</kbd><span>Search</span></div>
+        <div class="kbd-row"><kbd>?</kbd><span>Shortcuts</span></div>
+        <div class="kbd-row"><kbd>R</kbd><span>Refresh</span></div>
+        <div class="kbd-row"><kbd>Space</kbd><span>Pause</span></div>
+        <div class="kbd-row"><kbd>[</kbd><kbd>]</kbd><span>Rate</span></div>
+        <div class="kbd-row"><kbd>&uarr;</kbd><kbd>&darr;</kbd><span>Step</span></div>
+        <div class="kbd-row"><kbd>Enter</kbd><span>Detail</span></div>
+        <div class="kbd-row"><kbd>W</kbd><span>Watch</span></div>
+        <div class="kbd-row"><kbd>1&ndash;5</kbd><span>Range</span></div>
+        <div class="kbd-row"><kbd>C</kbd><span>Chart</span></div>
+        <div class="kbd-row"><kbd>V</kbd><span>Volume</span></div>
+        <div class="kbd-row"><kbd>F</kbd><span>Full scr</span></div>
+        <div class="kbd-row"><kbd>Z</kbd><span>Zoom</span></div>
+        <div class="kbd-row"><kbd>T</kbd><span>Theme</span></div>
+        <div class="kbd-row"><kbd>L</kbd><span>MarketLens</span></div>
+        <div class="kbd-row"><kbd>M</kbd><span>Dock tape</span></div>
+      </div>
+      <p class="tiny mut" style="margin-top:2mm">Pop-out any panel into a second window for a dual-monitor lab; symbol changes broadcast between windows.</p>
+    </div>
+  </div>
+
+  <div style="margin-top:4mm">
+    <h4 style="margin-bottom:1.6mm">The API students can build on</h4>
+    <table class="tbl api-table">
+      <thead><tr><th class="l" style="width:62mm">Endpoint</th><th class="l">Returns</th><th class="l" style="width:34mm">Typical TTL</th></tr></thead>
+      <tbody>
+        <tr><td class="l mono">GET /api/market/indices</td><td class="l">Index quotes with day range and advance/decline</td><td class="l">15 s</td></tr>
+        <tr><td class="l mono">GET /api/market/quotes?symbols=</td><td class="l">Equity quotes for a comma-separated watchlist</td><td class="l">15 s</td></tr>
+        <tr><td class="l mono">GET /api/market/options?symbol=NIFTY</td><td class="l">Trimmed option chain around ATM</td><td class="l">45&ndash;60 s</td></tr>
+        <tr><td class="l mono">GET /api/market/fii-dii</td><td class="l">Institutional cash-market flows in &#8377; crore</td><td class="l">5 min</td></tr>
+        <tr><td class="l mono">GET /api/market/history?symbol=&amp;range=</td><td class="l">OHLCV candles for 1D, 1W, 1M, 6M or 1Y</td><td class="l">60 s</td></tr>
+        <tr><td class="l mono">GET /api/market/news?limit=</td><td class="l">Publisher headlines with timestamps</td><td class="l">5 min</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="row" style="margin-top:4mm;gap:4mm">
+    <div class="col" style="flex:1.1">
+      <h4>Known limitations &mdash; taught, not hidden</h4>
+      <ul class="limits" style="margin-top:1.4mm">
+        <li>NSE has no official public API; some endpoints return 403 on campus networks, hence the MCP and Yahoo fallbacks.</li>
+        <li>Yahoo quotes are delayed by roughly 15 minutes &mdash; fine for teaching, not for trading.</li>
+        <li>FII/DII publishes only the latest session through the public endpoint.</li>
+        <li>Symbols change; unknown tickers render as &ldquo;no quote&rdquo; instead of disappearing.</li>
+      </ul>
+    </div>
+    <div class="col" style="flex:1">
+      <h4>Data ethics &amp; attribution</h4>
+      <p class="mini" style="margin-top:1.4mm">Data belongs to NSE India, Yahoo Finance and the respective publishers. This is an educational, non-commercial classroom tool: <b>not investment advice</b>, not a trading system. Do not redistribute or resell the data; check NSE&rsquo;s terms before exposing the dashboard outside the institution.</p>
+      <div class="chips" style="margin-top:2mm">
+        <span class="tag grey">educational use</span><span class="tag grey">no redistribution</span><span class="tag grey">source-labelled</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ready">
+    <div class="rc"><b>Room</b><p>Projector at 1600&ndash;1920 px, F11 full screen, dark theme by default.</p></div>
+    <div class="rc"><b>Network</b><p>One host machine; 40 browsers share the cache. No keys, no student installs.</p></div>
+    <div class="rc"><b>Software</b><p>Node.js 22+ on the host; any modern browser on the lab PCs.</p></div>
+    <div class="rc"><b>Offline</b><p>Pull the cable: every panel falls back to DEMO and the class continues.</p></div>
+  </div>
+
+  <div style="display:flex;gap:4mm;margin-top:3.4mm;align-items:flex-start">
+    <div style="flex:none;width:38mm">
+      <h4 style="margin-bottom:.8mm">If something<br>looks wrong</h4>
+      <p class="tiny mut">Three faults students hit in week one.</p>
+    </div>
+    <div class="mislead" style="flex:1;margin-top:0">
+      <div class="m" style="border-color:var(--teal)"><b>A panel is blank</b><p>Open <span class="mono">/api/health</span>; the badge will say whether it is delayed or demo.</p></div>
+      <div class="m" style="border-color:var(--amber)"><b>NSE returns 403</b><p>Expected on many campus networks. Quotes fall back to MCP, then Yahoo.</p></div>
+      <div class="m"><b>Unknown ticker</b><p>NSE renames symbols (TATAMOTORS &rarr; TMCV / TMPV). Edit the watchlist or <span class="mono">symbols.ts</span>.</p></div>
+    </div>
+  </div>
+
+  <div class="mapband">
+    <div class="ml"><b>Where it fits the syllabus</b><span>One terminal, five core courses</span></div>
+    <div class="mr">
+      <span><b>FM</b>Financial Management</span>
+      <span><b>SAPM</b>Security Analysis &amp; Portfolio Management</span>
+      <span><b>DER</b>Derivatives Management</span>
+      <span><b>BA</b>Business Analytics</span>
+      <span><b>FINTECH</b>Digital Banking &amp; FinTech</span>
+    </div>
+  </div>
+
+  <div class="backband" style="margin-top:auto">
+    <img src="../public/panimalar-crest.png" alt="">
+    <div>
+      <h3>Panimalar MBA Fintech Lab</h3>
+      <p>Department of Management Studies &middot; Panimalar Engineering College &middot; Chennai</p>
+    </div>
+    <div class="right">
+      PROSPECTUS 2026&ndash;27<br>
+      Built for the classroom.<br>
+      Measured by decisions.
+    </div>
+  </div>
+</section>
+
+
+
+</body>
+</html>

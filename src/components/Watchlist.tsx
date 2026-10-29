@@ -5,7 +5,8 @@ import { compact, price, pct, toneClass } from "@/lib/format";
 import { useSymbolSearch } from "@/lib/usePoll";
 import { DEFAULT_WATCHLIST, SYMBOL_UNIVERSE } from "@/lib/symbols";
 import type { Quote } from "@/lib/types";
-import { Empty, Panel, RangeBar, Skeleton } from "./ui";
+import { Empty, Panel, Skeleton } from "./ui";
+import { DayRangeTrend } from "./DayRangeTrend";
 
 type SortKey = "symbol" | "price" | "changePct" | "volume";
 type FilterKey = "all" | "nifty50" | "banking" | "it" | "auto" | "gainers" | "losers";
@@ -33,59 +34,6 @@ const HEADERS: { id: string; label: string; align: string; visible: string; sort
 interface Row {
   symbol: string;
   quote?: Quote;
-}
-
-/**
- * Pure SVG Mini-Sparkline displaying intraday price path and current pulse dot.
- */
-function MiniSparkline({
-  open,
-  low,
-  high,
-  current,
-  prevClose,
-}: {
-  open: number;
-  low: number;
-  high: number;
-  current: number;
-  prevClose: number;
-}) {
-  const min = Math.min(open, low, high, current, prevClose);
-  const max = Math.max(open, low, high, current, prevClose);
-  const range = max - min || 1;
-  const height = 18;
-  const width = 56;
-  const pad = 2;
-
-  const getY = (val: number) => {
-    const norm = (val - min) / range;
-    return height - pad - norm * (height - pad * 2);
-  };
-
-  const isUp = current >= prevClose;
-  const strokeColor = isUp ? "var(--color-up)" : "var(--color-down)";
-
-  const p0 = `0,${getY(open).toFixed(1)}`;
-  const p1 = `14,${getY(open + (low - open) * 0.65).toFixed(1)}`;
-  const p2 = `28,${getY((low + high) / 2).toFixed(1)}`;
-  const p3 = `42,${getY(high - (high - current) * 0.35).toFixed(1)}`;
-  const p4 = `${width},${getY(current).toFixed(1)}`;
-  const points = `${p0} ${p1} ${p2} ${p3} ${p4}`;
-
-  return (
-    <svg width={width} height={height} className="shrink-0 overflow-visible" aria-hidden>
-      <polyline
-        points={points}
-        fill="none"
-        stroke={strokeColor}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx={width} cy={getY(current)} r="2" fill={strokeColor} />
-    </svg>
-  );
 }
 
 export function Watchlist({
@@ -449,19 +397,15 @@ export function Watchlist({
                       {quote.change.toFixed(2)}
                     </span>
                   </td>
-                  <td className="hidden w-48 px-3 py-2 md:table-cell">
-                    <div className="flex items-center gap-3">
-                      <MiniSparkline
-                        open={quote.open}
-                        low={quote.low}
-                        high={quote.high}
-                        current={quote.price}
-                        prevClose={quote.prevClose}
-                      />
-                      <div className="flex-1">
-                        <RangeBar low={quote.low} high={quote.high} value={quote.price} prevClose={quote.prevClose} />
-                      </div>
-                    </div>
+                  <td className="hidden w-44 px-3 py-1.5 md:table-cell">
+                    <DayRangeTrend
+                      symbol={quote.symbol}
+                      open={quote.open}
+                      low={quote.low}
+                      high={quote.high}
+                      current={quote.price}
+                      prevClose={quote.prevClose}
+                    />
                   </td>
                   <td className="hidden px-3 py-1.5 text-right font-mono tabular-nums text-muted lg:table-cell">
                     {compact(quote.volume)}

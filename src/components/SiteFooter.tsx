@@ -373,7 +373,7 @@ export function SiteFooter({
               </span>
             </div>
             <div className="text-[11px] text-muted pt-0.5">
-              Curated &amp; Designed by <span className="font-semibold text-ink">Dr. S. Satheeshkumar</span> · Department of Business Administration
+              Curated &amp; Designed by <span className="font-semibold text-ink">Dr. S. Satheeshkumar</span> · Department of MBA
             </div>
           </div>
         </div>

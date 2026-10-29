@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { num, pct, pctOf, signed, timeIST, toneClass } from "@/lib/format";
-import { INDEX_CARDS } from "@/lib/symbols";
+import { INDEX_CATEGORIES, type IndexCategory, type IndexCardMeta } from "@/lib/symbols";
 import type { Envelope, History, IndexQuote } from "@/lib/types";
 import { RangeBar, Skeleton } from "./ui";
 
@@ -68,6 +68,26 @@ export function IndexStrip({
   const [flashes, setFlashes] = useState<Record<string, "up" | "down">>({});
   const prevPricesRef = useRef<Map<string, number>>(new Map());
 
+  const [category, setCategory] = useState<IndexCategory>("core");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("nse-lab.index-category") as IndexCategory | null;
+      if (saved && INDEX_CATEGORIES.some((c) => c.id === saved)) {
+        setCategory(saved);
+      }
+    } catch {
+      // quota or private mode fallback
+    }
+  }, []);
+
+  const chooseCategory = (next: IndexCategory) => {
+    setCategory(next);
+    try {
+      localStorage.setItem("nse-lab.index-category", next);
+    } catch {}
+  };
+
   const [order, setOrder] = useState<CardOrder>("fixed");
   const [sparks, setSparks] = useState<Record<string, number[]>>({});
   const sparkRequests = useRef<Set<string>>(new Set());
@@ -123,14 +143,15 @@ export function IndexStrip({
 
   /** Movers keeps the VIX regime card pinned last so its inverse tone stays readable. */
   const orderedCards = useMemo(() => {
-    const cards = [...INDEX_CARDS];
+    const activeMeta = INDEX_CATEGORIES.find((c) => c.id === category) ?? INDEX_CATEGORIES[0];
+    const cards = [...activeMeta.cards];
     if (order === "fixed") return cards;
     const equities = cards
       .filter((card) => card.symbol !== "INDIA VIX")
       .sort((a, b) => (byName.get(b.symbol)?.changePct ?? 0) - (byName.get(a.symbol)?.changePct ?? 0));
     const vix = cards.filter((card) => card.symbol === "INDIA VIX");
     return [...equities, ...vix];
-  }, [order, byName]);
+  }, [category, order, byName]);
 
   const chooseOrder = (next: CardOrder) => {
     if (next === order) return;
@@ -196,10 +217,47 @@ export function IndexStrip({
 
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between gap-2">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-          Market indices
-        </span>
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+            Market indices
+          </span>
+
+          {/* Segmented Category Tabs */}
+          <div
+            role="tablist"
+            aria-label="Index category selector"
+            className="inline-flex items-center rounded-lg border border-line bg-panel2/90 p-0.5 shadow-xs"
+          >
+            {INDEX_CATEGORIES.map((cat) => {
+              const isActive = category === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => chooseCategory(cat.id)}
+                  className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[10px] tracking-wider transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-cyan/15 text-cyan font-bold shadow-xs border border-cyan/30"
+                      : "text-muted hover:text-ink hover:bg-wash/5 border border-transparent font-medium"
+                  }`}
+                >
+                  <span>{cat.label}</span>
+                  <span
+                    className={`rounded px-1 py-0.2 text-[8px] font-mono ${
+                      isActive ? "bg-cyan/25 text-cyan" : "bg-panel text-muted/70"
+                    }`}
+                  >
+                    {cat.cards.length}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div
           role="group"
           aria-label="Index card order"
@@ -381,12 +439,12 @@ export function IndexStrip({
                     <span className="truncate text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">
                       {card.label}
                     </span>
-                    <span
+                    <div
                       className="relative shrink-0 text-[9px] font-semibold uppercase tracking-wider"
                       title={live && !isVix ? derivedText : undefined}
                     >
                       <span
-                        className={`transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0 ${cornerTone}`}
+                        className={`block transition-opacity duration-150 group-hover:hidden group-focus-within:hidden ${cornerTone}`}
                       >
                         {cornerText === "Prev close" ? (
                           <>
@@ -402,10 +460,10 @@ export function IndexStrip({
                           cornerText
                         )}
                       </span>
-                      <span className="absolute right-0 top-0 whitespace-nowrap text-cyan opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100">
+                      <span className="hidden group-hover:inline-flex group-focus-within:inline-flex items-center text-cyan whitespace-nowrap">
                         Open chart ↗
                       </span>
-                    </span>
+                    </div>
                   </div>
 
                   <div className="mt-1.5 flex items-baseline justify-between gap-1 @max-[130px]:flex-col @max-[130px]:items-start @max-[130px]:gap-0.5">

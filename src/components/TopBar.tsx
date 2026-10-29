@@ -168,7 +168,7 @@ export function TopBar({
               </span>
             </div>
             <p className="text-[11px] font-medium text-muted/90 tracking-tight hidden sm:block">
-              Department of Management Studies · Live Terminal
+              Department of MBA · Live Terminal
             </p>
           </div>
         </div>

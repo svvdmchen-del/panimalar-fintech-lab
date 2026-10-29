@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { compact, price, pct, toneClass } from "@/lib/format";
 import { SYMBOL_UNIVERSE } from "@/lib/symbols";
 import type { Mover, Movers, Quote } from "@/lib/types";
-import { Empty, Panel, RangeBar, Skeleton } from "./ui";
+import { Empty, Panel, Skeleton } from "./ui";
+import { DayRangeTrend } from "./DayRangeTrend";
 
 type Tab = "gainers" | "losers" | "volume";
 type DeskFilter = "all" | "gainers" | "losers" | "volume" | "banking" | "it" | "auto";
@@ -26,56 +27,6 @@ const DESK_FILTERS: { key: DeskFilter; label: string }[] = [
 ];
 
 const SECTOR_BY_SYMBOL = new Map(SYMBOL_UNIVERSE.map((item) => [item.symbol, item.sector]));
-
-function MiniSparkline({
-  open,
-  low,
-  high,
-  current,
-  prevClose,
-}: {
-  open: number;
-  low: number;
-  high: number;
-  current: number;
-  prevClose: number;
-}) {
-  const min = Math.min(open, low, high, current, prevClose);
-  const max = Math.max(open, low, high, current, prevClose);
-  const range = max - min || 1;
-  const height = 18;
-  const width = 56;
-  const pad = 2;
-
-  const getY = (val: number) => {
-    const norm = (val - min) / range;
-    return height - pad - norm * (height - pad * 2);
-  };
-
-  const isUp = current >= prevClose;
-  const strokeColor = isUp ? "var(--color-up)" : "var(--color-down)";
-
-  const p0 = `0,${getY(open).toFixed(1)}`;
-  const p1 = `14,${getY(open + (low - open) * 0.65).toFixed(1)}`;
-  const p2 = `28,${getY((low + high) / 2).toFixed(1)}`;
-  const p3 = `42,${getY(high - (high - current) * 0.35).toFixed(1)}`;
-  const p4 = `${width},${getY(current).toFixed(1)}`;
-  const points = `${p0} ${p1} ${p2} ${p3} ${p4}`;
-
-  return (
-    <svg width={width} height={height} className="shrink-0 overflow-visible" aria-hidden>
-      <polyline
-        points={points}
-        fill="none"
-        stroke={strokeColor}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx={width} cy={getY(current)} r="2" fill={strokeColor} />
-    </svg>
-  );
-}
 
 export function MoversPanel({
   movers,
@@ -267,20 +218,16 @@ export function MoversPanel({
                         </span>
                       </td>
 
-                      {/* Day Range & Trend Column (Sparkline + RangeBar) */}
-                      <td className="hidden w-56 px-3 py-2 md:table-cell">
-                        <div className="flex items-center gap-3">
-                          <MiniSparkline
-                            open={open}
-                            low={low}
-                            high={high}
-                            current={ltp}
-                            prevClose={prevClose}
-                          />
-                          <div className="flex-1">
-                            <RangeBar low={low} high={high} value={ltp} prevClose={prevClose} />
-                          </div>
-                        </div>
+                      {/* Day Range & Trend Column (Stacked Sparkline + Range Numbers) */}
+                      <td className="hidden w-44 px-3 py-1.5 md:table-cell">
+                        <DayRangeTrend
+                          symbol={mover.symbol}
+                          open={open}
+                          low={low}
+                          high={high}
+                          current={ltp}
+                          prevClose={prevClose}
+                        />
                       </td>
 
                       {/* Volume Column */}

@@ -1,14 +1,68 @@
 import type { SectorPerf } from "./types";
 
-/** Index cards shown across the top of the dashboard. */
-export const INDEX_CARDS = [
-  { symbol: "NIFTY 50", label: "NIFTY 50", hint: "Benchmark" },
-  { symbol: "NIFTY BANK", label: "BANK NIFTY", hint: "Banking" },
-  { symbol: "NIFTY IT", label: "NIFTY IT", hint: "Technology" },
-  { symbol: "NIFTY MIDCAP 100", label: "MIDCAP 100", hint: "Mid caps" },
-  { symbol: "NIFTY NEXT 50", label: "NEXT 50", hint: "Large caps" },
-  { symbol: "INDIA VIX", label: "INDIA VIX", hint: "Volatility" },
+export type IndexCategory = "core" | "mcap" | "sectors";
+
+export interface IndexCardMeta {
+  readonly symbol: string;
+  readonly label: string;
+  readonly hint: string;
+}
+
+/** Segmented index categories shown across the top of the dashboard. */
+export const INDEX_CATEGORIES: {
+  readonly id: IndexCategory;
+  readonly label: string;
+  readonly count: number;
+  readonly cards: readonly IndexCardMeta[];
+}[] = [
+  {
+    id: "core",
+    label: "Core / F&O",
+    count: 6,
+    cards: [
+      { symbol: "NIFTY 50", label: "NIFTY 50", hint: "Benchmark" },
+      { symbol: "NIFTY BANK", label: "BANK NIFTY", hint: "Banking" },
+      { symbol: "NIFTY FIN SERVICE", label: "FINNIFTY", hint: "Financial Services" },
+      { symbol: "NIFTY MIDCAP 100", label: "MIDCAP 100", hint: "Mid caps" },
+      { symbol: "NIFTY IT", label: "NIFTY IT", hint: "Technology" },
+      { symbol: "INDIA VIX", label: "INDIA VIX", hint: "Volatility" },
+    ],
+  },
+  {
+    id: "mcap",
+    label: "Market Cap",
+    count: 6,
+    cards: [
+      { symbol: "NIFTY 50", label: "NIFTY 50", hint: "Large cap 50" },
+      { symbol: "NIFTY NEXT 50", label: "NEXT 50", hint: "Large cap 51-100" },
+      { symbol: "NIFTY MIDCAP 100", label: "MIDCAP 100", hint: "Mid caps" },
+      { symbol: "NIFTY SMALLCAP 100", label: "SMALLCAP 100", hint: "Small caps" },
+      { symbol: "NIFTY 200", label: "NIFTY 200", hint: "Large & Mid caps" },
+      { symbol: "NIFTY 500", label: "NIFTY 500", hint: "Broad market" },
+    ],
+  },
+  {
+    id: "sectors",
+    label: "Sectors",
+    count: 6,
+    cards: [
+      { symbol: "NIFTY BANK", label: "BANK NIFTY", hint: "Banking" },
+      { symbol: "NIFTY IT", label: "NIFTY IT", hint: "Technology" },
+      { symbol: "NIFTY AUTO", label: "NIFTY AUTO", hint: "Automobile" },
+      { symbol: "NIFTY PSU BANK", label: "PSU BANK", hint: "Public Banks" },
+      { symbol: "NIFTY FMCG", label: "NIFTY FMCG", hint: "Consumables" },
+      { symbol: "NIFTY METAL", label: "NIFTY METAL", hint: "Metals & Mining" },
+    ],
+  },
 ] as const;
+
+/** All unique symbols across all categories to fetch in one call. */
+export const ALL_INDEX_SYMBOLS = Array.from(
+  new Set(INDEX_CATEGORIES.flatMap((cat) => cat.cards.map((c) => c.symbol))),
+);
+
+/** Default index cards shown on initial load (backward-compatible). */
+export const INDEX_CARDS = INDEX_CATEGORIES[0].cards;
 
 /** Sectoral indices used to build the heat-map. */
 export const SECTOR_INDICES: { name: string; short: string }[] = [
@@ -203,6 +257,13 @@ export function searchUniverse(query: string, limit = 8) {
 export const YAHOO_INDEX_MAP: Record<string, string> = {
   "NIFTY 50": "^NSEI",
   "NIFTY BANK": "^NSEBANK",
+  "NIFTY IT": "^CNXIT",
+  "NIFTY NEXT 50": "^NSMIDCP",
+  "NIFTY 200": "^CNX200",
+  "NIFTY 500": "^CRSLDX",
+  "NIFTY AUTO": "^CNXAUTO",
+  "NIFTY FMCG": "^CNXFMCG",
+  "NIFTY METAL": "^CNXMETAL",
   "INDIA VIX": "^INDIAVIX",
 };
 

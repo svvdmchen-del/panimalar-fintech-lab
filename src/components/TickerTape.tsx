@@ -234,21 +234,30 @@ export function TickerTape({
                   ? "bg-down/[0.18] text-down font-bold"
                   : "";
 
+              const isUp = item.changePct > 0;
+              const isDown = item.changePct < 0;
+              const arrowGlyph = isUp ? "▲" : isDown ? "▼" : "◆";
+              const badgeToneClass = isUp
+                ? "bg-up/15 text-up border-up/30 hover:bg-up/25"
+                : isDown
+                ? "bg-down/15 text-down border-down/30 hover:bg-down/25"
+                : "bg-panel2 text-muted border-line/80";
+
               return (
                 <button
                   key={`${copy}-${item.symbol}-${index}`}
                   type="button"
                   onClick={() => handleClick(item)}
                   title={item.isMacro ? `Select ${item.symbol}` : `Open ${item.symbol} Valuation & Detail Modal`}
-                  className={`flex items-center gap-2 whitespace-nowrap border-r border-line/50 px-3.5 py-2 text-[11px] transition-colors duration-300 hover:bg-wash/5 ${flashClass}`}
+                  className={`group flex items-center gap-2 whitespace-nowrap border-r border-line/50 px-3.5 py-2 text-[11px] transition-colors duration-300 hover:bg-wash/5 ${flashClass}`}
                 >
                   {item.isMacro ? (
-                    <span className="rounded bg-cyan/15 px-1 py-0.2 text-[9px] font-semibold text-cyan">
+                    <span className="rounded bg-cyan/15 px-1.5 py-0.5 text-[9px] font-bold text-cyan font-mono tracking-wider">
                       MACRO
                     </span>
                   ) : null}
                   <span className="font-semibold tracking-wide text-ink/90">{item.label ?? item.symbol}</span>
-                  <span className="font-mono tabular-nums text-muted">
+                  <span className="font-mono tabular-nums text-muted font-medium">
                     {item.isMacro && item.symbol === "USD/INR"
                       ? `₹${item.price.toFixed(2)}`
                       : item.isMacro && item.symbol === "BRENT"
@@ -257,9 +266,17 @@ export function TickerTape({
                       ? num(item.price, 2)
                       : price(item.price)}
                   </span>
-                  <span className={`inline-flex items-center gap-0.5 font-mono text-[10px] tabular-nums ${toneClass(item.changePct)}`}>
-                    {flash === "up" ? "▲" : flash === "down" ? "▼" : null}
-                    {pct(item.changePct)}
+
+                  {/* Tinted Micro-Badge Chip with Up/Down Arrow (CNBC / TV Marquee Style) */}
+                  <span
+                    className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums border transition-all ${badgeToneClass} ${
+                      flash === "up" ? "ring-1 ring-up bg-up/30 shadow-xs" : flash === "down" ? "ring-1 ring-down bg-down/30 shadow-xs" : ""
+                    }`}
+                  >
+                    <span className="text-[8px] leading-none shrink-0" aria-hidden>
+                      {arrowGlyph}
+                    </span>
+                    <span>{pct(item.changePct)}</span>
                   </span>
                 </button>
               );
