@@ -148,3 +148,10 @@ body {
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ==========================================================================
+   REPORT EXPORT
+   The official lab report PDF is rendered server-side in Chromium from
+   src/lib/report/document.ts, so the dashboard no longer needs a print
+   stylesheet of its own. See /api/report/pdf.
+   ========================================================================== */

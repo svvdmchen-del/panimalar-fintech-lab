@@ -29,6 +29,11 @@ export function TopBar({
   onDetails,
   onOpenShortcuts,
   onOpenMarketLens,
+  onOpenLabMode,
+  onOpenPaperTrade,
+  onOpenExport,
+  simulationActive,
+  onToggleSimulation,
   updatedAt,
 }: {
   dataStatus: DataStatus;
@@ -42,6 +47,11 @@ export function TopBar({
   onDetails: (symbol: string) => void;
   onOpenShortcuts?: () => void;
   onOpenMarketLens?: () => void;
+  onOpenLabMode?: () => void;
+  onOpenPaperTrade?: () => void;
+  onOpenExport?: () => void;
+  simulationActive?: boolean;
+  onToggleSimulation?: () => void;
   updatedAt?: number;
 }) {
   const now = useNow(1000);
@@ -126,56 +136,79 @@ export function TopBar({
   const statusText = marketOpen ? "MARKET OPEN" : "MARKET CLOSED";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur-md">
-      <div className="mx-auto flex max-w-[1680px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
-        <div className="flex items-center gap-2.5">
-          <Image
-            src="/panimalar-crest.png"
-            alt="Panimalar Engineering College crest"
-            width={80}
-            height={80}
-            priority
-            className="size-10 shrink-0 rounded-full"
-          />
-          <div className="leading-tight">
-            <h1 className="text-[12px] font-semibold tracking-[0.12em] text-ink">
-              PANIMALAR MBA FINTECH LAB TERMINAL
-            </h1>
-            <p className="text-[10px] text-muted">Classroom market dashboard</p>
+    <header className="sticky top-0 z-40 border-b border-line bg-bg/95 backdrop-blur-md shadow-sm">
+      {/* TIER 1: Navigation & Cockpit Command Deck */}
+      <div className="mx-auto flex max-w-[1680px] items-center justify-between gap-3 px-4 py-2">
+        {/* Left: Institutional Branding (Dominant & Spacious) */}
+        <div className="flex items-center gap-3 shrink-0 min-w-max">
+          <div className="relative">
+            <Image
+              src="/panimalar-crest.png"
+              alt="Panimalar Engineering College crest"
+              width={80}
+              height={80}
+              priority
+              className="size-10 shrink-0 rounded-full ring-1 ring-line/80 shadow-sm"
+            />
+            <span
+              className={`absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full ring-2 ring-bg ${
+                marketOpen ? "bg-up animate-pulse" : "bg-muted"
+              }`}
+              title={marketOpen ? "Live Exchange Feed Active" : "Exchange Offline"}
+            />
+          </div>
+
+          <div className="leading-snug">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black tracking-widest text-ink uppercase">
+                PANIMALAR ENGINEERING COLLEGE
+              </span>
+              <span className="rounded-md bg-cyan/15 px-2 py-0.5 text-[10px] font-bold font-mono uppercase tracking-wider text-cyan border border-cyan/35 shadow-xs">
+                MBA FINTECH LAB
+              </span>
+            </div>
+            <p className="text-[11px] font-medium text-muted/90 tracking-tight hidden sm:block">
+              Department of Management Studies · Live Terminal
+            </p>
           </div>
         </div>
 
-        {/* Global Search with Arrow Navigation & Shortcut hint */}
-        <div className="relative order-last w-full sm:order-none sm:ml-2 sm:w-72">
-          <input
-            ref={searchInputRef}
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => setOpen(true)}
-            onBlur={() => window.setTimeout(() => setOpen(false), 140)}
-            onKeyDown={onSearchKeyDown}
-            placeholder="Search NSE stock (or press /)…"
-            aria-label="Search for an NSE stock"
-            className="w-full rounded-lg border border-line bg-panel pl-3 pr-8 py-1.5 text-[11px] text-ink placeholder:text-muted/60 focus:border-cyan/40 focus:outline-none focus:ring-1 focus:ring-cyan/40"
-          />
-          <kbd
-            title="Press / or Ctrl+K anywhere to focus search"
-            className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded border border-line bg-panel2 px-1.5 py-0.5 text-[9px] font-mono text-muted/70"
-          >
-            /
-          </kbd>
+        {/* Center: Command Bar Search (Compact & Proportional) */}
+        <div className="relative w-52 lg:w-64 mx-2 hidden md:block">
+          <div className="relative flex items-center">
+            <span className="absolute left-3 text-muted/70 text-xs pointer-events-none" aria-hidden>
+              🔍
+            </span>
+            <input
+              ref={searchInputRef}
+              value={query}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setOpen(true);
+              }}
+              onFocus={() => setOpen(true)}
+              onBlur={() => window.setTimeout(() => setOpen(false), 160)}
+              onKeyDown={onSearchKeyDown}
+              placeholder="Search NSE stock or index (or press Ctrl+K)…"
+              aria-label="Search for an NSE stock"
+              className="w-full rounded-lg border border-line bg-panel/80 pl-8 pr-14 py-1.5 text-xs text-ink placeholder:text-muted/60 focus:border-cyan/50 focus:bg-panel focus:outline-none focus:ring-1 focus:ring-cyan/40 transition-all shadow-inner"
+            />
+            <kbd
+              title="Press Ctrl+K or / anywhere to focus search"
+              className="pointer-events-none absolute right-2 rounded border border-line bg-panel2 px-1.5 py-0.5 text-[9px] font-mono text-muted/80 shadow-xs"
+            >
+              Ctrl+K
+            </kbd>
+          </div>
 
           {open && results.length > 0 ? (
             <ul
               role="listbox"
-              className="absolute left-0 top-full z-50 mt-1 w-80 max-w-[90vw] overflow-hidden rounded-lg border border-line bg-panel2 shadow-2xl"
+              className="absolute left-0 top-full z-50 mt-1.5 w-full overflow-hidden rounded-xl border border-line bg-panel2/95 backdrop-blur-md shadow-2xl animate-[fadeIn_100ms_ease-out]"
             >
-              <div className="border-b border-line/60 px-3 py-1 text-[9px] text-muted flex items-center justify-between">
+              <div className="border-b border-line/60 px-3 py-1.5 text-[9px] text-muted flex items-center justify-between">
                 <span>Navigate with ↑ ↓ and press Enter</span>
-                <span>{results.length} matches</span>
+                <span className="font-mono">{results.length} matches</span>
               </div>
               {results.map((entry, index) => {
                 const isHighlighted = index === activeIndex;
@@ -183,23 +216,20 @@ export function TopBar({
                   <li key={entry.symbol} role="presentation">
                     <button
                       type="button"
-                      role="option"
-                      aria-selected={isHighlighted}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onMouseEnter={() => setActiveIndex(index)}
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => pick(entry.symbol)}
-                      className={`flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left text-[11px] transition-colors ${
+                      className={`flex w-full items-baseline justify-between gap-2 px-3 py-2 text-left text-xs transition-colors ${
                         isHighlighted
                           ? "bg-cyan/15 text-cyan border-l-2 border-cyan"
                           : "text-ink hover:bg-wash/5"
                       }`}
                     >
                       <div className="min-w-0 flex-1">
-                        <span className="font-semibold">{entry.symbol}</span>
+                        <span className="font-bold">{entry.symbol}</span>
                         <span className="ml-2 truncate text-[10px] text-muted">{entry.name}</span>
                       </div>
                       {entry.sector ? (
-                        <span className="shrink-0 rounded border border-line/60 bg-panel px-1 py-0.5 text-[8px] uppercase tracking-wider text-muted/80">
+                        <span className="shrink-0 rounded border border-line/60 bg-panel px-1.5 py-0.2 text-[8px] uppercase tracking-wider text-muted/80">
                           {entry.sector}
                         </span>
                       ) : null}
@@ -211,101 +241,175 @@ export function TopBar({
           ) : null}
         </div>
 
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <span
-            title={session ? `${session.market} · ${session.tradeDate} · ${session.message}` : undefined}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[9px] font-semibold tracking-[0.12em] ${statusTone}`}
-          >
-            <span
-              className={`size-1.5 rounded-full ${marketOpen ? "animate-pulse-soft bg-up" : "bg-muted"}`}
-              aria-hidden
-            />
-            {statusText}
-          </span>
+        {/* Right: Cohesive Segmented "Lab Desks" Pill + Compact Utility Cluster */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* 1. Cohesive "Lab Desks" Segmented Control */}
+          <div className="inline-flex items-center rounded-lg border border-line bg-panel2 p-0.5 shadow-sm divide-x divide-line/60">
+            {onOpenLabMode ? (
+              <button
+                type="button"
+                onClick={onOpenLabMode}
+                title="MBA FinTech Lab Activities & Case Studies (Hotkey: E)"
+                className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold text-cyan hover:bg-cyan/15 hover:text-cyan transition-all rounded-l-md"
+              >
+                <span className="text-[12px]" aria-hidden>🎓</span>
+                <span className="hidden sm:inline">Lab Mode</span>
+                <span className="rounded bg-cyan/20 px-1 py-0.2 text-[8px] font-mono text-cyan/90">E</span>
+              </button>
+            ) : null}
 
-          <span className="hidden items-baseline gap-1.5 rounded-md border border-line bg-panel px-2 py-1 font-mono text-[11px] tabular-nums md:flex">
-            <span className="text-muted">{now ? weekdayIST(now) : "—"}</span>
-            <span className="text-ink">{now ? timeIST(now, true) : "--:--:--"}</span>
-            <span className="text-[9px] text-muted/60">IST</span>
-          </span>
+            {onOpenPaperTrade ? (
+              <button
+                type="button"
+                onClick={onOpenPaperTrade}
+                title="Virtual Paper Trading Desk (Hotkey: P)"
+                className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-up hover:bg-up/15 hover:text-up transition-all"
+              >
+                <span className="text-[12px]" aria-hidden>📝</span>
+                <span className="hidden sm:inline">Paper Trade</span>
+                <span className="rounded bg-up/20 px-1 py-0.2 text-[8px] font-mono text-up/90">P</span>
+              </button>
+            ) : null}
 
-          <span className="hidden text-[10px] text-muted xl:inline">{now ? dateIST(now) : ""}</span>
+            {onToggleSimulation ? (
+              <button
+                type="button"
+                onClick={onToggleSimulation}
+                title="Historical Event Replay (June 4th, Budget, COVID)"
+                className={`flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold transition-all ${
+                  simulationActive
+                    ? "bg-accent text-white animate-pulse"
+                    : "text-accent hover:bg-accent/15"
+                }`}
+              >
+                <span className="text-[12px]" aria-hidden>⏪</span>
+                <span className="hidden sm:inline">{simulationActive ? "Simulating" : "Replay"}</span>
+              </button>
+            ) : null}
 
-          <span title={sources.length ? sources.join("\n") : undefined}>
-            <DataBadge status={dataStatus} />
-          </span>
+            {onOpenMarketLens ? (
+              <button
+                type="button"
+                onClick={onOpenMarketLens}
+                title="NSE MarketLens Valuation Screener (Hotkey: L)"
+                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-ink/90 hover:bg-panel hover:text-cyan transition-all"
+              >
+                <span className="text-[12px]" aria-hidden>🔍</span>
+                <span>MarketLens</span>
+                <span className="rounded bg-panel px-1 py-0.2 text-[8px] font-mono text-muted">L</span>
+              </button>
+            ) : null}
 
-          <select
-            value={intervalMs}
-            onChange={(event) => onIntervalChange(Number(event.target.value))}
-            aria-label="Refresh interval"
-            className="rounded-md border border-line bg-panel px-1.5 py-1 font-mono text-[10px] text-muted focus:outline-none focus:ring-1 focus:ring-cyan/40"
-          >
-            {INTERVALS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            {onOpenExport ? (
+              <button
+                type="button"
+                onClick={onOpenExport}
+                title="Export Assessment Report (Hotkey: X)"
+                className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold text-muted hover:bg-panel hover:text-ink transition-all rounded-r-md"
+              >
+                <span className="text-[12px]" aria-hidden>📥</span>
+                <span className="hidden sm:inline">Report</span>
+                <span className="rounded bg-panel px-1 py-0.2 text-[8px] font-mono text-muted">X</span>
+              </button>
+            ) : null}
+          </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              onRefresh();
-              setJustRefreshed(true);
-              window.setTimeout(() => setJustRefreshed(false), 700);
-            }}
-            title={updatedAt ? `Last update ${timeIST(updatedAt, true)} IST (or press R)` : "Refresh now (R)"}
-            aria-label="Refresh data now"
-            className="rounded-md border border-line bg-panel px-2 py-1 text-[11px] text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
-          >
-            <span className={justRefreshed ? "inline-block animate-spin" : "inline-block"} aria-hidden>
-              ↻
-            </span>
-          </button>
+          {/* 2. Compact Utility Menu: Combined Refresh/Interval & System Controls */}
+          <div className="flex items-center gap-1.5">
+            {/* Combined Refresh & Interval Dropdown Pill */}
+            <div className="flex items-center rounded-lg border border-line bg-panel overflow-hidden text-[11px] shadow-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  onRefresh();
+                  setJustRefreshed(true);
+                  window.setTimeout(() => setJustRefreshed(false), 700);
+                }}
+                title={updatedAt ? `Last update ${timeIST(updatedAt, true)} IST (or press R)` : "Refresh now (R)"}
+                aria-label="Refresh data now"
+                className="px-2 py-1 text-muted hover:text-cyan transition-colors"
+              >
+                <span className={justRefreshed ? "inline-block animate-spin" : "inline-block"} aria-hidden>
+                  ↻
+                </span>
+              </button>
 
-          <ZoomToggle />
-          <ThemeToggle />
+              <select
+                value={intervalMs}
+                onChange={(event) => onIntervalChange(Number(event.target.value))}
+                aria-label="Refresh interval"
+                className="border-l border-line bg-panel2/60 px-1 py-1 font-mono text-[10px] text-muted focus:outline-none focus:text-ink"
+              >
+                {INTERVALS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* NSE MarketLens Launcher */}
-          {onOpenMarketLens ? (
-            <button
-              type="button"
-              onClick={onOpenMarketLens}
-              title="Open NSE MarketLens Research Cockpit (or press L)"
-              aria-label="Open NSE MarketLens Research Cockpit"
-              className="hidden items-center gap-1.5 rounded-md border border-cyan/40 bg-cyan/10 px-2 py-1 text-[10px] font-semibold text-cyan transition-colors hover:bg-cyan/20 sm:inline-flex"
-            >
-              <span className="text-[11px]" aria-hidden>🔍</span>
-              <span>MarketLens</span>
-              <span className="rounded bg-cyan/20 px-1 py-0.2 text-[8px] font-mono text-cyan/90">L</span>
-            </button>
-          ) : null}
+            {/* View Cluster */}
+            <ZoomToggle />
+            <ThemeToggle />
 
-          {onOpenShortcuts ? (
-            <button
-              type="button"
-              onClick={onOpenShortcuts}
-              title="Keyboard shortcuts HUD (press ?)"
-              aria-label="Open keyboard shortcuts cheat sheet"
-              className="flex h-7 w-7 items-center justify-center rounded-md border border-line bg-panel text-[11px] font-mono text-muted transition-colors hover:border-cyan/40 hover:text-cyan"
-            >
-              ?
-            </button>
-          ) : null}
+            {/* Shortcuts Cheat Sheet */}
+            {onOpenShortcuts ? (
+              <button
+                type="button"
+                onClick={onOpenShortcuts}
+                title="Keyboard shortcuts HUD (press ?)"
+                aria-label="Open keyboard shortcuts cheat sheet"
+                className="flex h-7 w-7 items-center justify-center rounded-lg border border-line bg-panel text-xs font-mono text-muted transition-colors hover:border-cyan/40 hover:text-cyan shadow-xs"
+              >
+                ?
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-[1680px] items-center gap-3 px-4 pb-1.5 text-[9px] uppercase tracking-[0.12em] text-muted/50">
-        <span>{now ? sessionLabel(now) : "Session"}</span>
-        <span aria-hidden>·</span>
-        <span>NSE cash 09:15–15:30 IST</span>
-        {updatedAt ? (
-          <>
-            <span aria-hidden>·</span>
-            <span className="normal-case tracking-normal">updated {timeIST(updatedAt, true)}</span>
-          </>
-        ) : null}
+      {/* TIER 2: Telemetry Strip & Session Ribbon (Clean 3-Column Split) */}
+      <div className="border-t border-line/60 bg-panel/60 px-4 py-1 text-[10px]">
+        <div className="mx-auto flex max-w-[1680px] items-center justify-between gap-4 font-mono">
+          {/* Left: Market Session Status */}
+          <div className="flex items-center gap-2">
+            <span
+              title={session ? `${session.market} · ${session.tradeDate} · ${session.message}` : undefined}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.2 text-[9px] font-bold tracking-[0.12em] ${statusTone}`}
+            >
+              <span
+                className={`size-1.5 rounded-full ${marketOpen ? "animate-pulse bg-up" : "bg-muted"}`}
+                aria-hidden
+              />
+              {statusText}
+            </span>
+            <span className="text-muted/60 hidden sm:inline" aria-hidden>·</span>
+            <span className="text-muted truncate hidden sm:inline">
+              {now ? sessionLabel(now) : "Capital Market"} · NSE cash 09:15–15:30 IST
+            </span>
+          </div>
+
+          {/* Center: Wall-Clock IST Time */}
+          <div className="flex items-center gap-1.5 text-xs tabular-nums font-semibold">
+            <span className="text-muted font-normal">{now ? weekdayIST(now) : "—"}</span>
+            <span className="text-ink">{now ? timeIST(now, true) : "--:--:--"}</span>
+            <span className="text-[9px] text-muted/60">IST</span>
+            <span className="text-muted/40 hidden md:inline" aria-hidden>·</span>
+            <span className="text-muted text-[10px] hidden md:inline">{now ? dateIST(now) : ""}</span>
+          </div>
+
+          {/* Right: Data Health & Update Time */}
+          <div className="flex items-center gap-2.5">
+            <span title={sources.length ? sources.join("\n") : undefined}>
+              <DataBadge status={dataStatus} />
+            </span>
+            {updatedAt ? (
+              <span className="text-muted/70 text-[10px] hidden sm:inline">
+                updated <strong className="text-ink">{timeIST(updatedAt, true)}</strong>
+              </span>
+            ) : null}
+          </div>
+        </div>
       </div>
     </header>
   );

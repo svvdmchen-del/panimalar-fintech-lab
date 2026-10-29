@@ -81,8 +81,27 @@ Node.js 22+ is required (the MCP server and Next.js 16 both need it).
 | --- | --- | --- |
 | `NSE_MCP_SERVER` | `node_modules/india-stock-mcp/dist/index.js` | Override the MCP server entry point |
 | `NSE_MCP_DISABLED` | unset | Set to `1` to skip the MCP provider entirely (quotes then use Yahoo) |
+| `CHROMIUM_EXECUTABLE_PATH` | auto-detected | Chrome/Chromium binary used to render the lab-report PDF |
 
 No API keys are required. Nothing is sent anywhere except to the upstream data sources.
+
+### Report PDF export
+
+The "Report" button renders the lab assignment through `POST /api/report/pdf`, which prints the same HTML the
+on-screen preview uses with headless Chromium (`playwright-core`) — no browser print dialog, no browser headers or
+footers. The response is a real A4 PDF with a running header and "Page X of Y" on every sheet; long written answers
+flow onto continuation sheets instead of being clipped. If Chromium cannot be found the route fails with a message
+naming `CHROMIUM_EXECUTABLE_PATH`, which the dialog shows to the user.
+
+In production, point `CHROMIUM_EXECUTABLE_PATH` at a known-good binary:
+
+```bash
+CHROMIUM_EXECUTABLE_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"   # Windows
+CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium                                          # Debian/Ubuntu
+```
+
+Without it the renderer tries, in order, `playwright-core`'s bundled download
+(`npx playwright-core install chromium`), then the OS-installed Chrome/Edge.
 
 ---
 

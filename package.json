@@ -16,6 +16,7 @@
     "india-stock-mcp": "^1.0.1",
     "lightweight-charts": "^5.2.1",
     "next": "16.4.3",
+    "playwright-core": "^1.64.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "tailwindcss": "^4"

@@ -7,6 +7,10 @@ import { FiiDiiPanel } from "@/components/FiiDiiPanel";
 import { IndexStrip } from "@/components/IndexStrip";
 import { KeyboardShortcutsHUD } from "@/components/KeyboardShortcutsHUD";
 import { MarketLensDrawer } from "@/components/MarketLensDrawer";
+import { LabModeDrawer } from "@/components/LabModeDrawer";
+import { PaperTradingDrawer } from "@/components/PaperTradingDrawer";
+import { SimulationController } from "@/components/SimulationController";
+import { LabReportModal } from "@/components/LabReportModal";
 import { postBroadcast, subscribeBroadcast } from "@/lib/broadcast";
 import { MoversPanel } from "@/components/MoversPanel";
 import { NewsFeed } from "@/components/NewsFeed";
@@ -33,6 +37,7 @@ import type {
   Quote,
   SectorPerf,
 } from "@/lib/types";
+import type { SimulationPreset } from "@/lib/labTypes";
 import { useNow, usePoll, useStoredList } from "@/lib/usePoll";
 
 export default function Page() {
@@ -46,6 +51,25 @@ export default function Page() {
   const [dockBottomTicker, setDockBottomTicker] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [marketLensOpen, setMarketLensOpen] = useState(false);
+  const [labModeOpen, setLabModeOpen] = useState(false);
+  const [paperTradeOpen, setPaperTradeOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [simulationActive, setSimulationActive] = useState(false);
+  const [simulationPresetId, setSimulationPresetId] = useState("election-2024");
+  // Last replay tick, mirrored out of SimulationController so the paper desk can
+  // price fills on the simulated clock instead of wall time.
+  const [simulationTick, setSimulationTick] = useState<{
+    preset: SimulationPreset;
+    progressPct: number;
+  } | null>(null);
+
+  const handleSimulateTick = useCallback((preset: SimulationPreset, progressPct: number) => {
+    setSimulationTick((previous) =>
+      previous && previous.preset === preset && Math.abs(previous.progressPct - progressPct) < 0.0001
+        ? previous
+        : { preset, progressPct },
+    );
+  }, []);
 
   const now = useNow(30_000);
   const marketOpen = now ? isMarketOpen(now) : false;
@@ -258,6 +282,21 @@ export default function Page() {
         setMarketLensOpen((open) => !open);
         return;
       }
+      if (e.key === "e" || e.key === "E") {
+        e.preventDefault();
+        setLabModeOpen((open) => !open);
+        return;
+      }
+      if (e.key === "p" || e.key === "P") {
+        e.preventDefault();
+        setPaperTradeOpen((open) => !open);
+        return;
+      }
+      if (e.key === "x" || e.key === "X") {
+        e.preventDefault();
+        setReportModalOpen((open) => !open);
+        return;
+      }
       if (e.key === "m" || e.key === "M") {
         e.preventDefault();
         setDockBottomTicker((d) => !d);
@@ -303,6 +342,11 @@ export default function Page() {
         onDetails={setDetail}
         onOpenShortcuts={() => setShortcutsOpen(true)}
         onOpenMarketLens={() => setMarketLensOpen(true)}
+        onOpenLabMode={() => setLabModeOpen(true)}
+        onOpenPaperTrade={() => setPaperTradeOpen(true)}
+        onOpenExport={() => setReportModalOpen(true)}
+        simulationActive={simulationActive}
+        onToggleSimulation={() => setSimulationActive((s) => !s)}
         updatedAt={lastUpdated}
       />
 
@@ -328,7 +372,7 @@ export default function Page() {
         <BreadthStrip index={nifty50} />
 
         <div className="grid grid-cols-1 gap-2.5 xl:grid-cols-12">
-          <div className="min-w-0 xl:col-span-8">
+          <div id="watchlist" className="min-w-0 xl:col-span-8">
             <Watchlist
               quotes={quoteList}
               loading={quotes.loading}
@@ -341,7 +385,7 @@ export default function Page() {
             />
           </div>
 
-          <div className="min-w-0 xl:col-span-4">
+          <div id="movers" className="min-w-0 xl:col-span-4">
             <MoversPanel
               movers={movers.data?.data}
               loading={movers.loading}
@@ -350,7 +394,7 @@ export default function Page() {
             />
           </div>
 
-          <div className="min-w-0 xl:col-span-8">
+          <div id="chart" className="min-w-0 xl:col-span-8">
             <PriceChart
               symbol={selected}
               intervalMs={intervalMs}
@@ -358,7 +402,7 @@ export default function Page() {
             />
           </div>
 
-          <div className="min-w-0 xl:col-span-4 xl:self-start">
+          <div id="fii-dii" className="min-w-0 xl:col-span-4 xl:self-start">
             <FiiDiiPanel
               rows={flows.data?.data ?? []}
               loading={flows.loading}
@@ -366,7 +410,7 @@ export default function Page() {
             />
           </div>
 
-          <div className="min-w-0 xl:col-span-5">
+          <div id="sectors" className="min-w-0 xl:col-span-5">
             <SectorHeatmap
               sectors={sectors.data?.data ?? []}
               loading={sectors.loading}
@@ -374,7 +418,7 @@ export default function Page() {
             />
           </div>
 
-          <div className="min-w-0 xl:col-span-4">
+          <div id="options" className="min-w-0 xl:col-span-4">
             <OptionChainPanel
               chain={options.data?.data}
               loading={options.loading}
@@ -389,7 +433,7 @@ export default function Page() {
             />
           </div>
 
-          <div className="min-w-0 xl:col-span-3">
+          <div id="news" className="min-w-0 xl:col-span-3">
             <NewsFeed
               items={news.data?.data ?? []}
               loading={news.loading}
@@ -398,31 +442,108 @@ export default function Page() {
           </div>
         </div>
 
-        <footer className="flex flex-col gap-2 border-t border-line pt-3 text-[10px] leading-relaxed text-muted/60">
-          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
+        <footer className="mt-6 flex flex-col gap-3 rounded-xl border border-line bg-panel2/70 p-4 text-xs backdrop-blur-sm pb-8 shadow-xs">
+          {/* Tier 1: Institutional Authority & Live Telemetry */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-line/60 pb-3.5">
+            <div className="flex items-center gap-3">
               <Image
                 src="/panimalar-crest.png"
-                alt=""
-                width={36}
-                height={36}
-                className="size-[18px] shrink-0 rounded-full opacity-90"
+                alt="Panimalar Engineering College Crest"
+                width={64}
+                height={64}
+                className="size-8 shrink-0 rounded-full object-contain ring-1 ring-line/80 shadow-xs"
               />
-              <span className="text-muted/80">Designed by Dr S.Satheeshkumar , Department of MBA , Panimalar Engineering College</span>
+              <div className="leading-tight">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-black tracking-wider text-ink uppercase">
+                    Panimalar Engineering College
+                  </span>
+                  <span className="rounded bg-cyan/15 px-1.5 py-0.5 text-[9px] font-bold text-cyan uppercase tracking-wider font-mono">
+                    MBA FinTech Lab
+                  </span>
+                </div>
+                <div className="text-[11px] text-muted pt-0.5">
+                  Curated &amp; Directed by <span className="font-semibold text-ink">Dr. S. Satheeshkumar</span> · Department of Management Studies
+                </div>
+              </div>
             </div>
-            <p className="flex shrink-0 items-center gap-2">
-              <a href="/api/health" target="_blank" rel="noreferrer" className="hover:text-cyan">
-                System health
+
+            <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
+              <a
+                href="/api/health"
+                target="_blank"
+                rel="noreferrer"
+                title="View API health diagnostics"
+                className="flex items-center gap-1.5 rounded-md border border-line bg-panel px-2.5 py-1 text-ink hover:border-cyan hover:text-cyan transition-colors"
+              >
+                <span
+                  className={`size-1.5 rounded-full ${
+                    simulationActive
+                      ? "bg-amber-400 animate-pulse"
+                      : dataStatus === "live"
+                      ? "bg-up animate-pulse"
+                      : "bg-muted"
+                  }`}
+                />
+                <span>{simulationActive ? "Replay Feed" : dataStatus === "live" ? "Systems Live" : "Delayed Feed"}</span>
               </a>
-              <span aria-hidden>·</span>
-              <span>{watchlist.length} symbols watched</span>
-            </p>
+
+              <span className="rounded-md border border-line bg-panel px-2.5 py-1 text-muted" title="Active instruments monitored">
+                {watchlist.length} Watched
+              </span>
+
+              <span className="hidden sm:inline-flex rounded-md border border-line bg-panel px-2.5 py-1 text-muted text-[10px]">
+                NSE: 09:15–15:30 IST
+              </span>
+            </div>
           </div>
-          <p className="max-w-3xl">
-            Sources: NSE India public endpoints, NSE India MCP server (<span className="font-mono">india-stock-mcp</span>),
-            Yahoo Finance and Economic Times RSS. Prices may be delayed or incomplete — built for classroom
-            demonstrations, not investment advice.
-          </p>
+
+          {/* Tier 2: SEBI Academic Compliance & Fast Navigation Shortcuts */}
+          <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between text-[10px] text-muted leading-relaxed">
+            <p className="max-w-2xl">
+              <strong className="text-ink/80 font-semibold">Academic Sandbox:</strong> Live endpoints &amp; paper execution are strictly designed for MBA classroom demonstration and quantitative research. Not registered with SEBI as an investment adviser or research analyst. Sources: NSE India public endpoints, MCP server (<span className="font-mono">india-stock-mcp</span>), Yahoo Finance.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 shrink-0 pt-1 md:pt-0">
+              <button
+                type="button"
+                onClick={() => setShortcutsOpen(true)}
+                className="hover:text-cyan text-ink/75 transition-colors underline decoration-line/80 underline-offset-2"
+                title="Keyboard shortcuts cheat sheet"
+              >
+                Shortcuts (?)
+              </button>
+              <span className="text-line" aria-hidden>·</span>
+              <button
+                type="button"
+                onClick={() => setLabModeOpen(true)}
+                className="hover:text-cyan text-ink/75 transition-colors"
+                title="Open Classroom Interactive Challenges"
+              >
+                Lab Challenges (E)
+              </button>
+              <span className="text-line" aria-hidden>·</span>
+              <button
+                type="button"
+                onClick={() => setPaperTradeOpen(true)}
+                className="hover:text-cyan text-ink/75 transition-colors"
+                title="Open Virtual Paper Trading Desk"
+              >
+                Paper Desk (P)
+              </button>
+              <span className="text-line" aria-hidden>·</span>
+              <button
+                type="button"
+                onClick={() => setReportModalOpen(true)}
+                className="hover:text-cyan text-ink/75 transition-colors font-medium text-cyan"
+                title="Download / Submit Lab Assignment Report"
+              >
+                Report (X)
+              </button>
+              <span className="text-line" aria-hidden>·</span>
+              <span className="text-muted/60">© 2025–2027 Panimalar</span>
+            </div>
+          </div>
         </footer>
       </main>
 
@@ -443,6 +564,40 @@ export default function Page() {
 
       <KeyboardShortcutsHUD open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <MarketLensDrawer isOpen={marketLensOpen} onClose={() => setMarketLensOpen(false)} selectedSymbol={selected} />
+
+      <LabModeDrawer
+        isOpen={labModeOpen}
+        onClose={() => setLabModeOpen(false)}
+        onOpenPaperTrade={() => setPaperTradeOpen(true)}
+        onOpenReport={() => setReportModalOpen(true)}
+        onLaunchSimulation={(presetId) => {
+          if (presetId) setSimulationPresetId(presetId);
+          setSimulationActive(true);
+        }}
+      />
+
+      <PaperTradingDrawer
+        isOpen={paperTradeOpen}
+        onClose={() => setPaperTradeOpen(false)}
+        activeSymbol={selected}
+        activeQuote={detailQuote || quoteList.find((q) => q.symbol === selected)}
+        quotes={quoteList}
+        feedStatus={simulationActive ? "demo" : dataStatus}
+        replay={simulationActive ? simulationTick : null}
+      />
+
+      <LabReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        activeSymbol={selected}
+      />
+
+      <SimulationController
+        isActive={simulationActive}
+        initialPresetId={simulationPresetId}
+        onClose={() => setSimulationActive(false)}
+        onSimulateTick={handleSimulateTick}
+      />
     </div>
   );
 }

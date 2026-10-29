@@ -8,12 +8,15 @@ import {
   CrosshairMode,
   HistogramSeries,
   createChart,
+  createSeriesMarkers,
+  type SeriesMarker,
   type Time,
   type UTCTimestamp,
 } from "lightweight-charts";
 import { num, price, pct, timeIST, toneClass } from "@/lib/format";
 import { usePoll } from "@/lib/usePoll";
 import { useTheme } from "@/lib/theme";
+import { loadDeskState } from "@/lib/desk/store";
 import type { ChartRange, Candle, Envelope, History } from "@/lib/types";
 import { DataBadge, Empty, Skeleton } from "./ui";
 import { openPopout } from "@/lib/broadcast";
@@ -77,8 +80,9 @@ export function PriceChart({
   const [range, setRange] = useState<ChartRange>("1D");
   const [chartType, setChartType] = useState<"area" | "candle">("area");
   const [showVolume, setShowVolume] = useState(true);
+  const [tradeNonce, setTradeNonce] = useState(0);
 
-  // Keyboard shortcut listener for chart controls
+  // Keyboard shortcut listener for chart controls & paper trade markers
   useEffect(() => {
     const onRangeChange = (e: Event) => {
       const custom = e as CustomEvent<ChartRange>;
@@ -86,14 +90,17 @@ export function PriceChart({
     };
     const onToggleType = () => setChartType((t) => (t === "area" ? "candle" : "area"));
     const onToggleVol = () => setShowVolume((v) => !v);
+    const onTradeUpdate = () => setTradeNonce((n) => n + 1);
 
     window.addEventListener("nse:chart-range", onRangeChange);
     window.addEventListener("nse:chart-toggle-type", onToggleType);
     window.addEventListener("nse:chart-toggle-vol", onToggleVol);
+    window.addEventListener("nse:paper-trade-update", onTradeUpdate);
     return () => {
       window.removeEventListener("nse:chart-range", onRangeChange);
       window.removeEventListener("nse:chart-toggle-type", onToggleType);
       window.removeEventListener("nse:chart-toggle-vol", onToggleVol);
+      window.removeEventListener("nse:paper-trade-update", onTradeUpdate);
     };
   }, []);
   const [hoveredCandle, setHoveredCandle] = useState<{
@@ -228,27 +235,30 @@ export function PriceChart({
       candleByTime.set(toTime(c) as number, c);
     }
 
+    const mainSeries =
+      chartType === "area"
+        ? chart.addSeries(AreaSeries, {
+            lineColor: rising ? colors.up : colors.down,
+            lineWidth: 2,
+            topColor: rising ? colors.areaTop.up : colors.areaTop.down,
+            bottomColor: "rgba(0,0,0,0)",
+            priceLineVisible: false,
+            lastValueVisible: true,
+            priceFormat: { type: "price", precision: 2, minMove: 0.05 },
+          })
+        : chart.addSeries(CandlestickSeries, {
+            upColor: colors.up,
+            downColor: colors.down,
+            borderVisible: false,
+            wickUpColor: colors.up,
+            wickDownColor: colors.down,
+            priceFormat: { type: "price", precision: 2, minMove: 0.05 },
+          });
+
     if (chartType === "area") {
-      const area = chart.addSeries(AreaSeries, {
-        lineColor: rising ? colors.up : colors.down,
-        lineWidth: 2,
-        topColor: rising ? colors.areaTop.up : colors.areaTop.down,
-        bottomColor: "rgba(0,0,0,0)",
-        priceLineVisible: false,
-        lastValueVisible: true,
-        priceFormat: { type: "price", precision: 2, minMove: 0.05 },
-      });
-      area.setData(candles.map((candle) => ({ time: toTime(candle), value: candle.close })));
+      mainSeries.setData(candles.map((candle) => ({ time: toTime(candle), value: candle.close })));
     } else {
-      const series = chart.addSeries(CandlestickSeries, {
-        upColor: colors.up,
-        downColor: colors.down,
-        borderVisible: false,
-        wickUpColor: colors.up,
-        wickDownColor: colors.down,
-        priceFormat: { type: "price", precision: 2, minMove: 0.05 },
-      });
-      series.setData(
+      mainSeries.setData(
         candles.map((candle) => ({
           time: toTime(candle),
           open: candle.open,
@@ -257,6 +267,76 @@ export function PriceChart({
           close: candle.close,
         })),
       );
+    }
+
+    // Chart execution markers for paper trades. Cash equity only: option legs
+    // are struck at prices that do not correspond to the underlying's candles.
+    try {
+      const store = loadDeskState();
+      const savedPositions = store.positions.filter((position) => position.kind === "EQUITY");
+      const savedHistory = store.history.filter((trade) => trade.kind === "EQUITY" && trade.session.mode === "LIVE");
+      const markers: SeriesMarker<Time>[] = [];
+
+      const findNearestCandleTime = (epochMs: number): Time | null => {
+        const sec = Math.floor(epochMs / 1000);
+        let bestDiff = Number.POSITIVE_INFINITY;
+        let bestTime: Time | null = null;
+        for (const c of candles) {
+          const diff = Math.abs(c.time - sec);
+          if (diff < bestDiff) {
+            bestDiff = diff;
+            bestTime = toTime(c);
+          }
+        }
+        return bestTime;
+      };
+
+      for (const pos of savedPositions) {
+        if (pos.symbol?.toUpperCase() === symbol.toUpperCase()) {
+          const t = findNearestCandleTime(pos.entryTime);
+          if (t) {
+            markers.push({
+              time: t,
+              position: pos.side === "BUY" ? "belowBar" : "aboveBar",
+              color: pos.side === "BUY" ? colors.up : colors.down,
+              shape: pos.side === "BUY" ? "arrowUp" : "arrowDown",
+              text: `▲ B @ ₹${pos.entryPrice}`,
+            });
+          }
+        }
+      }
+
+      for (const h of savedHistory) {
+        if (h.symbol?.toUpperCase() === symbol.toUpperCase()) {
+          const tEntry = findNearestCandleTime(h.entryTime);
+          if (tEntry) {
+            markers.push({
+              time: tEntry,
+              position: h.side === "BUY" ? "belowBar" : "aboveBar",
+              color: h.side === "BUY" ? colors.up : colors.down,
+              shape: h.side === "BUY" ? "arrowUp" : "arrowDown",
+              text: `B: ₹${h.entryPrice}`,
+            });
+          }
+          const tExit = findNearestCandleTime(h.exitTime);
+          if (tExit) {
+            markers.push({
+              time: tExit,
+              position: h.side === "BUY" ? "aboveBar" : "belowBar",
+              color: h.netPnl >= 0 ? colors.up : colors.down,
+              shape: h.side === "BUY" ? "arrowDown" : "arrowUp",
+              text: `▼ S: ₹${h.exitPrice}`,
+            });
+          }
+        }
+      }
+
+      if (markers.length > 0) {
+        markers.sort((a, b) => (a.time as number) - (b.time as number));
+        createSeriesMarkers(mainSeries, markers);
+      }
+    } catch {
+      // ignore
     }
 
     if (showVolume) {
@@ -323,7 +403,7 @@ export function PriceChart({
       observer.disconnect();
       chart.remove();
     };
-  }, [candles, isIntraday, height, theme, chartType, showVolume, data?.data?.prevClose]);
+  }, [candles, isIntraday, height, theme, chartType, showVolume, data?.data?.prevClose, tradeNonce, symbol]);
 
   const activeDisplay = hoveredCandle ?? stats;
 

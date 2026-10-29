@@ -14,18 +14,28 @@ interface ShortcutCategory {
 
 const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
   {
-    title: "1. Search & Global Navigation",
+    title: "1. MBA FinTech Lab & Desks",
+    items: [
+      { keys: ["E"], action: "Toggle MBA FinTech Lab Mode & Case Studies" },
+      { keys: ["P"], action: "Toggle Virtual Paper Trading & Orders Desk" },
+      { keys: ["X"], action: "Open Lab Assignment Report Generator" },
+      { keys: ["L"], action: "Toggle NSE MarketLens Research Cockpit" },
+
+    ],
+  },
+  {
+    title: "2. Search & Global Navigation",
     items: [
       { keys: ["/"], action: "Focus Global Stock Search" },
       { keys: ["Ctrl", "K"], action: "Alternative Search Shortcut" },
       { keys: ["↑", "↓"], action: "Navigate search dropdown & watchlist" },
       { keys: ["Enter"], action: "Open Stock Valuation Modal" },
       { keys: ["Esc"], action: "Close modal / dismiss search" },
-      { keys: ["L"], action: "Toggle NSE MarketLens Research Cockpit" },
+
     ],
   },
   {
-    title: "2. Live Feed & Classroom Controls",
+    title: "3. Live Feed & Classroom Controls",
     items: [
       { keys: ["Space"], action: "Freeze / Resume live ticker tape" },
       { keys: ["R"], action: "Force instant market data refresh" },

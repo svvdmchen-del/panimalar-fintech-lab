@@ -10,7 +10,12 @@ const nextConfig: NextConfig = {
       "./node_modules/zod/**/*",
       "./node_modules/yahoo-finance2/**/*",
     ],
+    // The PDF route inlines the college crest at render time and needs the
+    // Chromium driver's assets (browsers.json, protocol json) at runtime.
+    "/api/report/pdf": ["./public/panimalar-crest.png", "./node_modules/playwright-core/**/*"],
   },
+  // Chromium driver must stay a real node_modules require, never bundled.
+  serverExternalPackages: ["playwright-core"],
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
