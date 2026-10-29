@@ -22,6 +22,8 @@ export const DESK_KEY = "nse-lab.paper-store";
 export const LEGACY_BACKUP_KEY = "nse-lab.paper-store.v1.backup";
 export const REPLAY_PREFIX = "nse-lab.paper-replay.";
 export const UPDATE_EVENT = "nse:paper-trade-update";
+/** Fired by the lab drawer after every answer write so readers stay in sync. */
+export const ANSWERS_EVENT = "nse:lab-answers-update";
 
 const LEGACY_POSITIONS = "nse-lab.paper-positions";
 const LEGACY_HISTORY = "nse-lab.paper-history";
@@ -135,6 +137,11 @@ export function persistReplay(presetId: string, body: ReplayBody): void {
 export function resetDesk(): void {
   if (!canUseStorage()) return;
   window.localStorage.removeItem(DESK_KEY);
+  // v1 source keys must go too: `loadDeskState()` re-migrates them, which would
+  // resurrect every position and trade the reset just cleared.
+  for (const key of [LEGACY_POSITIONS, LEGACY_HISTORY, LEGACY_FRICTION]) {
+    window.localStorage.removeItem(key);
+  }
   const keys: string[] = [];
   for (let index = 0; index < window.localStorage.length; index += 1) {
     const key = window.localStorage.key(index);

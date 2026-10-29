@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { BreadthStrip } from "@/components/BreadthStrip";
 import { FiiDiiPanel } from "@/components/FiiDiiPanel";
 import { IndexStrip } from "@/components/IndexStrip";
@@ -17,6 +16,7 @@ import { NewsFeed } from "@/components/NewsFeed";
 import { OptionChainPanel } from "@/components/OptionChainPanel";
 import { PriceChart } from "@/components/PriceChart";
 import { SectorHeatmap } from "@/components/SectorHeatmap";
+import { SiteFooter } from "@/components/SiteFooter";
 import { StockModal } from "@/components/StockModal";
 import { TickerTape } from "@/components/TickerTape";
 import { TopBar } from "@/components/TopBar";
@@ -442,109 +442,15 @@ export default function Page() {
           </div>
         </div>
 
-        <footer className="mt-6 flex flex-col gap-3 rounded-xl border border-line bg-panel2/70 p-4 text-xs backdrop-blur-sm pb-8 shadow-xs">
-          {/* Tier 1: Institutional Authority & Live Telemetry */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-line/60 pb-3.5">
-            <div className="flex items-center gap-3">
-              <Image
-                src="/panimalar-crest.png"
-                alt="Panimalar Engineering College Crest"
-                width={64}
-                height={64}
-                className="size-8 shrink-0 rounded-full object-contain ring-1 ring-line/80 shadow-xs"
-              />
-              <div className="leading-tight">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-black tracking-wider text-ink uppercase">
-                    Panimalar Engineering College
-                  </span>
-                  <span className="rounded bg-cyan/15 px-1.5 py-0.5 text-[9px] font-bold text-cyan uppercase tracking-wider font-mono">
-                    MBA FinTech Lab
-                  </span>
-                </div>
-                <div className="text-[11px] text-muted pt-0.5">
-                  Curated &amp; Directed by <span className="font-semibold text-ink">Dr. S. Satheeshkumar</span> · Department of Management Studies
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 font-mono text-[11px]">
-              <a
-                href="/api/health"
-                target="_blank"
-                rel="noreferrer"
-                title="View API health diagnostics"
-                className="flex items-center gap-1.5 rounded-md border border-line bg-panel px-2.5 py-1 text-ink hover:border-cyan hover:text-cyan transition-colors"
-              >
-                <span
-                  className={`size-1.5 rounded-full ${
-                    simulationActive
-                      ? "bg-amber-400 animate-pulse"
-                      : dataStatus === "live"
-                      ? "bg-up animate-pulse"
-                      : "bg-muted"
-                  }`}
-                />
-                <span>{simulationActive ? "Replay Feed" : dataStatus === "live" ? "Systems Live" : "Delayed Feed"}</span>
-              </a>
-
-              <span className="rounded-md border border-line bg-panel px-2.5 py-1 text-muted" title="Active instruments monitored">
-                {watchlist.length} Watched
-              </span>
-
-              <span className="hidden sm:inline-flex rounded-md border border-line bg-panel px-2.5 py-1 text-muted text-[10px]">
-                NSE: 09:15–15:30 IST
-              </span>
-            </div>
-          </div>
-
-          {/* Tier 2: SEBI Academic Compliance & Fast Navigation Shortcuts */}
-          <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between text-[10px] text-muted leading-relaxed">
-            <p className="max-w-2xl">
-              <strong className="text-ink/80 font-semibold">Academic Sandbox:</strong> Live endpoints &amp; paper execution are strictly designed for MBA classroom demonstration and quantitative research. Not registered with SEBI as an investment adviser or research analyst. Sources: NSE India public endpoints, MCP server (<span className="font-mono">india-stock-mcp</span>), Yahoo Finance.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3 shrink-0 pt-1 md:pt-0">
-              <button
-                type="button"
-                onClick={() => setShortcutsOpen(true)}
-                className="hover:text-cyan text-ink/75 transition-colors underline decoration-line/80 underline-offset-2"
-                title="Keyboard shortcuts cheat sheet"
-              >
-                Shortcuts (?)
-              </button>
-              <span className="text-line" aria-hidden>·</span>
-              <button
-                type="button"
-                onClick={() => setLabModeOpen(true)}
-                className="hover:text-cyan text-ink/75 transition-colors"
-                title="Open Classroom Interactive Challenges"
-              >
-                Lab Challenges (E)
-              </button>
-              <span className="text-line" aria-hidden>·</span>
-              <button
-                type="button"
-                onClick={() => setPaperTradeOpen(true)}
-                className="hover:text-cyan text-ink/75 transition-colors"
-                title="Open Virtual Paper Trading Desk"
-              >
-                Paper Desk (P)
-              </button>
-              <span className="text-line" aria-hidden>·</span>
-              <button
-                type="button"
-                onClick={() => setReportModalOpen(true)}
-                className="hover:text-cyan text-ink/75 transition-colors font-medium text-cyan"
-                title="Download / Submit Lab Assignment Report"
-              >
-                Report (X)
-              </button>
-              <span className="text-line" aria-hidden>·</span>
-              <span className="text-muted/60">© 2025–2027 Panimalar</span>
-            </div>
-          </div>
-        </footer>
+        <SiteFooter
+          lastUpdated={lastUpdated}
+          watchlistCount={watchlist.length}
+          replay={simulationActive ? simulationTick : null}
+          onOpenShortcuts={() => setShortcutsOpen(true)}
+          onOpenLab={() => setLabModeOpen(true)}
+          onOpenPaperDesk={() => setPaperTradeOpen(true)}
+          onOpenReport={() => setReportModalOpen(true)}
+        />
       </main>
 
       {detail ? (

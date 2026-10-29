@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { LAB_ACTIVITIES, CASE_STUDIES } from "@/lib/caseStudiesData";
+import { ANSWERS_EVENT } from "@/lib/desk/store";
 
 export function LabModeDrawer({
   isOpen,
@@ -32,33 +33,39 @@ export function LabModeDrawer({
 
   // Load answers from localStorage
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("nse-lab.case-answers");
-      if (saved) {
-        setAnswers(JSON.parse(saved));
+    const load = () => {
+      try {
+        const saved = localStorage.getItem("nse-lab.case-answers");
+        if (saved) {
+          setAnswers(JSON.parse(saved));
+        }
+      } catch {
+        // Ignore JSON errors
       }
-    } catch {
-      // Ignore JSON errors
-    }
+    };
+    // Deferred so the first read happens after mount (never during hydration).
+    const first = setTimeout(load, 0);
+    return () => clearTimeout(first);
   }, []);
 
   // Save answers to localStorage
   const handleAnswerChange = (groupId: string, questionId: string, value: string) => {
-    setAnswers((prev) => {
-      const updated = {
-        ...prev,
-        [groupId]: {
-          ...(prev[groupId] || {}),
-          [questionId]: value,
-        },
-      };
-      try {
-        localStorage.setItem("nse-lab.case-answers", JSON.stringify(updated));
-      } catch {
-        // storage quota fallback
-      }
-      return updated;
-    });
+    const updated = {
+      ...answers,
+      [groupId]: {
+        ...(answers[groupId] || {}),
+        [questionId]: value,
+      },
+    };
+    setAnswers(updated);
+    try {
+      localStorage.setItem("nse-lab.case-answers", JSON.stringify(updated));
+      // Notify the footer readiness strip; dispatched after the state update so
+      // no component is asked to render while this one is rendering.
+      window.dispatchEvent(new CustomEvent(ANSWERS_EVENT));
+    } catch {
+      // storage quota fallback
+    }
   };
 
   // Timer effect
