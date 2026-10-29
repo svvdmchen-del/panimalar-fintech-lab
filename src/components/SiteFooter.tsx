@@ -91,6 +91,17 @@ function answered(value?: string): boolean {
   return Boolean(value && value.trim());
 }
 
+/**
+ * Submission readiness reads at a glance: green once a session is exam-ready,
+ * amber while it is work in progress, red when barely started.
+ */
+function readinessTone(pct: number) {
+  if (pct >= 80) return { text: "text-up", bar: "bg-up" };
+  if (pct >= 30) return { text: "text-accent", bar: "bg-accent" };
+  if (pct > 0) return { text: "text-down", bar: "bg-down" };
+  return { text: "text-muted", bar: "bg-track" };
+}
+
 function readProfile(): StudentProfile | null {
   if (typeof window === "undefined") return null;
   try {
@@ -268,6 +279,7 @@ export function SiteFooter({
   const overallPct = Math.round(
     (gates.reduce((sum, gate) => sum + Math.min(1, gate.fraction), 0) / gates.length) * 100,
   );
+  const readiness = readinessTone(overallPct);
 
   const missingAnswers = activityTotal - activityAnswered + (caseTotal - caseAnswered);
   const pending: string[] = [];
@@ -281,7 +293,7 @@ export function SiteFooter({
     context = `Replay · ${replay.preset.title} at ${simClockLabel(replay.progressPct)} — replay fills stay in their own ledger and never enter the graded PDF.`;
   } else if (gatesMet === gates.length) {
     context = "All three submission gates met — open Report to review, sign and download the graded PDF.";
-  } else if (gatesMet === 0) {
+  } else if (overallPct === 0) {
     context = "Fresh session — answer a lab activity or place a paper trade to start the submission trail.";
   } else {
     context = `Still pending: ${pending.join(" and ")} before this session is submission-ready.`;
@@ -338,7 +350,7 @@ export function SiteFooter({
   return (
     <footer
       className={`mt-6 overflow-hidden rounded-xl border border-line bg-panel2/70 text-xs shadow-xs backdrop-blur-sm ${
-        replay ? "pb-52" : "pb-8"
+        replay ? "pb-52" : ""
       }`}
     >
       {/* Tier 1 — institutional identity and live session clock */}
@@ -429,8 +441,8 @@ export function SiteFooter({
 
       {/* Tier 3 — status pills and their detail panels */}
       <div className="px-4 py-3">
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-3">
+          <div className="flex flex-wrap items-center gap-2 lg:shrink-0">
             <button
               type="button"
               onClick={() => togglePanel("readiness")}
@@ -444,15 +456,13 @@ export function SiteFooter({
                   <span
                     key={gate.key}
                     className={`h-full w-1 rounded-sm ${
-                      gate.done ? "bg-up" : gate.fraction > 0 ? "bg-accent" : "bg-track"
+                      gate.fraction > 0 ? readiness.bar : "bg-track"
                     }`}
                   />
                 ))}
               </span>
               <span>Readiness</span>
-              <span className={`font-semibold ${gatesMet === gates.length ? "text-up" : "text-ink"}`}>
-                {overallPct}%
-              </span>
+              <span className={`font-semibold ${readiness.text}`}>{overallPct}%</span>
             </button>
 
             <button
@@ -528,7 +538,8 @@ export function SiteFooter({
             </button>
           </div>
 
-          <p className="max-w-xl text-[10px] leading-relaxed text-muted lg:text-right">{context}</p>
+          <span className="hidden h-4 w-px shrink-0 bg-line lg:block" aria-hidden />
+          <p className="min-w-0 flex-1 text-[10px] leading-relaxed text-muted">{context}</p>
         </div>
 
         {panel === "readiness" ? (
@@ -916,12 +927,16 @@ export function SiteFooter({
             )}
           </section>
         ) : null}
+      </div>
 
-        {/* Utility links and legal */}
-        <div className="mt-3 flex flex-col gap-2.5 border-t border-line/60 pt-2.5 sm:flex-row sm:items-center sm:justify-between">
+      {/* Base strip — utilities, copyright and the return-to-top control */}
+      <div className="border-t border-line/60 bg-bg/30 px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] text-muted">
+          <span className="order-2 whitespace-nowrap text-muted sm:order-1">© 2025–2027 Panimalar</span>
+
           <nav
             aria-label="Desk utilities"
-            className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] text-muted"
+            className="order-1 flex w-full flex-wrap items-center gap-x-3 gap-y-1.5 text-[10px] text-muted sm:order-2 sm:w-auto sm:flex-1 sm:justify-center"
           >
             <button
               type="button"
@@ -964,16 +979,12 @@ export function SiteFooter({
             >
               Report (X)
             </button>
-            <span className="text-line" aria-hidden>
-              ·
-            </span>
-            <span className="text-muted/60">© 2025–2027 Panimalar</span>
           </nav>
 
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="self-start rounded border border-line px-2 py-0.5 text-[10px] text-muted transition-colors hover:border-cyan hover:text-cyan sm:self-auto"
+            className="order-3 ml-auto rounded border border-line px-2 py-0.5 text-[10px] text-muted transition-colors hover:border-cyan hover:text-cyan"
             title="Back to the top of the dashboard"
           >
             Back to top ↑
