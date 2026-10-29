@@ -464,28 +464,22 @@ export function SiteFooter({
 
       {/* Tier 4 — disclosure, utilities and legal */}
       <div className="px-4 pt-3">
-        <details className="group rounded-lg border border-line bg-panel/50">
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-2.5 py-1.5 text-[10px] text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
+        <div className="rounded-lg border border-line bg-panel/50 px-3 py-2">
+          <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted">
             <span className="size-1.5 rounded-full bg-accent" aria-hidden />
             <span className="text-[9px] font-bold uppercase tracking-wider text-ink/80">
               Academic sandbox
             </span>
             <span>Not SEBI registered · disclosure</span>
-            <span
-              className="ml-auto text-[10px] text-muted transition-transform group-open:rotate-180"
-              aria-hidden
-            >
-              ▾
-            </span>
-          </summary>
-          <p className="border-t border-line/60 px-3 py-2 text-[10px] leading-relaxed text-muted">
+          </div>
+          <p className="mt-1 text-[10px] leading-relaxed text-muted">
             <strong className="font-semibold text-ink/80">Academic sandbox:</strong> live endpoints and
             paper execution are strictly designed for MBA classroom demonstration and quantitative
             research. Not registered with SEBI as an investment adviser or research analyst. Sources:
             NSE India public endpoints, MCP server (<span className="font-mono">india-stock-mcp</span>),
             Yahoo Finance and public market-news RSS.
           </p>
-        </details>
+        </div>
 
         <div className="mt-3 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
           <nav
