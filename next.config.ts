@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  experimental: {
+    agentUpgrade: "security",
+  },
   outputFileTracingIncludes: {
     "/api/**/*": [
       "./bin/mcp-server.bundle.mjs",
