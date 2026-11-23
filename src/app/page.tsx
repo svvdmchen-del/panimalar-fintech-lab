@@ -315,8 +315,15 @@ export default function Page() {
   }, [watchlist, selected, detail, intervalMs, toggleWatchlist]);
 
   const handleSelectSymbol = (symbol: string) => {
-    const clean = symbol.trim().toUpperCase();
+    const clean = symbol.replace(/\.NS$/i, "").trim().toUpperCase();
     setSelected(clean);
+    postBroadcast({ type: "SELECT_SYMBOL", symbol: clean });
+  };
+
+  const handleOpenDetails = (symbol: string) => {
+    const clean = symbol.replace(/\.NS$/i, "").trim().toUpperCase();
+    setSelected(clean);
+    setDetail(clean);
     postBroadcast({ type: "SELECT_SYMBOL", symbol: clean });
   };
 
@@ -345,7 +352,7 @@ export default function Page() {
         onIntervalChange={setIntervalMs}
         onRefresh={() => setRefreshToken((value) => value + 1)}
         onSelect={handleSelectSymbol}
-        onDetails={setDetail}
+        onDetails={handleOpenDetails}
         onOpenShortcuts={() => setShortcutsOpen(true)}
         onOpenMarketLens={() => setMarketLensOpen(true)}
         onOpenLabMode={() => setLabModeOpen(true)}
@@ -360,7 +367,7 @@ export default function Page() {
         quotes={tape}
         indices={indexList}
         onSelect={handleSelectSymbol}
-        onDetails={setDetail}
+        onDetails={handleOpenDetails}
         dockBottom={dockBottomTicker}
         onToggleDock={() => setDockBottomTicker((d) => !d)}
       />
@@ -391,7 +398,7 @@ export default function Page() {
               loading={quotes.loading}
               selected={selected}
               onSelect={handleSelectSymbol}
-              onDetails={setDetail}
+              onDetails={handleOpenDetails}
               watchlist={watchlist}
               onWatchlistChange={setWatchlist}
               badge={quotes.data ? <DataBadge status={quotes.data.status} source={quotes.data.source} /> : null}
@@ -403,6 +410,7 @@ export default function Page() {
               movers={movers.data?.data}
               loading={movers.loading}
               onSelect={handleSelectSymbol}
+              onDetails={handleOpenDetails}
               badge={movers.data ? <DataBadge status={movers.data.status} source={movers.data.source} /> : null}
             />
           </div>
@@ -483,7 +491,7 @@ export default function Page() {
       ) : null}
 
       <KeyboardShortcutsHUD open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
-      <MarketLensDrawer isOpen={marketLensOpen} onClose={() => setMarketLensOpen(false)} selectedSymbol={selected} />
+      <MarketLensDrawer isOpen={marketLensOpen} onClose={() => setMarketLensOpen(false)} selectedSymbol={detail || selected} />
 
       <LabModeDrawer
         isOpen={labModeOpen}

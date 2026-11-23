@@ -185,6 +185,7 @@ export function StockModal({
 
   const quote = initialQuote ?? fallbackQuote.data?.data?.[0];
   const fundamentals = fundamentalsRes.data?.data;
+  const cleanSymbol = (symbol || "").replace(/\.NS$/i, "").trim().toUpperCase();
 
   // Reset active search suggestion index when query changes
   useEffect(() => {
@@ -578,7 +579,7 @@ export function StockModal({
               {inWatchlist ? "Remove from watchlist" : "+ Add to watchlist"}
             </button>
             <a
-              href={`https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(symbol)}`}
+              href={`https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(cleanSymbol)}`}
               target="_blank"
               rel="noreferrer noopener"
               className="rounded-md border border-line bg-panel px-3 py-1 text-xs text-muted hover:text-ink"
@@ -586,9 +587,10 @@ export function StockModal({
               Open on NSE ↗
             </a>
             <a
-              href="https://marketlens.nseindia.com/"
+              href={`https://marketlens.nseindia.in/screener?q=${encodeURIComponent(cleanSymbol)}`}
               target="_blank"
               rel="noreferrer noopener"
+              title={`Search ${cleanSymbol} on NSE MarketLens`}
               className="inline-flex items-center gap-1.5 rounded-md border border-cyan/40 bg-cyan/10 px-3 py-1 text-xs font-semibold text-cyan hover:bg-cyan/20 transition-colors"
             >
               <span>🔍</span>

@@ -11,6 +11,8 @@ export function MarketLensDrawer({
   onClose: () => void;
   selectedSymbol?: string;
 }) {
+  const cleanSymbol = selectedSymbol?.replace(/\.NS$/i, "").trim().toUpperCase();
+
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -97,7 +99,7 @@ export function MarketLensDrawer({
 
             <div className="mt-3.5 flex flex-wrap items-center gap-2">
               <a
-                href="https://marketlens.nseindia.com/"
+                href="https://marketlens.nseindia.in/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-lg bg-cyan px-3.5 py-1.5 text-xs font-semibold text-black shadow-md hover:bg-cyan/90 transition-transform active:scale-95"
@@ -106,14 +108,14 @@ export function MarketLensDrawer({
                 <span className="text-[10px]" aria-hidden>↗</span>
               </a>
 
-              {selectedSymbol ? (
+              {cleanSymbol ? (
                 <a
-                  href={`https://marketlens.nseindia.com/`}
+                  href={`https://marketlens.nseindia.in/screener?q=${encodeURIComponent(cleanSymbol)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-panel2 px-3 py-1.5 text-xs font-medium text-ink hover:border-cyan/40 hover:text-cyan transition-colors"
                 >
-                  <span>Search {selectedSymbol} on Lens</span>
+                  <span>Search {cleanSymbol} on Lens</span>
                   <span className="text-[10px]" aria-hidden>↗</span>
                 </a>
               ) : null}
@@ -129,7 +131,7 @@ export function MarketLensDrawer({
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {/* Module 1 */}
               <a
-                href="https://marketlens.nseindia.com/"
+                href={cleanSymbol ? `https://marketlens.nseindia.in/screener?q=${encodeURIComponent(cleanSymbol)}` : "https://marketlens.nseindia.in/screener"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-xl border border-line bg-panel2/60 p-3 hover:border-cyan/40 hover:bg-panel2 transition-colors text-left"
@@ -145,7 +147,7 @@ export function MarketLensDrawer({
 
               {/* Module 2 */}
               <a
-                href="https://marketlens.nseindia.com/"
+                href="https://marketlens.nseindia.in/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-xl border border-line bg-panel2/60 p-3 hover:border-cyan/40 hover:bg-panel2 transition-colors text-left"
@@ -161,7 +163,7 @@ export function MarketLensDrawer({
 
               {/* Module 3 */}
               <a
-                href="https://marketlens.nseindia.com/"
+                href="https://marketlens.nseindia.in/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-xl border border-line bg-panel2/60 p-3 hover:border-cyan/40 hover:bg-panel2 transition-colors text-left"
@@ -177,7 +179,7 @@ export function MarketLensDrawer({
 
               {/* Module 4 */}
               <a
-                href="https://marketlens.nseindia.com/"
+                href="https://marketlens.nseindia.in/screener"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-xl border border-line bg-panel2/60 p-3 hover:border-cyan/40 hover:bg-panel2 transition-colors text-left"
