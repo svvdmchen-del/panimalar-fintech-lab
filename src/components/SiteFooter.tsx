@@ -339,7 +339,8 @@ export function SiteFooter({
   const failingChecks = checks.filter((check) => !check.ok).length;
   const mcpServer = health.data?.mcp.server ?? "";
   const mcpLabel =
-    mcpServer.match(/node_modules[\\/]([^\\/]+)/)?.[1] ?? (mcpServer || "india-stock-mcp");
+    mcpServer.match(/node_modules[\\/]([^\\/]+)/)?.[1] ??
+    (mcpServer.includes("mcp-server.bundle") ? "india-stock-mcp" : (mcpServer || "india-stock-mcp"));
   const nothingToReset = !desk || (openPositions === 0 && trades.length === 0);
   const storageText = storageKb >= 10 ? `${Math.round(storageKb)} KB` : `${storageKb.toFixed(1)} KB`;
   const replayTitle = ledgers

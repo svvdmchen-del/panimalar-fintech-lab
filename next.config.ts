@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingIncludes: {
     "/api/**/*": [
+      "./bin/mcp-server.bundle.mjs",
       "./node_modules/india-stock-mcp/**/*",
       "./node_modules/@modelcontextprotocol/**/*",
       "./node_modules/nse-bse-api/**/*",

@@ -34,12 +34,19 @@ type Pending = {
   timer: ReturnType<typeof setTimeout>;
 };
 
+const BUNDLED_SERVER = path.join(process.cwd(), "bin", "mcp-server.bundle.mjs");
 const DEFAULT_SERVER = path.join(
   "node_modules",
   "india-stock-mcp",
   "dist",
   "index.js",
 );
+
+function resolveDefaultServer(): string {
+  if (process.env.NSE_MCP_SERVER) return process.env.NSE_MCP_SERVER;
+  if (existsSync(BUNDLED_SERVER)) return BUNDLED_SERVER;
+  return path.resolve(process.cwd(), DEFAULT_SERVER);
+}
 
 export class McpStdioClient {
   readonly serverPath: string;
@@ -55,7 +62,7 @@ export class McpStdioClient {
   private lastToolCallAt: string | null = null;
 
   constructor(serverPath?: string) {
-    this.serverPath = serverPath ?? process.env.NSE_MCP_SERVER ?? path.resolve(process.cwd(), DEFAULT_SERVER);
+    this.serverPath = serverPath ?? resolveDefaultServer();
   }
 
   isRunning(): boolean {

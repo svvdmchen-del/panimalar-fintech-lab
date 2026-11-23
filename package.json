@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "bundle:mcp": "esbuild node_modules/india-stock-mcp/dist/index.js --bundle --platform=node --format=esm --banner:js=\"import { createRequire as _createRequire } from 'node:module'; const require = _createRequire(import.meta.url);\" --outfile=bin/mcp-server.bundle.mjs",
+    "prebuild": "npm run bundle:mcp",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -25,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "typescript": "^5"
